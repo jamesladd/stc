@@ -9,6 +9,7 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
     private static final Pattern METHOD_START_PATTERN = Pattern.compile("^[-+] .*\\s");
     private static final Pattern METHOD_UNARY_PATTERN = Pattern.compile("^\\w+[^:|\\s]");
     private static final Pattern METHOD_BINARY_PATTERN = Pattern.compile("^[-\\\\+*/=><,@%~|&?]+ \\w+");
+    private static final Pattern METHOD_KEYWORD_PATTERN = Pattern.compile("(\\w+: \\w+)+");
     private static final String METHOD_START = "[";
     private static final String METHOD_END = "].";
     private static final String CLASS_SELECTOR = "class";
@@ -61,7 +62,7 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
         transformation.append(" " + METHOD_PUT_SELECTOR);
         transformation.append(" " + METHOD_START);
         if (arguments.length() > 0)
-            transformation.append(" " + arguments + " |");
+            transformation.append(arguments + " |");
         transformation.append(NEWLINE);
         methods = true;
         return transformation.toString();
@@ -76,7 +77,7 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
         if (input.startsWith("+ ") || input.startsWith("- "))
             input = input.substring(2);
         arguments = "";
-        if (!isUnarySelector(input) && !isBinarySelector(input))
+        if (!isKeywordSelector(input) && !isUnarySelector(input) && !isBinarySelector(input))
             selector = "UnknownSelector";
     }
 
@@ -90,16 +91,30 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
     }
 
     private boolean isBinarySelector(String input) {
-        System.out.println("Binary:" + input + ":");
         Matcher matcher = METHOD_BINARY_PATTERN.matcher(input);
         if (matcher.find()) {
             selector = matcher.group();
             int space = selector.indexOf(' ');
-            arguments = ":" + selector.substring(space + 1);
+            arguments = " :" + selector.substring(space + 1);
             selector = selector.substring(0, space);
             return true;
         }
         return false;
+    }
+
+    private boolean isKeywordSelector(String input) {
+        Matcher matcher = METHOD_KEYWORD_PATTERN.matcher(input);
+        selector = "";
+        arguments = "";
+        boolean found = false;
+        while (matcher.find()) {
+            String keyword = matcher.group();
+            int space = keyword.indexOf(' ');
+            arguments = arguments + " :" + keyword.substring(space + 1);
+            selector = selector + keyword.substring(0, space);
+            found = true;
+        }
+        return found;
     }
 
     private boolean isClassMethod(String line) {
@@ -121,7 +136,11 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
     }
 
     public String end() {
-        return hasMethods() ? METHOD_END + "\n" : "";
+        return hasMethods() ? METHOD_END + NEWLINE + classInitializer() : "";
+    }
+
+    private String classInitializer() {
+        return className() + " initialize." + NEWLINE;
     }
 
     private boolean hasMethods() {

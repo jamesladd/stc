@@ -22,8 +22,7 @@ public class FileSourceReader implements SourceReader {
             if (line != null)
                 contents.append(line);
             while ((line = reader.readLine()) != null) {
-                line = lineTransformer.transform(line);
-                contents.append(line).append(newLine);
+                contents.append(lineTransformer.transform(line + newLine));
             }
             line = lineTransformer.end();
             if (line != null)

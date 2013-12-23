@@ -1,2 +1,3 @@
 
-Transcript show: 'hello world'; cr.
+- yourself
+  ^ self.

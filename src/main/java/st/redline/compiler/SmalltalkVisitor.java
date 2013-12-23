@@ -173,6 +173,13 @@ public interface SmalltalkVisitor<T> extends ParseTreeVisitor<T> {
 	T visitKeywordPair(@NotNull SmalltalkParser.KeywordPairContext ctx);
 
 	/**
+	 * Visit a parse tree produced by {@link SmalltalkParser#keywords}.
+	 * @param ctx the parse tree
+	 * @return the visitor result
+	 */
+	T visitKeywords(@NotNull SmalltalkParser.KeywordsContext ctx);
+
+	/**
 	 * Visit a parse tree produced by {@link SmalltalkParser#symbol}.
 	 * @param ctx the parse tree
 	 * @return the visitor result

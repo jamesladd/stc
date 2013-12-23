@@ -1,5 +1,7 @@
 /*
- * To regenerate source from this grammar execute the 'generate' command.
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
 
 grammar Smalltalk;
@@ -51,6 +53,7 @@ parseTimeLiteral : pseudoVariable | number | literalArray | string | symbol;
 unaryTail : unaryMessage ws unaryTail? ws;
 unaryMessage : ws unarySelector ~COLON;
 unarySelector : IDENTIFIER;
+keywords : KEYWORD+;
 reference : variable;
 binaryTail : binaryMessage binaryTail?;
 binaryMessage : ws BINARY_SELECTOR ws (unarySend | operand);

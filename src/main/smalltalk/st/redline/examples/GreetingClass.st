@@ -5,4 +5,3 @@
 
 + sayHello
   Transcript show: 'Hello World.'; cr.
-

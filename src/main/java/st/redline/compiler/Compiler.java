@@ -28,7 +28,15 @@ public class Compiler {
     }
 
     private byte[] generateClass(ParseTree tree) {
-        return new Generator(tree).generate();
+        return createGenerator(tree).generate();
+    }
+
+    private Generator createGenerator(ParseTree tree) {
+        return new Generator(tree, createVisitor());
+    }
+
+    private SmalltalkGeneratingVisitor createVisitor() {
+        return new SmalltalkGeneratingVisitor(source);
     }
 
     private ParseTree parse(String input) {

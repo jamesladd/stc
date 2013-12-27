@@ -403,4 +403,6 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	 * {@link #visitChildren} on {@code ctx}.
 	 */
 	@Override public T visitBlockParamList(@NotNull SmalltalkParser.BlockParamListContext ctx) { return visitChildren(ctx); }
+
+    public byte[] generatedClassBytes() { return null; }
 }

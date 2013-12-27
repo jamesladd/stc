@@ -21,11 +21,24 @@ public class SmalltalkSourceFinder implements SourceFinder {
     }
 
     public class SourceNotFound implements Source {
+
         public boolean hasContent() {
             return false;
         }
 
         public String contents() {
+            return "";
+        }
+
+        public String className() {
+            return "";
+        }
+
+        public String fullClassName() {
+            return "";
+        }
+
+        public String fileExtension() {
             return "";
         }
     }

@@ -19,6 +19,7 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
     private static final String METHOD_PUT_SELECTOR = "put:";
     private static final String CLASS_METHOD_INDICATOR = "+ ";
     private static final String NEWLINE = System.getProperty("line.separator");
+    private static final String SOURCE_FILE_EXTENSION = ".st";
 
     private final String name;
     private final String filename;
@@ -28,6 +29,7 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
     private String className;
     private String selector;
     private String arguments;
+    private String fullClassName;
 
     public SmalltalkSourceFile(String name, String filename, File file, SourceReader reader) {
         this.name = name;
@@ -49,6 +51,10 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
         if (isMethodDefinition(line))
             return methodDefinitionTransformation(line);
         return line;
+    }
+
+    public String fileExtension() {
+        return SOURCE_FILE_EXTENSION;
     }
 
     private String methodDefinitionTransformation(String line) {
@@ -123,14 +129,32 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
         return line.startsWith(CLASS_METHOD_INDICATOR);
     }
 
-    private String className() {
+    public String className() {
         if (className == null)
-            className = file.getName().substring(0, file.getName().lastIndexOf("."));
+            className = withoutExtension(filename());
         return className;
+    }
+
+    public String fullClassName() {
+        if (fullClassName == null)
+            fullClassName = withoutExtension(fullFilename());
+        return fullClassName;
+    }
+
+    private String withoutExtension(String filename) {
+        return filename.substring(0, filename.lastIndexOf("."));
     }
 
     private boolean isMethodDefinition(String line) {
         return METHOD_START_PATTERN.matcher(line).matches();
+    }
+
+    public String filename() {
+        return file.getName();
+    }
+
+    public String fullFilename() {
+        return file.getPath();
     }
 
     public String begin() {

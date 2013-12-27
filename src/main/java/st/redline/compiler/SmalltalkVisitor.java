@@ -353,4 +353,6 @@ public interface SmalltalkVisitor<T> extends ParseTreeVisitor<T> {
 	 * @return the visitor result
 	 */
 	T visitBlockParamList(@NotNull SmalltalkParser.BlockParamListContext ctx);
+
+    byte[] generatedClassBytes();
 }

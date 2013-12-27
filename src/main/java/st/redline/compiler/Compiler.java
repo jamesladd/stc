@@ -36,15 +36,16 @@ public class Compiler {
         SmalltalkParser parser = new SmalltalkParser(new CommonTokenStream(lexer));
 
         // dump tree
-        System.out.println(parser.script().toStringTree(parser));
-        System.out.flush();
+        // System.out.println(parser.script().toStringTree(parser));
+        // System.out.flush();
 
         return parser.script();
     }
 
     private String sourceContents() {
         String src = source.contents();
-        System.out.print(src);
+        // dump pre-processed source
+        // System.out.print(src);
         return src;
     }
 

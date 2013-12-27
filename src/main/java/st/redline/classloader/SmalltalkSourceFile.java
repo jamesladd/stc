@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/* Note: Move the preprocessing resposibility into an inner class. */
+
 public class SmalltalkSourceFile implements Source, LineTransformer {
 
     private static final Pattern METHOD_START_PATTERN = Pattern.compile("^[-+] .*\\s");

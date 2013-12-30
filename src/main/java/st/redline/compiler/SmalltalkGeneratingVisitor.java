@@ -1,15 +1,31 @@
 package st.redline.compiler;
 
 import org.antlr.v4.runtime.misc.NotNull;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import st.redline.classloader.Source;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
-public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements SmalltalkVisitor<Void> {
+public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements SmalltalkVisitor<Void>, Opcodes {
+
+    private static final Map<String, Integer> OPCODES = new HashMap<String, Integer>();
+    private static final int BYTECODE_VERSION;
+    static {
+        int compareTo17 = new BigDecimal(System.getProperty("java.specification.version")).compareTo(new BigDecimal("1.7"));
+        if (compareTo17 >= 0) {
+            BYTECODE_VERSION = V1_7;
+        } else {
+            BYTECODE_VERSION = V1_6;
+        }
+    }
 
     private final Stack<SmalltalkVisitor<Void>> visitors = new Stack<SmalltalkVisitor<Void>>();
     private final Source source;
@@ -54,16 +70,68 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         return "st/redline/runtime/ProtoObject";
     }
 
+    private String contextName() {
+        return "st/redline/runtime/Context";
+    }
+
     public byte[] generatedClassBytes() {
         return classBytes;
+    }
+
+    private int opcodeValue(String opcode) {
+        if (!OPCODES.containsKey(opcode))
+            throw new IllegalStateException("Unknown OPCODE '" + opcode + "'.");
+        return OPCODES.get(opcode);
+    }
+
+    public void pushLiteral(MethodVisitor mv, String literal) {
+        mv.visitLdcInsn(literal);
+    }
+
+    public void pushDuplicate(MethodVisitor mv) {
+        mv.visitInsn(DUP);
+    }
+
+    public void pushThis(MethodVisitor mv) {
+        mv.visitVarInsn(ALOAD, 0);
+    }
+
+    public void pushReceiver(MethodVisitor mv) {
+        mv.visitVarInsn(ALOAD, 1);
+    }
+
+    public void pushContext(MethodVisitor mv) {
+        mv.visitVarInsn(ALOAD, 2);
+    }
+
+    public void pushNull(MethodVisitor mv) {
+        mv.visitInsn(ACONST_NULL);
+    }
+
+    public void pushNumber(MethodVisitor mv, int value) {
+        switch (value) {
+            case 0: mv.visitInsn(ICONST_0); break;
+            case 1: mv.visitInsn(ICONST_1); break;
+            case 2: mv.visitInsn(ICONST_2); break;
+            case 3: mv.visitInsn(ICONST_3); break;
+            case 4: mv.visitInsn(ICONST_4); break;
+            case 5: mv.visitInsn(ICONST_5); break;
+            default:
+                if (value > 5 && value < 128)
+                    mv.visitIntInsn(BIPUSH, value);
+                else // SIPUSH not supported yet.
+                    throw new IllegalStateException("push of integer value " + value + " not yet supported.");
+        }
     }
 
     // ------------------------------
 
     private class ClassGeneratorVisitor extends SmalltalkBaseVisitor<Void> implements SmalltalkVisitor<Void>, Opcodes {
 
+        private final String SEND_MESSAGES_SIG = "(Lst/redline/runtime/ProtoObject;Lst/redline/runtime/Context;)Lst/redline/runtime/ProtoObject;";
         private final ClassWriter cw;
         private MethodVisitor mv;
+        private HashMap<String, ExtendedTerminalNode> temporaries;
 
         public ClassGeneratorVisitor() {
             cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
@@ -79,19 +147,19 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         }
 
         private void closeSendMessagesMethod() {
+            mv.visitInsn(ARETURN);
             mv.visitMaxs(0, 0);
             mv.visitEnd();
         }
 
         private void openSendMessagesMethod() {
-            mv = cw.visitMethod(ACC_PROTECTED, "sendMessages", "(L" + superclassName() + ";)L" + superclassName() + ";", null, null);
+            mv = cw.visitMethod(ACC_PROTECTED, "sendMessages", SEND_MESSAGES_SIG, null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 1);
-            mv.visitInsn(ARETURN);
         }
 
         private void openJavaClass() {
-            cw.visit(V1_6, ACC_PUBLIC + ACC_SUPER, fullClassName(), null, superclassName(), null);
+            cw.visit(BYTECODE_VERSION, ACC_PUBLIC + ACC_SUPER, fullClassName(), null, superclassName(), null);
             cw.visitSource(className() + sourceFileExtension(), null);
             makeJavaClassInitializer();
         }
@@ -110,10 +178,18 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             mv.visitVarInsn(ALOAD, 0);
             mv.visitMethodInsn(INVOKESPECIAL, superclassName(), "<init>", "()V");
 
-            // invoke sendMessages to send all messages embodied in the compiled script.
+            // create a Context
+            mv.visitTypeInsn(NEW, contextName());
+            mv.visitInsn(DUP);
             mv.visitVarInsn(ALOAD, 0);
+            mv.visitMethodInsn(INVOKESPECIAL, contextName(), "<init>", "(Lst/redline/runtime/ProtoObject;)V");
+            mv.visitVarInsn(ASTORE, 1);
+
+            // call sendMessages with parameters: this, context
             mv.visitVarInsn(ALOAD, 0);
-            mv.visitMethodInsn(INVOKEVIRTUAL, fullClassName(), "sendMessages", "(L" + superclassName() + ";)L" + superclassName() + ";");
+            mv.visitVarInsn(ALOAD, 0); // receiver
+            mv.visitVarInsn(ALOAD, 1); // context
+            mv.visitMethodInsn(INVOKEVIRTUAL, fullClassName(), "sendMessages", SEND_MESSAGES_SIG);
             mv.visitInsn(POP);
 
             mv.visitInsn(RETURN);
@@ -132,8 +208,35 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         }
 
         public Void visitTemps(@NotNull SmalltalkParser.TempsContext ctx) {
-            log("visitTemps");
+            initializeTemporaryVariableMap();
+            addToTemporaryVariableMap(ctx.IDENTIFIER());
+            addTemporariesToContext();
             return null;
+        }
+
+        private void addTemporariesToContext() {
+            pushContext(mv);
+            pushNumber(mv, temporaries.size());
+            mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "initTemporaries", "(I)V");
+        }
+
+        private void addToTemporaryVariableMap(List<TerminalNode> nodes) {
+            for (TerminalNode node : nodes)
+                addToTemporaryVariableMap(node);
+        }
+
+        private void addToTemporaryVariableMap(TerminalNode node) {
+            addToTemporaryVariableMap(node.getText(), temporaries.size(), node);
+        }
+
+        private void addToTemporaryVariableMap(String key, int index, TerminalNode node) {
+            if (temporaries.containsKey(key))
+                throw new RuntimeException("Temporary '" + key + "' already defined.");
+            temporaries.put(key, new ExtendedTerminalNode(node, index));
+        }
+
+        private void initializeTemporaryVariableMap() {
+            temporaries = new HashMap<String, ExtendedTerminalNode>();
         }
 
         public Void visitStatementExpressions(@NotNull SmalltalkParser.StatementExpressionsContext ctx) {
@@ -150,5 +253,223 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             log("visitStatementAnswer");
             return null;
         }
+    }
+
+    private class ExtendedTerminalNode {
+
+        private final TerminalNode node;
+        private final int index;
+
+        public ExtendedTerminalNode(TerminalNode node, int index) {
+            this.node = node;
+            this.index = index;
+        }
+    }
+
+    static {
+        OPCODES.put("V1_1", 196653);
+        OPCODES.put("V1_2", 46);
+        OPCODES.put("V1_3", 47);
+        OPCODES.put("V1_4", 48);
+        OPCODES.put("V1_5", 49);
+        OPCODES.put("V1_6", 50);
+        OPCODES.put("V1_7", 51);
+        OPCODES.put("ACC_PUBLIC", 1);
+        OPCODES.put("ACC_PRIVATE", 2);
+        OPCODES.put("ACC_PROTECTED", 4);
+        OPCODES.put("ACC_STATIC", 8);
+        OPCODES.put("ACC_FINAL", 16);
+        OPCODES.put("ACC_SUPER", 32);
+        OPCODES.put("ACC_SYNCHRONIZED", 32);
+        OPCODES.put("ACC_VOLATILE", 64);
+        OPCODES.put("ACC_BRIDGE", 64);
+        OPCODES.put("ACC_VARARGS", 128);
+        OPCODES.put("ACC_TRANSIENT", 128);
+        OPCODES.put("ACC_NATIVE", 256);
+        OPCODES.put("ACC_INTERFACE", 512);
+        OPCODES.put("ACC_ABSTRACT", 1024);
+        OPCODES.put("ACC_STRICT", 2048);
+        OPCODES.put("ACC_SYNTHETIC", 4096);
+        OPCODES.put("ACC_ANNOTATION", 8192);
+        OPCODES.put("ACC_ENUM", 16384);
+        OPCODES.put("ACC_DEPRECATED", 131072);
+        OPCODES.put("T_BOOLEAN", 4);
+        OPCODES.put("T_CHAR", 5);
+        OPCODES.put("T_FLOAT", 6);
+        OPCODES.put("T_DOUBLE", 7);
+        OPCODES.put("T_BYTE", 8);
+        OPCODES.put("T_SHORT", 9);
+        OPCODES.put("T_INT", 10);
+        OPCODES.put("T_LONG", 11);
+        OPCODES.put("F_NEW", -1);
+        OPCODES.put("F_FULL", 0);
+        OPCODES.put("F_APPEND", 1);
+        OPCODES.put("F_CHOP", 2);
+        OPCODES.put("F_SAME", 3);
+        OPCODES.put("F_SAME1", 4);
+        OPCODES.put("TOP", TOP);
+        OPCODES.put("INTEGER", INTEGER);
+        OPCODES.put("FLOAT", FLOAT);
+        OPCODES.put("DOUBLE", DOUBLE);
+        OPCODES.put("LONG", LONG);
+        OPCODES.put("NULL", NULL);
+        OPCODES.put("UNINITIALIZED_THIS", UNINITIALIZED_THIS);
+        OPCODES.put("NOP", 0);
+        OPCODES.put("ACONST_NULL", 1);
+        OPCODES.put("ICONST_M1", 2);
+        OPCODES.put("ICONST_0", 3);
+        OPCODES.put("ICONST_1", 4);
+        OPCODES.put("ICONST_2", 5);
+        OPCODES.put("ICONST_3", 6);
+        OPCODES.put("ICONST_4", 7);
+        OPCODES.put("ICONST_5", 8);
+        OPCODES.put("LCONST_0", 9);
+        OPCODES.put("LCONST_1", 10);
+        OPCODES.put("FCONST_0", 11);
+        OPCODES.put("FCONST_1", 12);
+        OPCODES.put("FCONST_2", 13);
+        OPCODES.put("DCONST_0", 14);
+        OPCODES.put("DCONST_1", 15);
+        OPCODES.put("BIPUSH", 16);
+        OPCODES.put("SIPUSH", 17);
+        OPCODES.put("LDC", 18);
+        OPCODES.put("ILOAD", 21);
+        OPCODES.put("LLOAD", 22);
+        OPCODES.put("FLOAD", 23);
+        OPCODES.put("DLOAD", 24);
+        OPCODES.put("ALOAD", 25);
+        OPCODES.put("IALOAD", 46);
+        OPCODES.put("LALOAD", 47);
+        OPCODES.put("FALOAD", 48);
+        OPCODES.put("DALOAD", 49);
+        OPCODES.put("AALOAD", 50);
+        OPCODES.put("BALOAD", 51);
+        OPCODES.put("CALOAD", 52);
+        OPCODES.put("SALOAD", 53);
+        OPCODES.put("ISTORE", 54);
+        OPCODES.put("LSTORE", 55);
+        OPCODES.put("FSTORE", 56);
+        OPCODES.put("DSTORE", 57);
+        OPCODES.put("ASTORE", 58);
+        OPCODES.put("IASTORE", 79);
+        OPCODES.put("LASTORE", 80);
+        OPCODES.put("FASTORE", 81);
+        OPCODES.put("DASTORE", 82);
+        OPCODES.put("AASTORE", 83);
+        OPCODES.put("BASTORE", 84);
+        OPCODES.put("CASTORE", 85);
+        OPCODES.put("SASTORE", 86);
+        OPCODES.put("POP", 87);
+        OPCODES.put("POP2", 88);
+        OPCODES.put("DUP", 89);
+        OPCODES.put("DUP_X1", 90);
+        OPCODES.put("DUP_X2", 91);
+        OPCODES.put("DUP2", 92);
+        OPCODES.put("DUP2_X1", 93);
+        OPCODES.put("DUP2_X2", 94);
+        OPCODES.put("SWAP", 95);
+        OPCODES.put("IADD", 96);
+        OPCODES.put("LADD", 97);
+        OPCODES.put("FADD", 98);
+        OPCODES.put("DADD", 99);
+        OPCODES.put("ISUB", 100);
+        OPCODES.put("LSUB", 101);
+        OPCODES.put("FSUB", 102);
+        OPCODES.put("DSUB", 103);
+        OPCODES.put("IMUL", 104);
+        OPCODES.put("LMUL", 105);
+        OPCODES.put("FMUL", 106);
+        OPCODES.put("DMUL", 107);
+        OPCODES.put("IDIV", 108);
+        OPCODES.put("LDIV", 109);
+        OPCODES.put("FDIV", 110);
+        OPCODES.put("DDIV", 111);
+        OPCODES.put("IREM", 112);
+        OPCODES.put("LREM", 113);
+        OPCODES.put("FREM", 114);
+        OPCODES.put("DREM", 115);
+        OPCODES.put("INEG", 116);
+        OPCODES.put("LNEG", 117);
+        OPCODES.put("FNEG", 118);
+        OPCODES.put("DNEG", 119);
+        OPCODES.put("ISHL", 120);
+        OPCODES.put("LSHL", 121);
+        OPCODES.put("ISHR", 122);
+        OPCODES.put("LSHR", 123);
+        OPCODES.put("IUSHR", 124);
+        OPCODES.put("LUSHR", 125);
+        OPCODES.put("IAND", 126);
+        OPCODES.put("LAND", 127);
+        OPCODES.put("IOR", 128);
+        OPCODES.put("LOR", 129);
+        OPCODES.put("IXOR", 130);
+        OPCODES.put("LXOR", 131);
+        OPCODES.put("IINC", 132);
+        OPCODES.put("I2L", 133);
+        OPCODES.put("I2F", 134);
+        OPCODES.put("I2D", 135);
+        OPCODES.put("L2I", 136);
+        OPCODES.put("L2F", 137);
+        OPCODES.put("L2D", 138);
+        OPCODES.put("F2I", 139);
+        OPCODES.put("F2L", 140);
+        OPCODES.put("F2D", 141);
+        OPCODES.put("D2I", 142);
+        OPCODES.put("D2L", 143);
+        OPCODES.put("D2F", 144);
+        OPCODES.put("I2B", 145);
+        OPCODES.put("I2C", 146);
+        OPCODES.put("I2S", 147);
+        OPCODES.put("LCMP", 148);
+        OPCODES.put("FCMPL", 149);
+        OPCODES.put("FCMPG", 150);
+        OPCODES.put("DCMPL", 151);
+        OPCODES.put("DCMPG", 152);
+        OPCODES.put("IFEQ", 153);
+        OPCODES.put("IFNE", 154);
+        OPCODES.put("IFLT", 155);
+        OPCODES.put("IFGE", 156);
+        OPCODES.put("IFGT", 157);
+        OPCODES.put("IFLE", 158);
+        OPCODES.put("IF_ICMPEQ", 159);
+        OPCODES.put("IF_ICMPNE", 160);
+        OPCODES.put("IF_ICMPLT", 161);
+        OPCODES.put("IF_ICMPGE", 162);
+        OPCODES.put("IF_ICMPGT", 163);
+        OPCODES.put("IF_ICMPLE", 164);
+        OPCODES.put("IF_ACMPEQ", 165);
+        OPCODES.put("IF_ACMPNE", 166);
+        OPCODES.put("GOTO", 167);
+        OPCODES.put("JSR", 168);
+        OPCODES.put("RET", 169);
+        OPCODES.put("TABLESWITCH", 170);
+        OPCODES.put("LOOKUPSWITCH", 171);
+        OPCODES.put("IRETURN", 172);
+        OPCODES.put("LRETURN", 173);
+        OPCODES.put("FRETURN", 174);
+        OPCODES.put("DRETURN", 175);
+        OPCODES.put("ARETURN", 176);
+        OPCODES.put("RETURN", 177);
+        OPCODES.put("GETSTATIC", 178);
+        OPCODES.put("PUTSTATIC", 179);
+        OPCODES.put("GETFIELD", 180);
+        OPCODES.put("PUTFIELD", 181);
+        OPCODES.put("INVOKEVIRTUAL", 182);
+        OPCODES.put("INVOKESPECIAL", 183);
+        OPCODES.put("INVOKESTATIC", 184);
+        OPCODES.put("INVOKEINTERFACE", 185);
+        OPCODES.put("INVOKEDYNAMIC", 186);
+        OPCODES.put("NEW", 187);
+        OPCODES.put("NEWARRAY", 188);
+        OPCODES.put("ANEWARRAY", 189);
+        OPCODES.put("ARRAYLENGTH", 190);
+        OPCODES.put("ATHROW", 191);
+        OPCODES.put("CHECKCAST", 192);
+        OPCODES.put("INSTANCEOF", 193);
+        OPCODES.put("MONITORENTER", 194);
+        OPCODES.put("MONITOREXIT", 195);
+        OPCODES.put("MULTIANEWARRAY", 197);
+        OPCODES.put("IFNULL", 198);
+        OPCODES.put("IFNONNULL", 199);
     }
 }

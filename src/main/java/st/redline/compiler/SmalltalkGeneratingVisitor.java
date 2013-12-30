@@ -1,5 +1,6 @@
 package st.redline.compiler;
 
+import org.antlr.v4.runtime.Token;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.objectweb.asm.ClassWriter;
@@ -108,6 +109,12 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         mv.visitInsn(ACONST_NULL);
     }
 
+    public void visitLine(MethodVisitor mv, int line) {
+        Label l0 = new Label();
+        mv.visitLabel(l0);
+        mv.visitLineNumber(line, l0);
+    }
+
     public void pushNumber(MethodVisitor mv, int value) {
         switch (value) {
             case 0: mv.visitInsn(ICONST_0); break;
@@ -185,7 +192,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             mv.visitMethodInsn(INVOKESPECIAL, contextName(), "<init>", "(Lst/redline/runtime/ProtoObject;)V");
             mv.visitVarInsn(ASTORE, 1);
 
-            // call sendMessages with parameters: this, context
+            // call sendMessages with parameters: this & context
             mv.visitVarInsn(ALOAD, 0);
             mv.visitVarInsn(ALOAD, 0); // receiver
             mv.visitVarInsn(ALOAD, 1); // context
@@ -215,9 +222,14 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         }
 
         private void addTemporariesToContext() {
+            visitLine(mv, lineNumberOfFirstTemporary());
             pushContext(mv);
             pushNumber(mv, temporaries.size());
             mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "initTemporaries", "(I)V");
+        }
+
+        private int lineNumberOfFirstTemporary() {
+            return temporaries.entrySet().iterator().next().getValue().getLine();
         }
 
         private void addToTemporaryVariableMap(List<TerminalNode> nodes) {
@@ -263,6 +275,14 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         public ExtendedTerminalNode(TerminalNode node, int index) {
             this.node = node;
             this.index = index;
+        }
+
+        public int getLine() {
+            return getSymbol().getLine();
+        }
+
+        public Token getSymbol() {
+            return node.getSymbol();
         }
     }
 

@@ -85,6 +85,10 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         return OPCODES.get(opcode);
     }
 
+    public void pop(MethodVisitor mv) {
+        mv.visitInsn(POP);
+    }
+
     public void pushLiteral(MethodVisitor mv, String literal) {
         mv.visitLdcInsn(literal);
     }
@@ -253,16 +257,130 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitStatementExpressions(@NotNull SmalltalkParser.StatementExpressionsContext ctx) {
             log("visitStatementExpressions");
+            ctx.expressions().accept(currentVisitor());
             return null;
         }
 
         public Void visitStatementExpressionsAnswer(@NotNull SmalltalkParser.StatementExpressionsAnswerContext ctx) {
             log("visitStatementExpressionsAnswer");
+            ctx.expressions().accept(currentVisitor());
+            ctx.answer().accept(currentVisitor());
             return null;
         }
 
         public Void visitStatementAnswer(@NotNull SmalltalkParser.StatementAnswerContext ctx) {
             log("visitStatementAnswer");
+            return null;
+        }
+
+        public Void visitExpression(@NotNull SmalltalkParser.ExpressionContext ctx) {
+            log("visitExpression");
+            SmalltalkParser.BinarySendContext binarySend = ctx.binarySend();
+            if (binarySend != null)
+                return binarySend.accept(currentVisitor());
+            SmalltalkParser.KeywordSendContext keywordSend = ctx.keywordSend();
+            if (keywordSend != null)
+                return keywordSend.accept(currentVisitor());
+            SmalltalkParser.CascadeContext cascade = ctx.cascade();
+            if (cascade != null)
+                return cascade.accept(currentVisitor());
+            SmalltalkParser.AssignmentContext assignment = ctx.assignment();
+            if (assignment != null)
+                return assignment.accept(currentVisitor());
+            throw new RuntimeException("vistExpression not alternative found.");
+        }
+
+        public Void visitUnarySend(@NotNull SmalltalkParser.UnarySendContext ctx) {
+            log("visitUnarySend");
+            ctx.operand().accept(currentVisitor());
+            SmalltalkParser.UnaryTailContext unaryTail = ctx.unaryTail();
+            if (unaryTail != null)
+                return unaryTail.accept(currentVisitor());
+            return null;
+        }
+
+        public Void visitUnaryTail(@NotNull SmalltalkParser.UnaryTailContext ctx) {
+            log("visitUnaryTail");
+            return null;
+        }
+
+        public Void visitBinarySend(@NotNull SmalltalkParser.BinarySendContext ctx) {
+            log("visitBinarySend");
+            ctx.unarySend().accept(currentVisitor());
+            SmalltalkParser.BinaryTailContext binaryTail = ctx.binaryTail();
+            if (binaryTail != null)
+                return binaryTail.accept(currentVisitor());
+            return null;
+        }
+
+        public Void visitBinaryTail(@NotNull SmalltalkParser.BinaryTailContext ctx) {
+            log("visitBinaryTail");
+            return null;
+        }
+
+        public Void visitKeywordSend(@NotNull SmalltalkParser.KeywordSendContext ctx) {
+            log("visitKeywordSend");
+            ctx.binarySend().accept(currentVisitor());
+            ctx.keywordMessage().accept(currentVisitor());
+            return null;
+        }
+
+        public Void visitCascade(@NotNull SmalltalkParser.CascadeContext ctx) {
+            log("visitCascade");
+            SmalltalkParser.BinarySendContext binarySend = ctx.binarySend();
+            if (binarySend != null)
+                return binarySend.accept(currentVisitor());
+            SmalltalkParser.KeywordSendContext keywordSend = ctx.keywordSend();
+            if (keywordSend != null)
+                return keywordSend.accept(currentVisitor());
+            for (SmalltalkParser.MessageContext message : ctx.message())
+                message.accept(currentVisitor());
+            return null;
+        }
+
+        public Void visitAssignment(@NotNull SmalltalkParser.AssignmentContext ctx) {
+            log("visitAssignment");
+            return null;
+        }
+
+        public Void visitMessage(@NotNull SmalltalkParser.MessageContext ctx) {
+            log("visitMessage");
+            SmalltalkParser.UnaryMessageContext unaryMessage = ctx.unaryMessage();
+            if (unaryMessage != null)
+                return unaryMessage.accept(currentVisitor());
+            SmalltalkParser.KeywordMessageContext keywordMessage = ctx.keywordMessage();
+            if (keywordMessage != null)
+                return keywordMessage.accept(currentVisitor());
+            SmalltalkParser.BinaryMessageContext binaryMessage = ctx.binaryMessage();
+            if (binaryMessage != null)
+                return binaryMessage.accept(currentVisitor());
+            throw new RuntimeException("vistMessage not alternative found.");
+        }
+
+        public Void visitUnaryMessage(@NotNull SmalltalkParser.UnaryMessageContext ctx) {
+            log("visitUnaryMessage");
+            return null;
+        }
+
+        public Void visitBinaryMessage(@NotNull SmalltalkParser.BinaryMessageContext ctx) {
+            log("visitBinaryMessage");
+            return null;
+        }
+
+        public Void visitKeywordMessage(@NotNull SmalltalkParser.KeywordMessageContext ctx) {
+            log("visitKeywordMessage");
+            for (SmalltalkParser.KeywordPairContext keywordPair : ctx.keywordPair())
+                keywordPair.accept(currentVisitor());
+            return null;
+        }
+
+        public Void visitKeywordPair(@NotNull SmalltalkParser.KeywordPairContext ctx) {
+            log("visitKeywordPair");
+            return null;
+        }
+
+        public Void visitOperand(@NotNull SmalltalkParser.OperandContext ctx) {
+            log("visitOperand");
             return null;
         }
     }

@@ -10,9 +10,10 @@ script : sequence EOF;
 sequence : ws temps? ws statements? ws;
 ws : (SEPARATOR | COMMENT)*;
 temps : PIPE (ws IDENTIFIER)* ws PIPE;
-statements : answer
-           | expressions ws PERIOD ws answer
-           | expressions PERIOD?;
+statements : answer # StatementAnswer
+           | expressions ws PERIOD ws answer # StatementExpressionsAnswer
+           | expressions PERIOD? # StatementExpressions
+           ;
 answer : CARROT ws expression ws PERIOD?;
 expression : assignment | cascade | keywordSend | binarySend | primitive;
 expressions : expression expressionList*;

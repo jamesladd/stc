@@ -297,6 +297,17 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class StatementsContext extends ParserRuleContext {
+		public StatementsContext(ParserRuleContext parent, int invokingState) {
+			super(parent, invokingState);
+		}
+		@Override public int getRuleIndex() { return RULE_statements; }
+	 
+		public StatementsContext() { }
+		public void copyFrom(StatementsContext ctx) {
+			super.copyFrom(ctx);
+		}
+	}
+	public static class StatementExpressionsAnswerContext extends StatementsContext {
 		public AnswerContext answer() {
 			return getRuleContext(AnswerContext.class,0);
 		}
@@ -310,13 +321,33 @@ public class SmalltalkParser extends Parser {
 		public ExpressionsContext expressions() {
 			return getRuleContext(ExpressionsContext.class,0);
 		}
-		public StatementsContext(ParserRuleContext parent, int invokingState) {
-			super(parent, invokingState);
-		}
-		@Override public int getRuleIndex() { return RULE_statements; }
+		public StatementExpressionsAnswerContext(StatementsContext ctx) { copyFrom(ctx); }
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SmalltalkVisitor ) return ((SmalltalkVisitor<? extends T>)visitor).visitStatements(this);
+			if ( visitor instanceof SmalltalkVisitor ) return ((SmalltalkVisitor<? extends T>)visitor).visitStatementExpressionsAnswer(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class StatementExpressionsContext extends StatementsContext {
+		public TerminalNode PERIOD() { return getToken(SmalltalkParser.PERIOD, 0); }
+		public ExpressionsContext expressions() {
+			return getRuleContext(ExpressionsContext.class,0);
+		}
+		public StatementExpressionsContext(StatementsContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SmalltalkVisitor ) return ((SmalltalkVisitor<? extends T>)visitor).visitStatementExpressions(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class StatementAnswerContext extends StatementsContext {
+		public AnswerContext answer() {
+			return getRuleContext(AnswerContext.class,0);
+		}
+		public StatementAnswerContext(StatementsContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SmalltalkVisitor ) return ((SmalltalkVisitor<? extends T>)visitor).visitStatementAnswer(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -329,6 +360,7 @@ public class SmalltalkParser extends Parser {
 			setState(140);
 			switch ( getInterpreter().adaptivePredict(_input,5,_ctx) ) {
 			case 1:
+				_localctx = new StatementAnswerContext(_localctx);
 				enterOuterAlt(_localctx, 1);
 				{
 				setState(129); answer();
@@ -336,6 +368,7 @@ public class SmalltalkParser extends Parser {
 				break;
 
 			case 2:
+				_localctx = new StatementExpressionsAnswerContext(_localctx);
 				enterOuterAlt(_localctx, 2);
 				{
 				setState(130); expressions();
@@ -347,6 +380,7 @@ public class SmalltalkParser extends Parser {
 				break;
 
 			case 3:
+				_localctx = new StatementExpressionsContext(_localctx);
 				enterOuterAlt(_localctx, 3);
 				{
 				setState(136); expressions();

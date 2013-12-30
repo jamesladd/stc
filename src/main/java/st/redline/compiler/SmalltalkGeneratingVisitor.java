@@ -29,11 +29,6 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         return null;
     }
 
-    public Void visitSequence(@NotNull SmalltalkParser.SequenceContext ctx) {
-        currentVisitor().visitSequence(ctx);
-        return null;
-    }
-
     private SmalltalkVisitor<Void> currentVisitor() {
         return visitors.peek();
     }
@@ -68,16 +63,31 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
     private class ClassGeneratorVisitor extends SmalltalkBaseVisitor<Void> implements SmalltalkVisitor<Void>, Opcodes {
 
         private final ClassWriter cw;
+        private MethodVisitor mv;
 
         public ClassGeneratorVisitor() {
-            cw = new ClassWriter(0);
+            cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
         }
 
         public Void visitScript(SmalltalkParser.ScriptContext ctx) {
             openJavaClass();
+            openSendMessagesMethod();
             ctx.sequence().accept(currentVisitor());
+            closeSendMessagesMethod();
             closeJavaClass();
             return null;
+        }
+
+        private void closeSendMessagesMethod() {
+            mv.visitMaxs(0, 0);
+            mv.visitEnd();
+        }
+
+        private void openSendMessagesMethod() {
+            mv = cw.visitMethod(ACC_PROTECTED, "sendMessages", "(L" + superclassName() + ";)L" + superclassName() + ";", null, null);
+            mv.visitCode();
+            mv.visitVarInsn(ALOAD, 1);
+            mv.visitInsn(ARETURN);
         }
 
         private void openJavaClass() {
@@ -99,15 +109,45 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             mv.visitLineNumber(0, l0);
             mv.visitVarInsn(ALOAD, 0);
             mv.visitMethodInsn(INVOKESPECIAL, superclassName(), "<init>", "()V");
+
+            // invoke sendMessages to send all messages embodied in the compiled script.
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitMethodInsn(INVOKEVIRTUAL, fullClassName(), "sendMessages", "(L" + superclassName() + ";)L" + superclassName() + ";");
+            mv.visitInsn(POP);
+
             mv.visitInsn(RETURN);
-            Label l1 = new Label();
-            mv.visitLabel(l1);
-            mv.visitLocalVariable("this", "L" + fullClassName() + ";", null, l0, l1, 0);
-            mv.visitMaxs(1, 1);
+            mv.visitMaxs(0, 0);
             mv.visitEnd();
         }
 
         public Void visitSequence(SmalltalkParser.SequenceContext ctx) {
+            SmalltalkParser.TempsContext temps = ctx.temps();
+            if (temps != null)
+                temps.accept(currentVisitor());
+            SmalltalkParser.StatementsContext statements = ctx.statements();
+            if (statements != null)
+                statements.accept(currentVisitor());
+            return null;
+        }
+
+        public Void visitTemps(@NotNull SmalltalkParser.TempsContext ctx) {
+            log("visitTemps");
+            return null;
+        }
+
+        public Void visitStatementExpressions(@NotNull SmalltalkParser.StatementExpressionsContext ctx) {
+            log("visitStatementExpressions");
+            return null;
+        }
+
+        public Void visitStatementExpressionsAnswer(@NotNull SmalltalkParser.StatementExpressionsAnswerContext ctx) {
+            log("visitStatementExpressionsAnswer");
+            return null;
+        }
+
+        public Void visitStatementAnswer(@NotNull SmalltalkParser.StatementAnswerContext ctx) {
+            log("visitStatementAnswer");
             return null;
         }
     }

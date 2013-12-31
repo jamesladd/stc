@@ -113,6 +113,24 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         mv.visitInsn(ACONST_NULL);
     }
 
+    public void pushTemporary(MethodVisitor mv, int index) {
+        pushContext(mv);
+        pushNumber(mv, index);
+        mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "temporaryAt", "(I)Lst/redline/runtime/ProtoObject;");
+    }
+
+    public void pushArgument(MethodVisitor mv, int index) {
+        pushContext(mv);
+        pushNumber(mv, index);
+        mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "argumentAt", "(I)Lst/redline/runtime/ProtoObject;");
+    }
+
+    public void pushReference(MethodVisitor mv, String name) {
+        pushReceiver(mv);
+        pushLiteral(mv, name);
+        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "variableAt", "(Ljava/lang/String;)Lst/redline/runtime/ProtoObject;");
+    }
+
     public void visitLine(MethodVisitor mv, int line) {
         Label l0 = new Label();
         mv.visitLabel(l0);
@@ -143,6 +161,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         private final ClassWriter cw;
         private MethodVisitor mv;
         private HashMap<String, ExtendedTerminalNode> temporaries;
+        private HashMap<String, ExtendedTerminalNode> arguments;
 
         public ClassGeneratorVisitor() {
             cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
@@ -236,6 +255,14 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             return temporaries.entrySet().iterator().next().getValue().getLine();
         }
 
+        private boolean isTemporary(String key) {
+            return temporaries != null && temporaries.containsKey(key);
+        }
+
+        private int indexOfTemporary(String key) {
+            return temporaries.get(key).getIndex();
+        }
+
         private void addToTemporaryVariableMap(List<TerminalNode> nodes) {
             for (TerminalNode node : nodes)
                 addToTemporaryVariableMap(node);
@@ -253,6 +280,18 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         private void initializeTemporaryVariableMap() {
             temporaries = new HashMap<String, ExtendedTerminalNode>();
+        }
+
+        private boolean isArgument(String key) {
+            return arguments != null && arguments.containsKey(key);
+        }
+
+        private int indexOfArgument(String key) {
+            return arguments.get(key).getIndex();
+        }
+
+        private void initializeArgumentsMap() {
+            arguments = new HashMap<String, ExtendedTerminalNode>();
         }
 
         public Void visitStatementExpressions(@NotNull SmalltalkParser.StatementExpressionsContext ctx) {
@@ -287,7 +326,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             SmalltalkParser.AssignmentContext assignment = ctx.assignment();
             if (assignment != null)
                 return assignment.accept(currentVisitor());
-            throw new RuntimeException("vistExpression not alternative found.");
+            throw new RuntimeException("vistExpression no alternative found.");
         }
 
         public Void visitUnarySend(@NotNull SmalltalkParser.UnarySendContext ctx) {
@@ -354,7 +393,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             SmalltalkParser.BinaryMessageContext binaryMessage = ctx.binaryMessage();
             if (binaryMessage != null)
                 return binaryMessage.accept(currentVisitor());
-            throw new RuntimeException("vistMessage not alternative found.");
+            throw new RuntimeException("vistMessage no alternative found.");
         }
 
         public Void visitUnaryMessage(@NotNull SmalltalkParser.UnaryMessageContext ctx) {
@@ -381,7 +420,44 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitOperand(@NotNull SmalltalkParser.OperandContext ctx) {
             log("visitOperand");
+            SmalltalkParser.LiteralContext literal = ctx.literal();
+            if (literal != null)
+                return literal.accept(currentVisitor());
+            SmalltalkParser.ReferenceContext reference = ctx.reference();
+            if (reference != null)
+                return reference.accept(currentVisitor());
+            SmalltalkParser.SubexpressionContext subexpression = ctx.subexpression();
+            if (subexpression != null)
+                return subexpression.accept(currentVisitor());
+            throw new RuntimeException("vistOperand no alternative found.");
+        }
+
+        public Void visitLiteral(@NotNull SmalltalkParser.LiteralContext ctx) {
+            log("visitLiteral");
             return null;
+        }
+
+        public Void visitReference(@NotNull SmalltalkParser.ReferenceContext ctx) {
+            log("visitReference " + ctx.variable().IDENTIFIER().getSymbol().getText());
+            TerminalNode identifier = ctx.variable().IDENTIFIER();
+            String name = identifier.getSymbol().getText();
+            visitLine(mv, identifier.getSymbol().getLine());
+            if (isTemporary(name))
+                pushTemporary(mv, indexOfTemporary(name));
+            else if (isArgument(name))
+                pushArgument(mv, indexOfArgument(name));
+            else
+                pushReference(mv, name);
+            return null;
+        }
+
+        public Void visitSubexpression(@NotNull SmalltalkParser.SubexpressionContext ctx) {
+            log("visitSubexpression");
+            return null;
+        }
+
+        public Void visitVariable(@NotNull SmalltalkParser.VariableContext ctx) {
+            throw new RuntimeException("visitVariable should have been handed before now.");
         }
     }
 
@@ -393,6 +469,10 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         public ExtendedTerminalNode(TerminalNode node, int index) {
             this.node = node;
             this.index = index;
+        }
+
+        public int getIndex() {
+            return index;
         }
 
         public int getLine() {

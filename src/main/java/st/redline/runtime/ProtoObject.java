@@ -6,4 +6,9 @@ public class ProtoObject {
         System.out.println("sendMessages(" + receiver + "," + context + ")");
         return receiver;
     }
+
+    public ProtoObject variableAt(String name) {
+        System.out.println("variableAt " + name);
+        return null;
+    }
 }

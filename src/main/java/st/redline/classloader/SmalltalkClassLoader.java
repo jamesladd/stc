@@ -18,7 +18,7 @@ public class SmalltalkClassLoader extends ClassLoader {
         this.objectCache = new HashMap<String, ProtoObject>();
     }
 
-    public ProtoObject findObject(String name) throws ObjectNotFoundException {
+    public ProtoObject findObject(String name) {
         ProtoObject cls = cachedObject(name);
         if (cls != null)
             return cls;
@@ -28,6 +28,9 @@ public class SmalltalkClassLoader extends ClassLoader {
             if (cls != null)
                 return cls;
         } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        } catch (ObjectNotFoundException e) {
+            e.printStackTrace();
         }
         throw new ObjectNotFoundException("Object '" + name + "' was not found.");
     }
@@ -37,6 +40,7 @@ public class SmalltalkClassLoader extends ClassLoader {
     }
 
     public Class findClass(String name) throws ClassNotFoundException {
+        System.out.println("findClass " + name);
         Class cls = cachedClass(name);
         if (cls != null)
             return cls;

@@ -68,11 +68,11 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
     }
 
     private String superclassName() {
-        return "st/redline/runtime/ProtoObject";
+        return "st/redline/core/ProtoObject";
     }
 
     private String contextName() {
-        return "st/redline/runtime/Context";
+        return "st/redline/core/Context";
     }
 
     public byte[] generatedClassBytes() {
@@ -116,19 +116,19 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
     public void pushTemporary(MethodVisitor mv, int index) {
         pushContext(mv);
         pushNumber(mv, index);
-        mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "temporaryAt", "(I)Lst/redline/runtime/ProtoObject;");
+        mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "temporaryAt", "(I)Lst/redline/core/ProtoObject;");
     }
 
     public void pushArgument(MethodVisitor mv, int index) {
         pushContext(mv);
         pushNumber(mv, index);
-        mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "argumentAt", "(I)Lst/redline/runtime/ProtoObject;");
+        mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "argumentAt", "(I)Lst/redline/core/ProtoObject;");
     }
 
     public void pushReference(MethodVisitor mv, String name) {
         pushReceiver(mv);
         pushLiteral(mv, name);
-        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "variableAt", "(Ljava/lang/String;)Lst/redline/runtime/ProtoObject;");
+        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "variableAt", "(Ljava/lang/String;)Lst/redline/core/ProtoObject;");
     }
 
     public void visitLine(MethodVisitor mv, int line) {
@@ -157,7 +157,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
     private class ClassGeneratorVisitor extends SmalltalkBaseVisitor<Void> implements SmalltalkVisitor<Void>, Opcodes {
 
-        private final String SEND_MESSAGES_SIG = "(Lst/redline/runtime/ProtoObject;Lst/redline/runtime/Context;)Lst/redline/runtime/ProtoObject;";
+        private final String SEND_MESSAGES_SIG = "(Lst/redline/core/ProtoObject;Lst/redline/core/Context;)Lst/redline/core/ProtoObject;";
         private final ClassWriter cw;
         private MethodVisitor mv;
         private HashMap<String, ExtendedTerminalNode> temporaries;
@@ -212,7 +212,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             mv.visitTypeInsn(NEW, contextName());
             mv.visitInsn(DUP);
             mv.visitVarInsn(ALOAD, 0);
-            mv.visitMethodInsn(INVOKESPECIAL, contextName(), "<init>", "(Lst/redline/runtime/ProtoObject;)V");
+            mv.visitMethodInsn(INVOKESPECIAL, contextName(), "<init>", "(Lst/redline/core/ProtoObject;)V");
             mv.visitVarInsn(ASTORE, 1);
 
             // call sendMessages with parameters: this & context

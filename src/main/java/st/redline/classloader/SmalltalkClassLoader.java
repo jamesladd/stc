@@ -1,18 +1,39 @@
 package st.redline.classloader;
 
 import st.redline.compiler.Compiler;
+import st.redline.core.ProtoObject;
 
 import java.util.HashMap;
 
 public class SmalltalkClassLoader extends ClassLoader {
 
     private final SourceFinder sourceFinder;
-    private final HashMap<String, Class> cache;
+    private final HashMap<String, Class> classCache;
+    private final HashMap<String, ProtoObject> objectCache;
 
     public SmalltalkClassLoader(ClassLoader classLoader, SourceFinder sourceFinder) {
         super(classLoader);
         this.sourceFinder = sourceFinder;
-        this.cache = new HashMap<String, Class>();
+        this.classCache = new HashMap<String, Class>();
+        this.objectCache = new HashMap<String, ProtoObject>();
+    }
+
+    public ProtoObject findObject(String name) throws ObjectNotFoundException {
+        ProtoObject cls = cachedObject(name);
+        if (cls != null)
+            return cls;
+        try {
+            findClass(name);
+            cls = cachedObject(name);
+            if (cls != null)
+                return cls;
+        } catch (ClassNotFoundException e) {
+        }
+        throw new ObjectNotFoundException("Object '" + name + "' was not found.");
+    }
+
+    private ProtoObject cachedObject(String name) {
+        return objectCache.get(name);
     }
 
     public Class findClass(String name) throws ClassNotFoundException {
@@ -28,11 +49,11 @@ public class SmalltalkClassLoader extends ClassLoader {
     }
 
     private void cacheClass(Class cls, String name) {
-        cache.put(name, cls);
+        classCache.put(name, cls);
     }
 
     private Class cachedClass(String name) {
-        return cache.get(name);
+        return classCache.get(name);
     }
 
     private byte[] loadClassData(String name) {

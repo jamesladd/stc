@@ -258,7 +258,7 @@ ProtoObject subclass: #Object.
 
 - storeString
     "Answer a String representation of the receiver from which the receiver can be reconstructed."
-    ^ String streamContents: [:s | self storeOn: s].
+    ^ String streamContents: [ :st | self storeOn: st ].
 
 "category: system primitives"
 

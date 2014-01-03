@@ -1,1 +1,1 @@
-Object new.
+ProtoObject < #Object.

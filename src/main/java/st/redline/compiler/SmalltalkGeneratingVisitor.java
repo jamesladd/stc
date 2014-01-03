@@ -189,12 +189,14 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         }
 
         private void openJavaClass() {
+            System.out.println("openJavaClass: " + fullClassName());
             cw.visit(BYTECODE_VERSION, ACC_PUBLIC + ACC_SUPER, fullClassName(), null, superclassName(), null);
             cw.visitSource(className() + sourceFileExtension(), null);
             makeJavaClassInitializer();
         }
 
         private void closeJavaClass() {
+            System.out.println("closeJavaClass: " + fullClassName());
             cw.visitEnd();
             classBytes = cw.toByteArray();
         }

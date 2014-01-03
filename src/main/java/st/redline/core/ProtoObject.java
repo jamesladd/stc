@@ -8,12 +8,12 @@ public class ProtoObject {
     private ProtoObject selfClass;
 
     public ProtoObject variableAt(String name) {
-        System.out.println("variableAt " + name);
+        System.out.println("** variableAt " + name);
         return resolveObject(name);
     }
 
     public ProtoObject resolveObject(String name) {
-        System.out.println("resolveObject " + name);
+        System.out.println("** resolveObject " + name);
         return findObject(importFor(name));
     }
 
@@ -34,7 +34,7 @@ public class ProtoObject {
     }
 
     protected ProtoObject sendMessages(ProtoObject receiver, Context context) {
-        System.out.println("sendMessages(" + receiver + "," + context + ")");
+        System.out.println("** sendMessages(" + receiver + "," + context + ")");
         return receiver;
     }
 }

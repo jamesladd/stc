@@ -342,6 +342,10 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitUnaryTail(@NotNull SmalltalkParser.UnaryTailContext ctx) {
             log("visitUnaryTail");
+            ctx.unaryMessage().accept(currentVisitor());
+            SmalltalkParser.UnaryTailContext unaryTail = ctx.unaryTail();
+            if (unaryTail != null)
+                return unaryTail.accept(currentVisitor());
             return null;
         }
 
@@ -356,6 +360,10 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitBinaryTail(@NotNull SmalltalkParser.BinaryTailContext ctx) {
             log("visitBinaryTail");
+            ctx.binaryMessage().accept(currentVisitor());
+            SmalltalkParser.BinaryTailContext binaryTail = ctx.binaryTail();
+            if (binaryTail != null)
+                return binaryTail.accept(currentVisitor());
             return null;
         }
 
@@ -395,7 +403,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             SmalltalkParser.BinaryMessageContext binaryMessage = ctx.binaryMessage();
             if (binaryMessage != null)
                 return binaryMessage.accept(currentVisitor());
-            throw new RuntimeException("vistMessage no alternative found.");
+            throw new RuntimeException("visitMessage no alternative found.");
         }
 
         public Void visitUnaryMessage(@NotNull SmalltalkParser.UnaryMessageContext ctx) {
@@ -405,6 +413,14 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitBinaryMessage(@NotNull SmalltalkParser.BinaryMessageContext ctx) {
             log("visitBinaryMessage");
+            TerminalNode binarySelector = ctx.BINARY_SELECTOR();
+            SmalltalkParser.UnarySendContext unarySend = ctx.unarySend();
+            if (unarySend != null)
+                unarySend.accept(currentVisitor());
+            SmalltalkParser.OperandContext operand = ctx.operand();
+            if (operand != null)
+                operand.accept(currentVisitor());
+            log("send BinaryMessage here");
             return null;
         }
 

@@ -328,7 +328,15 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             SmalltalkParser.AssignmentContext assignment = ctx.assignment();
             if (assignment != null)
                 return assignment.accept(currentVisitor());
+            SmalltalkParser.PrimitiveContext primitiveContext = ctx.primitive();
+            if (primitiveContext != null)
+                return primitiveContext.accept(currentVisitor());
             throw new RuntimeException("vistExpression no alternative found.");
+        }
+
+        public Void visitPrimitive(@NotNull SmalltalkParser.PrimitiveContext ctx) {
+            log("visitPrimitive");
+            return null;
         }
 
         public Void visitUnarySend(@NotNull SmalltalkParser.UnarySendContext ctx) {
@@ -412,7 +420,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         }
 
         public Void visitBinaryMessage(@NotNull SmalltalkParser.BinaryMessageContext ctx) {
-            log("visitBinaryMessage");
+            log("visitBinaryMessage " + ctx.BINARY_SELECTOR().getSymbol().getText());
             TerminalNode binarySelector = ctx.BINARY_SELECTOR();
             SmalltalkParser.UnarySendContext unarySend = ctx.unarySend();
             if (unarySend != null)

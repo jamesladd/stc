@@ -37,4 +37,21 @@ public class ProtoObject {
         System.out.println("** sendMessages(" + receiver + "," + context + ")");
         return receiver;
     }
+
+    public ProtoObject perform(ProtoObject arg1, String selector) {
+        System.out.println("** perform(" + arg1 + "," + selector + ") " + this);
+        return perform0(selector, arg1);
+    }
+
+    protected ProtoObject perform0(String selector, ProtoObject ... arguments) {
+        return perform0(selfClass, selector, arguments);
+    }
+
+    protected ProtoObject perform0(ProtoObject foundInClass, String selector, ProtoObject... arguments) {
+//        ProtoObject cls = foundInClass;
+//        while (!cls.includesSelector(selector))
+//            cls = cls.superclass();
+//        return apply(cls.methodFor(selector), cls, selector, arguments);
+        return null;
+    }
 }

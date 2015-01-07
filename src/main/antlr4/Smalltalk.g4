@@ -3,7 +3,6 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
 grammar Smalltalk;
 
 script : sequence EOF;
@@ -31,8 +30,8 @@ operand : literal | reference | subexpression;
 subexpression : OPEN_PAREN ws expression ws CLOSE_PAREN;
 literal : runtimeLiteral | parsetimeLiteral;
 runtimeLiteral : dynamicDictionary | dynamicArray | block;
-block : BLOCK_START blockParamList? sequence? BLOCK_END;
-blockParamList : (ws BLOCK_PARAM)+ ws PIPE?;
+block : BLOCK_START blockParamList? ws sequence? BLOCK_END;
+blockParamList : (ws BLOCK_PARAM)+;
 dynamicDictionary : DYNDICT_START ws expressions? ws DYNARR_END;
 dynamicArray : DYNARR_START ws expressions? ws DYNARR_END;
 parsetimeLiteral : pseudoVariable | number | charConstant | literalArray | string | symbol;

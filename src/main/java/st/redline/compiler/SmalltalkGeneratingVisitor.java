@@ -479,6 +479,11 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             throw new RuntimeException("vistLiteral no alternative found.");
         }
 
+        public Void visitRuntimeLiteral(@NotNull SmalltalkParser.RuntimeLiteralContext ctx) {
+            log("visitRuntimeLiteral");
+            return null;
+        }
+
         public Void visitParsetimeLiteral(@NotNull SmalltalkParser.ParsetimeLiteralContext ctx) {
             log("visitParsetimeLiteral");
             SmalltalkParser.PseudoVariableContext pseudoVariable = ctx.pseudoVariable();

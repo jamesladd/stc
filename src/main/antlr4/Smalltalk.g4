@@ -6,10 +6,10 @@
 
 grammar Smalltalk;
 
-script : ws sequence EOF;
-sequence : temps? ws statements? ws;
+script : sequence EOF;
+sequence : temps? ws statements?;
 ws : (SEPARATOR | COMMENT)*;
-temps : PIPE (ws IDENTIFIER)* ws PIPE;
+temps : PIPE (ws IDENTIFIER)+ ws PIPE;
 statements : answer # StatementAnswer
            | expressions ws PERIOD ws answer # StatementExpressionsAnswer
            | expressions PERIOD? # StatementExpressions
@@ -31,7 +31,7 @@ operand : literal | reference | subexpression;
 subexpression : OPEN_PAREN ws expression ws CLOSE_PAREN;
 literal : runtimeLiteral | parsetimeLiteral;
 runtimeLiteral : dynamicDictionary | dynamicArray | block;
-block : BLOCK_START blockParamList? ws sequence? BLOCK_END;
+block : BLOCK_START blockParamList? sequence? BLOCK_END;
 blockParamList : (ws BLOCK_PARAM)+ ws PIPE?;
 dynamicDictionary : DYNDICT_START ws expressions? ws DYNARR_END;
 dynamicArray : DYNARR_START ws expressions? ws DYNARR_END;
@@ -58,6 +58,16 @@ reference : variable;
 binaryTail : binaryMessage binaryTail?;
 binaryMessage : ws BINARY_SELECTOR ws (unarySend | operand);
 
+SEPARATOR : [ \t\r\n];
+STRING : '\'' (.)*? '\'';
+COMMENT : '"' (.)*? '"';
+BLOCK_START : '[';
+BLOCK_END : ']';
+LT : '<';
+GT : '>';
+PIPE : '|';
+MINUS : '-';
+RESERVED_WORD : 'nil' | 'true' | 'false' | 'self' | 'super';
 IDENTIFIER : [a-zA-Z]+[a-zA-Z0-9_]*;
 PERIOD : '.';
 CARROT : '^';
@@ -76,17 +86,9 @@ DYNARR_END : '}';
 DYNARR_START : '{';
 BLOCK_START : '[';
 BLOCK_END : ']';
-RESERVED_WORD : 'nil' | 'true' | 'false' | 'self' | 'super';
 DIGIT : [0-9];
 HEXDIGIT : [0-9a-fA-F];
 BINARY_SELECTOR : ('\\' | '+' | '*' | '/' | '=' | GT | LT | ',' | '@' | '%' | '~' | PIPE | '&' | MINUS | '?')+;
 KEYWORD : IDENTIFIER COLON;
 BLOCK_PARAM : COLON IDENTIFIER;
 CHARACTER_CONSTANT : DOLLAR (HEXDIGIT | DOLLAR);
-SEPARATOR : [ \t\r\n];
-STRING : '\'' (.)*? '\'';
-COMMENT : '"' (.)*? '"';
-LT : '<';
-GT : '>';
-PIPE : '|';
-MINUS : '-';

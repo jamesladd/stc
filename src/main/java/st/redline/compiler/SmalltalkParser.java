@@ -72,11 +72,11 @@ public class SmalltalkParser extends Parser {
 	}
 	public static class ScriptContext extends ParserRuleContext {
 		public TerminalNode EOF() { return getToken(SmalltalkParser.EOF, 0); }
-		public SequenceContext sequence() {
-			return getRuleContext(SequenceContext.class,0);
-		}
 		public WsContext ws() {
 			return getRuleContext(WsContext.class,0);
+		}
+		public SequenceContext sequence() {
+			return getRuleContext(SequenceContext.class,0);
 		}
 		public ScriptContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -112,14 +112,14 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class SequenceContext extends ParserRuleContext {
-		public StatementsContext statements() {
-			return getRuleContext(StatementsContext.class,0);
-		}
 		public TempsContext temps() {
 			return getRuleContext(TempsContext.class,0);
 		}
 		public WsContext ws(int i) {
 			return getRuleContext(WsContext.class,i);
+		}
+		public StatementsContext statements() {
+			return getRuleContext(StatementsContext.class,0);
 		}
 		public List<WsContext> ws() {
 			return getRuleContexts(WsContext.class);
@@ -174,14 +174,14 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class WsContext extends ParserRuleContext {
+		public List<TerminalNode> COMMENT() { return getTokens(SmalltalkParser.COMMENT); }
 		public TerminalNode SEPARATOR(int i) {
 			return getToken(SmalltalkParser.SEPARATOR, i);
 		}
+		public List<TerminalNode> SEPARATOR() { return getTokens(SmalltalkParser.SEPARATOR); }
 		public TerminalNode COMMENT(int i) {
 			return getToken(SmalltalkParser.COMMENT, i);
 		}
-		public List<TerminalNode> SEPARATOR() { return getTokens(SmalltalkParser.SEPARATOR); }
-		public List<TerminalNode> COMMENT() { return getTokens(SmalltalkParser.COMMENT); }
 		public WsContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -235,20 +235,20 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class TempsContext extends ParserRuleContext {
+		public WsContext ws(int i) {
+			return getRuleContext(WsContext.class,i);
+		}
 		public List<TerminalNode> PIPE() { return getTokens(SmalltalkParser.PIPE); }
 		public TerminalNode IDENTIFIER(int i) {
 			return getToken(SmalltalkParser.IDENTIFIER, i);
 		}
-		public List<TerminalNode> IDENTIFIER() { return getTokens(SmalltalkParser.IDENTIFIER); }
 		public TerminalNode PIPE(int i) {
 			return getToken(SmalltalkParser.PIPE, i);
-		}
-		public WsContext ws(int i) {
-			return getRuleContext(WsContext.class,i);
 		}
 		public List<WsContext> ws() {
 			return getRuleContexts(WsContext.class);
 		}
+		public List<TerminalNode> IDENTIFIER() { return getTokens(SmalltalkParser.IDENTIFIER); }
 		public TempsContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -310,39 +310,6 @@ public class SmalltalkParser extends Parser {
 			super.copyFrom(ctx);
 		}
 	}
-	public static class StatementExpressionsAnswerContext extends StatementsContext {
-		public AnswerContext answer() {
-			return getRuleContext(AnswerContext.class,0);
-		}
-		public WsContext ws(int i) {
-			return getRuleContext(WsContext.class,i);
-		}
-		public List<WsContext> ws() {
-			return getRuleContexts(WsContext.class);
-		}
-		public TerminalNode PERIOD() { return getToken(SmalltalkParser.PERIOD, 0); }
-		public ExpressionsContext expressions() {
-			return getRuleContext(ExpressionsContext.class,0);
-		}
-		public StatementExpressionsAnswerContext(StatementsContext ctx) { copyFrom(ctx); }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SmalltalkVisitor ) return ((SmalltalkVisitor<? extends T>)visitor).visitStatementExpressionsAnswer(this);
-			else return visitor.visitChildren(this);
-		}
-	}
-	public static class StatementExpressionsContext extends StatementsContext {
-		public TerminalNode PERIOD() { return getToken(SmalltalkParser.PERIOD, 0); }
-		public ExpressionsContext expressions() {
-			return getRuleContext(ExpressionsContext.class,0);
-		}
-		public StatementExpressionsContext(StatementsContext ctx) { copyFrom(ctx); }
-		@Override
-		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
-			if ( visitor instanceof SmalltalkVisitor ) return ((SmalltalkVisitor<? extends T>)visitor).visitStatementExpressions(this);
-			else return visitor.visitChildren(this);
-		}
-	}
 	public static class StatementAnswerContext extends StatementsContext {
 		public AnswerContext answer() {
 			return getRuleContext(AnswerContext.class,0);
@@ -351,6 +318,39 @@ public class SmalltalkParser extends Parser {
 		@Override
 		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
 			if ( visitor instanceof SmalltalkVisitor ) return ((SmalltalkVisitor<? extends T>)visitor).visitStatementAnswer(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class StatementExpressionsContext extends StatementsContext {
+		public ExpressionsContext expressions() {
+			return getRuleContext(ExpressionsContext.class,0);
+		}
+		public TerminalNode PERIOD() { return getToken(SmalltalkParser.PERIOD, 0); }
+		public StatementExpressionsContext(StatementsContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SmalltalkVisitor ) return ((SmalltalkVisitor<? extends T>)visitor).visitStatementExpressions(this);
+			else return visitor.visitChildren(this);
+		}
+	}
+	public static class StatementExpressionsAnswerContext extends StatementsContext {
+		public WsContext ws(int i) {
+			return getRuleContext(WsContext.class,i);
+		}
+		public ExpressionsContext expressions() {
+			return getRuleContext(ExpressionsContext.class,0);
+		}
+		public List<WsContext> ws() {
+			return getRuleContexts(WsContext.class);
+		}
+		public AnswerContext answer() {
+			return getRuleContext(AnswerContext.class,0);
+		}
+		public TerminalNode PERIOD() { return getToken(SmalltalkParser.PERIOD, 0); }
+		public StatementExpressionsAnswerContext(StatementsContext ctx) { copyFrom(ctx); }
+		@Override
+		public <T> T accept(ParseTreeVisitor<? extends T> visitor) {
+			if ( visitor instanceof SmalltalkVisitor ) return ((SmalltalkVisitor<? extends T>)visitor).visitStatementExpressionsAnswer(this);
 			else return visitor.visitChildren(this);
 		}
 	}
@@ -411,15 +411,15 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class AnswerContext extends ParserRuleContext {
-		public TerminalNode CARROT() { return getToken(SmalltalkParser.CARROT, 0); }
-		public ExpressionContext expression() {
-			return getRuleContext(ExpressionContext.class,0);
-		}
 		public WsContext ws(int i) {
 			return getRuleContext(WsContext.class,i);
 		}
+		public TerminalNode CARROT() { return getToken(SmalltalkParser.CARROT, 0); }
 		public List<WsContext> ws() {
 			return getRuleContexts(WsContext.class);
+		}
+		public ExpressionContext expression() {
+			return getRuleContext(ExpressionContext.class,0);
 		}
 		public TerminalNode PERIOD() { return getToken(SmalltalkParser.PERIOD, 0); }
 		public AnswerContext(ParserRuleContext parent, int invokingState) {
@@ -466,20 +466,20 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class ExpressionContext extends ParserRuleContext {
+		public AssignmentContext assignment() {
+			return getRuleContext(AssignmentContext.class,0);
+		}
 		public BinarySendContext binarySend() {
 			return getRuleContext(BinarySendContext.class,0);
 		}
-		public AssignmentContext assignment() {
-			return getRuleContext(AssignmentContext.class,0);
+		public CascadeContext cascade() {
+			return getRuleContext(CascadeContext.class,0);
 		}
 		public KeywordSendContext keywordSend() {
 			return getRuleContext(KeywordSendContext.class,0);
 		}
 		public PrimitiveContext primitive() {
 			return getRuleContext(PrimitiveContext.class,0);
-		}
-		public CascadeContext cascade() {
-			return getRuleContext(CascadeContext.class,0);
 		}
 		public ExpressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -549,11 +549,11 @@ public class SmalltalkParser extends Parser {
 		public List<ExpressionListContext> expressionList() {
 			return getRuleContexts(ExpressionListContext.class);
 		}
-		public ExpressionContext expression() {
-			return getRuleContext(ExpressionContext.class,0);
-		}
 		public ExpressionListContext expressionList(int i) {
 			return getRuleContext(ExpressionListContext.class,i);
+		}
+		public ExpressionContext expression() {
+			return getRuleContext(ExpressionContext.class,0);
 		}
 		public ExpressionsContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -603,9 +603,6 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class ExpressionListContext extends ParserRuleContext {
-		public ExpressionContext expression() {
-			return getRuleContext(ExpressionContext.class,0);
-		}
 		public WsContext ws(int i) {
 			return getRuleContext(WsContext.class,i);
 		}
@@ -613,6 +610,9 @@ public class SmalltalkParser extends Parser {
 			return getRuleContexts(WsContext.class);
 		}
 		public TerminalNode PERIOD() { return getToken(SmalltalkParser.PERIOD, 0); }
+		public ExpressionContext expression() {
+			return getRuleContext(ExpressionContext.class,0);
+		}
 		public ExpressionListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -648,27 +648,27 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class CascadeContext extends ParserRuleContext {
+		public WsContext ws(int i) {
+			return getRuleContext(WsContext.class,i);
+		}
+		public List<MessageContext> message() {
+			return getRuleContexts(MessageContext.class);
+		}
+		public List<TerminalNode> SEMI_COLON() { return getTokens(SmalltalkParser.SEMI_COLON); }
 		public TerminalNode SEMI_COLON(int i) {
 			return getToken(SmalltalkParser.SEMI_COLON, i);
 		}
-		public List<TerminalNode> SEMI_COLON() { return getTokens(SmalltalkParser.SEMI_COLON); }
-		public List<MessageContext> message() {
-			return getRuleContexts(MessageContext.class);
+		public MessageContext message(int i) {
+			return getRuleContext(MessageContext.class,i);
+		}
+		public List<WsContext> ws() {
+			return getRuleContexts(WsContext.class);
 		}
 		public BinarySendContext binarySend() {
 			return getRuleContext(BinarySendContext.class,0);
 		}
 		public KeywordSendContext keywordSend() {
 			return getRuleContext(KeywordSendContext.class,0);
-		}
-		public MessageContext message(int i) {
-			return getRuleContext(MessageContext.class,i);
-		}
-		public WsContext ws(int i) {
-			return getRuleContext(WsContext.class,i);
-		}
-		public List<WsContext> ws() {
-			return getRuleContexts(WsContext.class);
 		}
 		public CascadeContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -739,14 +739,14 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class MessageContext extends ParserRuleContext {
-		public BinaryMessageContext binaryMessage() {
-			return getRuleContext(BinaryMessageContext.class,0);
+		public UnaryMessageContext unaryMessage() {
+			return getRuleContext(UnaryMessageContext.class,0);
 		}
 		public KeywordMessageContext keywordMessage() {
 			return getRuleContext(KeywordMessageContext.class,0);
 		}
-		public UnaryMessageContext unaryMessage() {
-			return getRuleContext(UnaryMessageContext.class,0);
+		public BinaryMessageContext binaryMessage() {
+			return getRuleContext(BinaryMessageContext.class,0);
 		}
 		public MessageContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -799,18 +799,18 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class AssignmentContext extends ParserRuleContext {
-		public VariableContext variable() {
-			return getRuleContext(VariableContext.class,0);
-		}
-		public ExpressionContext expression() {
-			return getRuleContext(ExpressionContext.class,0);
-		}
-		public TerminalNode ASSIGNMENT() { return getToken(SmalltalkParser.ASSIGNMENT, 0); }
 		public WsContext ws(int i) {
 			return getRuleContext(WsContext.class,i);
 		}
 		public List<WsContext> ws() {
 			return getRuleContexts(WsContext.class);
+		}
+		public TerminalNode ASSIGNMENT() { return getToken(SmalltalkParser.ASSIGNMENT, 0); }
+		public ExpressionContext expression() {
+			return getRuleContext(ExpressionContext.class,0);
+		}
+		public VariableContext variable() {
+			return getRuleContext(VariableContext.class,0);
 		}
 		public AssignmentContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -881,11 +881,11 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class BinarySendContext extends ParserRuleContext {
-		public BinaryTailContext binaryTail() {
-			return getRuleContext(BinaryTailContext.class,0);
-		}
 		public UnarySendContext unarySend() {
 			return getRuleContext(UnarySendContext.class,0);
+		}
+		public BinaryTailContext binaryTail() {
+			return getRuleContext(BinaryTailContext.class,0);
 		}
 		public BinarySendContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1016,17 +1016,17 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class KeywordMessageContext extends ParserRuleContext {
-		public List<KeywordPairContext> keywordPair() {
-			return getRuleContexts(KeywordPairContext.class);
-		}
-		public KeywordPairContext keywordPair(int i) {
-			return getRuleContext(KeywordPairContext.class,i);
-		}
 		public WsContext ws(int i) {
 			return getRuleContext(WsContext.class,i);
 		}
+		public List<KeywordPairContext> keywordPair() {
+			return getRuleContexts(KeywordPairContext.class);
+		}
 		public List<WsContext> ws() {
 			return getRuleContexts(WsContext.class);
+		}
+		public KeywordPairContext keywordPair(int i) {
+			return getRuleContext(KeywordPairContext.class,i);
 		}
 		public KeywordMessageContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1075,15 +1075,15 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class KeywordPairContext extends ParserRuleContext {
-		public BinarySendContext binarySend() {
-			return getRuleContext(BinarySendContext.class,0);
-		}
-		public TerminalNode KEYWORD() { return getToken(SmalltalkParser.KEYWORD, 0); }
 		public WsContext ws(int i) {
 			return getRuleContext(WsContext.class,i);
 		}
+		public TerminalNode KEYWORD() { return getToken(SmalltalkParser.KEYWORD, 0); }
 		public List<WsContext> ws() {
 			return getRuleContexts(WsContext.class);
+		}
+		public BinarySendContext binarySend() {
+			return getRuleContext(BinarySendContext.class,0);
 		}
 		public KeywordPairContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1120,14 +1120,14 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class OperandContext extends ParserRuleContext {
-		public SubexpressionContext subexpression() {
-			return getRuleContext(SubexpressionContext.class,0);
+		public ReferenceContext reference() {
+			return getRuleContext(ReferenceContext.class,0);
 		}
 		public LiteralContext literal() {
 			return getRuleContext(LiteralContext.class,0);
 		}
-		public ReferenceContext reference() {
-			return getRuleContext(ReferenceContext.class,0);
+		public SubexpressionContext subexpression() {
+			return getRuleContext(SubexpressionContext.class,0);
 		}
 		public OperandContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1190,17 +1190,17 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class SubexpressionContext extends ParserRuleContext {
-		public TerminalNode CLOSE_PAREN() { return getToken(SmalltalkParser.CLOSE_PAREN, 0); }
-		public TerminalNode OPEN_PAREN() { return getToken(SmalltalkParser.OPEN_PAREN, 0); }
-		public ExpressionContext expression() {
-			return getRuleContext(ExpressionContext.class,0);
-		}
 		public WsContext ws(int i) {
 			return getRuleContext(WsContext.class,i);
 		}
+		public TerminalNode CLOSE_PAREN() { return getToken(SmalltalkParser.CLOSE_PAREN, 0); }
 		public List<WsContext> ws() {
 			return getRuleContexts(WsContext.class);
 		}
+		public ExpressionContext expression() {
+			return getRuleContext(ExpressionContext.class,0);
+		}
+		public TerminalNode OPEN_PAREN() { return getToken(SmalltalkParser.OPEN_PAREN, 0); }
 		public SubexpressionContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1237,11 +1237,11 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class LiteralContext extends ParserRuleContext {
-		public RuntimeLiteralContext runtimeLiteral() {
-			return getRuleContext(RuntimeLiteralContext.class,0);
-		}
 		public ParsetimeLiteralContext parsetimeLiteral() {
 			return getRuleContext(ParsetimeLiteralContext.class,0);
+		}
+		public RuntimeLiteralContext runtimeLiteral() {
+			return getRuleContext(RuntimeLiteralContext.class,0);
 		}
 		public LiteralContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1260,14 +1260,6 @@ public class SmalltalkParser extends Parser {
 		try {
 			setState(231);
 			switch (_input.LA(1)) {
-			case DYNDICT_START:
-			case DYNARR_START:
-			case BLOCK_START:
-				enterOuterAlt(_localctx, 1);
-				{
-				setState(229); runtimeLiteral();
-				}
-				break;
 			case HASH:
 			case HEX:
 			case LITARR_START:
@@ -1276,9 +1268,17 @@ public class SmalltalkParser extends Parser {
 			case CHARACTER_CONSTANT:
 			case STRING:
 			case MINUS:
+				enterOuterAlt(_localctx, 1);
+				{
+				setState(229); parsetimeLiteral();
+				}
+				break;
+			case DYNDICT_START:
+			case DYNARR_START:
+			case BLOCK_START:
 				enterOuterAlt(_localctx, 2);
 				{
-				setState(230); parsetimeLiteral();
+				setState(230); runtimeLiteral();
 				}
 				break;
 			default:
@@ -1297,14 +1297,14 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class RuntimeLiteralContext extends ParserRuleContext {
-		public DynamicArrayContext dynamicArray() {
-			return getRuleContext(DynamicArrayContext.class,0);
+		public DynamicDictionaryContext dynamicDictionary() {
+			return getRuleContext(DynamicDictionaryContext.class,0);
 		}
 		public BlockContext block() {
 			return getRuleContext(BlockContext.class,0);
 		}
-		public DynamicDictionaryContext dynamicDictionary() {
-			return getRuleContext(DynamicDictionaryContext.class,0);
+		public DynamicArrayContext dynamicArray() {
+			return getRuleContext(DynamicArrayContext.class,0);
 		}
 		public RuntimeLiteralContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1357,16 +1357,16 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class BlockContext extends ParserRuleContext {
-		public SequenceContext sequence() {
-			return getRuleContext(SequenceContext.class,0);
+		public TerminalNode BLOCK_END() { return getToken(SmalltalkParser.BLOCK_END, 0); }
+		public WsContext ws() {
+			return getRuleContext(WsContext.class,0);
 		}
 		public BlockParamListContext blockParamList() {
 			return getRuleContext(BlockParamListContext.class,0);
 		}
-		public WsContext ws() {
-			return getRuleContext(WsContext.class,0);
+		public SequenceContext sequence() {
+			return getRuleContext(SequenceContext.class,0);
 		}
-		public TerminalNode BLOCK_END() { return getToken(SmalltalkParser.BLOCK_END, 0); }
 		public TerminalNode BLOCK_START() { return getToken(SmalltalkParser.BLOCK_START, 0); }
 		public BlockContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1419,16 +1419,16 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class BlockParamListContext extends ParserRuleContext {
-		public TerminalNode PIPE() { return getToken(SmalltalkParser.PIPE, 0); }
 		public List<TerminalNode> BLOCK_PARAM() { return getTokens(SmalltalkParser.BLOCK_PARAM); }
-		public TerminalNode BLOCK_PARAM(int i) {
-			return getToken(SmalltalkParser.BLOCK_PARAM, i);
-		}
 		public WsContext ws(int i) {
 			return getRuleContext(WsContext.class,i);
 		}
+		public TerminalNode PIPE() { return getToken(SmalltalkParser.PIPE, 0); }
 		public List<WsContext> ws() {
 			return getRuleContexts(WsContext.class);
+		}
+		public TerminalNode BLOCK_PARAM(int i) {
+			return getToken(SmalltalkParser.BLOCK_PARAM, i);
 		}
 		public BlockParamListContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1491,16 +1491,16 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class DynamicDictionaryContext extends ParserRuleContext {
-		public TerminalNode DYNARR_END() { return getToken(SmalltalkParser.DYNARR_END, 0); }
 		public WsContext ws(int i) {
 			return getRuleContext(WsContext.class,i);
 		}
-		public List<WsContext> ws() {
-			return getRuleContexts(WsContext.class);
-		}
 		public TerminalNode DYNDICT_START() { return getToken(SmalltalkParser.DYNDICT_START, 0); }
+		public TerminalNode DYNARR_END() { return getToken(SmalltalkParser.DYNARR_END, 0); }
 		public ExpressionsContext expressions() {
 			return getRuleContext(ExpressionsContext.class,0);
+		}
+		public List<WsContext> ws() {
+			return getRuleContexts(WsContext.class);
 		}
 		public DynamicDictionaryContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1545,17 +1545,17 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class DynamicArrayContext extends ParserRuleContext {
-		public TerminalNode DYNARR_END() { return getToken(SmalltalkParser.DYNARR_END, 0); }
+		public TerminalNode DYNARR_START() { return getToken(SmalltalkParser.DYNARR_START, 0); }
 		public WsContext ws(int i) {
 			return getRuleContext(WsContext.class,i);
+		}
+		public TerminalNode DYNARR_END() { return getToken(SmalltalkParser.DYNARR_END, 0); }
+		public ExpressionsContext expressions() {
+			return getRuleContext(ExpressionsContext.class,0);
 		}
 		public List<WsContext> ws() {
 			return getRuleContexts(WsContext.class);
 		}
-		public ExpressionsContext expressions() {
-			return getRuleContext(ExpressionsContext.class,0);
-		}
-		public TerminalNode DYNARR_START() { return getToken(SmalltalkParser.DYNARR_START, 0); }
 		public DynamicArrayContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -1602,20 +1602,20 @@ public class SmalltalkParser extends Parser {
 		public NumberContext number() {
 			return getRuleContext(NumberContext.class,0);
 		}
-		public PseudoVariableContext pseudoVariable() {
-			return getRuleContext(PseudoVariableContext.class,0);
+		public CharConstantContext charConstant() {
+			return getRuleContext(CharConstantContext.class,0);
 		}
 		public StringContext string() {
 			return getRuleContext(StringContext.class,0);
 		}
-		public CharConstantContext charConstant() {
-			return getRuleContext(CharConstantContext.class,0);
+		public SymbolContext symbol() {
+			return getRuleContext(SymbolContext.class,0);
 		}
 		public LiteralArrayContext literalArray() {
 			return getRuleContext(LiteralArrayContext.class,0);
 		}
-		public SymbolContext symbol() {
-			return getRuleContext(SymbolContext.class,0);
+		public PseudoVariableContext pseudoVariable() {
+			return getRuleContext(PseudoVariableContext.class,0);
 		}
 		public ParsetimeLiteralContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1688,17 +1688,17 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class NumberContext extends ParserRuleContext {
-		public StIntegerContext stInteger() {
-			return getRuleContext(StIntegerContext.class,0);
+		public StFloatContext stFloat() {
+			return getRuleContext(StFloatContext.class,0);
 		}
 		public NumberExpContext numberExp() {
 			return getRuleContext(NumberExpContext.class,0);
 		}
+		public StIntegerContext stInteger() {
+			return getRuleContext(StIntegerContext.class,0);
+		}
 		public HexContext hex() {
 			return getRuleContext(HexContext.class,0);
-		}
-		public StFloatContext stFloat() {
-			return getRuleContext(StFloatContext.class,0);
 		}
 		public NumberContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1758,15 +1758,15 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class NumberExpContext extends ParserRuleContext {
-		public StIntegerContext stInteger(int i) {
-			return getRuleContext(StIntegerContext.class,i);
+		public StFloatContext stFloat() {
+			return getRuleContext(StFloatContext.class,0);
 		}
+		public TerminalNode EXP() { return getToken(SmalltalkParser.EXP, 0); }
 		public List<StIntegerContext> stInteger() {
 			return getRuleContexts(StIntegerContext.class);
 		}
-		public TerminalNode EXP() { return getToken(SmalltalkParser.EXP, 0); }
-		public StFloatContext stFloat() {
-			return getRuleContext(StFloatContext.class,0);
+		public StIntegerContext stInteger(int i) {
+			return getRuleContext(StIntegerContext.class,i);
 		}
 		public NumberExpContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -1849,11 +1849,11 @@ public class SmalltalkParser extends Parser {
 
 	public static class HexContext extends ParserRuleContext {
 		public List<TerminalNode> HEXDIGIT() { return getTokens(SmalltalkParser.HEXDIGIT); }
+		public TerminalNode HEX() { return getToken(SmalltalkParser.HEX, 0); }
+		public TerminalNode MINUS() { return getToken(SmalltalkParser.MINUS, 0); }
 		public TerminalNode HEXDIGIT(int i) {
 			return getToken(SmalltalkParser.HEXDIGIT, i);
 		}
-		public TerminalNode MINUS() { return getToken(SmalltalkParser.MINUS, 0); }
-		public TerminalNode HEX() { return getToken(SmalltalkParser.HEX, 0); }
 		public HexContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2119,10 +2119,10 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class SymbolContext extends ParserRuleContext {
-		public TerminalNode HASH() { return getToken(SmalltalkParser.HASH, 0); }
 		public BareSymbolContext bareSymbol() {
 			return getRuleContext(BareSymbolContext.class,0);
 		}
+		public TerminalNode HASH() { return getToken(SmalltalkParser.HASH, 0); }
 		public SymbolContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2156,19 +2156,19 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class PrimitiveContext extends ParserRuleContext {
-		public TerminalNode DIGIT(int i) {
-			return getToken(SmalltalkParser.DIGIT, i);
-		}
-		public List<TerminalNode> DIGIT() { return getTokens(SmalltalkParser.DIGIT); }
-		public TerminalNode KEYWORD() { return getToken(SmalltalkParser.KEYWORD, 0); }
-		public TerminalNode LT() { return getToken(SmalltalkParser.LT, 0); }
-		public TerminalNode GT() { return getToken(SmalltalkParser.GT, 0); }
 		public WsContext ws(int i) {
 			return getRuleContext(WsContext.class,i);
 		}
+		public TerminalNode DIGIT(int i) {
+			return getToken(SmalltalkParser.DIGIT, i);
+		}
+		public TerminalNode LT() { return getToken(SmalltalkParser.LT, 0); }
+		public TerminalNode GT() { return getToken(SmalltalkParser.GT, 0); }
 		public List<WsContext> ws() {
 			return getRuleContexts(WsContext.class);
 		}
+		public TerminalNode KEYWORD() { return getToken(SmalltalkParser.KEYWORD, 0); }
+		public List<TerminalNode> DIGIT() { return getTokens(SmalltalkParser.DIGIT); }
 		public PrimitiveContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2220,15 +2220,15 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class BareSymbolContext extends ParserRuleContext {
+		public TerminalNode KEYWORD(int i) {
+			return getToken(SmalltalkParser.KEYWORD, i);
+		}
+		public TerminalNode BINARY_SELECTOR() { return getToken(SmalltalkParser.BINARY_SELECTOR, 0); }
 		public StringContext string() {
 			return getRuleContext(StringContext.class,0);
 		}
 		public List<TerminalNode> KEYWORD() { return getTokens(SmalltalkParser.KEYWORD); }
 		public TerminalNode IDENTIFIER() { return getToken(SmalltalkParser.IDENTIFIER, 0); }
-		public TerminalNode BINARY_SELECTOR() { return getToken(SmalltalkParser.BINARY_SELECTOR, 0); }
-		public TerminalNode KEYWORD(int i) {
-			return getToken(SmalltalkParser.KEYWORD, i);
-		}
 		public BareSymbolContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2306,10 +2306,10 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class LiteralArrayContext extends ParserRuleContext {
-		public TerminalNode LITARR_START() { return getToken(SmalltalkParser.LITARR_START, 0); }
 		public LiteralArrayRestContext literalArrayRest() {
 			return getRuleContext(LiteralArrayRestContext.class,0);
 		}
+		public TerminalNode LITARR_START() { return getToken(SmalltalkParser.LITARR_START, 0); }
 		public LiteralArrayContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2343,9 +2343,18 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class LiteralArrayRestContext extends ParserRuleContext {
+		public BareSymbolContext bareSymbol(int i) {
+			return getRuleContext(BareSymbolContext.class,i);
+		}
+		public WsContext ws(int i) {
+			return getRuleContext(WsContext.class,i);
+		}
+		public List<ParsetimeLiteralContext> parsetimeLiteral() {
+			return getRuleContexts(ParsetimeLiteralContext.class);
+		}
 		public TerminalNode CLOSE_PAREN() { return getToken(SmalltalkParser.CLOSE_PAREN, 0); }
-		public List<BareLiteralArrayContext> bareLiteralArray() {
-			return getRuleContexts(BareLiteralArrayContext.class);
+		public ParsetimeLiteralContext parsetimeLiteral(int i) {
+			return getRuleContext(ParsetimeLiteralContext.class,i);
 		}
 		public BareLiteralArrayContext bareLiteralArray(int i) {
 			return getRuleContext(BareLiteralArrayContext.class,i);
@@ -2353,20 +2362,11 @@ public class SmalltalkParser extends Parser {
 		public List<BareSymbolContext> bareSymbol() {
 			return getRuleContexts(BareSymbolContext.class);
 		}
-		public BareSymbolContext bareSymbol(int i) {
-			return getRuleContext(BareSymbolContext.class,i);
-		}
-		public WsContext ws(int i) {
-			return getRuleContext(WsContext.class,i);
+		public List<BareLiteralArrayContext> bareLiteralArray() {
+			return getRuleContexts(BareLiteralArrayContext.class);
 		}
 		public List<WsContext> ws() {
 			return getRuleContexts(WsContext.class);
-		}
-		public ParsetimeLiteralContext parsetimeLiteral(int i) {
-			return getRuleContext(ParsetimeLiteralContext.class,i);
-		}
-		public List<ParsetimeLiteralContext> parsetimeLiteral() {
-			return getRuleContexts(ParsetimeLiteralContext.class);
 		}
 		public LiteralArrayRestContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2435,10 +2435,10 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class BareLiteralArrayContext extends ParserRuleContext {
-		public TerminalNode OPEN_PAREN() { return getToken(SmalltalkParser.OPEN_PAREN, 0); }
 		public LiteralArrayRestContext literalArrayRest() {
 			return getRuleContext(LiteralArrayRestContext.class,0);
 		}
+		public TerminalNode OPEN_PAREN() { return getToken(SmalltalkParser.OPEN_PAREN, 0); }
 		public BareLiteralArrayContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2472,14 +2472,14 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class UnaryTailContext extends ParserRuleContext {
+		public WsContext ws(int i) {
+			return getRuleContext(WsContext.class,i);
+		}
 		public UnaryTailContext unaryTail() {
 			return getRuleContext(UnaryTailContext.class,0);
 		}
 		public UnaryMessageContext unaryMessage() {
 			return getRuleContext(UnaryMessageContext.class,0);
-		}
-		public WsContext ws(int i) {
-			return getRuleContext(WsContext.class,i);
 		}
 		public List<WsContext> ws() {
 			return getRuleContexts(WsContext.class);
@@ -2598,10 +2598,10 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class KeywordsContext extends ParserRuleContext {
-		public List<TerminalNode> KEYWORD() { return getTokens(SmalltalkParser.KEYWORD); }
 		public TerminalNode KEYWORD(int i) {
 			return getToken(SmalltalkParser.KEYWORD, i);
 		}
+		public List<TerminalNode> KEYWORD() { return getTokens(SmalltalkParser.KEYWORD); }
 		public KeywordsContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
 		}
@@ -2682,11 +2682,11 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class BinaryTailContext extends ParserRuleContext {
-		public BinaryMessageContext binaryMessage() {
-			return getRuleContext(BinaryMessageContext.class,0);
-		}
 		public BinaryTailContext binaryTail() {
 			return getRuleContext(BinaryTailContext.class,0);
+		}
+		public BinaryMessageContext binaryMessage() {
+			return getRuleContext(BinaryMessageContext.class,0);
 		}
 		public BinaryTailContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2728,18 +2728,18 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static class BinaryMessageContext extends ParserRuleContext {
-		public TerminalNode BINARY_SELECTOR() { return getToken(SmalltalkParser.BINARY_SELECTOR, 0); }
 		public UnarySendContext unarySend() {
 			return getRuleContext(UnarySendContext.class,0);
-		}
-		public OperandContext operand() {
-			return getRuleContext(OperandContext.class,0);
 		}
 		public WsContext ws(int i) {
 			return getRuleContext(WsContext.class,i);
 		}
+		public TerminalNode BINARY_SELECTOR() { return getToken(SmalltalkParser.BINARY_SELECTOR, 0); }
 		public List<WsContext> ws() {
 			return getRuleContexts(WsContext.class);
+		}
+		public OperandContext operand() {
+			return getRuleContext(OperandContext.class,0);
 		}
 		public BinaryMessageContext(ParserRuleContext parent, int invokingState) {
 			super(parent, invokingState);
@@ -2870,7 +2870,7 @@ public class SmalltalkParser extends Parser {
 		"\5\\/\2\u00de\u00e0\5(\25\2\u00df\u00dc\3\2\2\2\u00df\u00dd\3\2\2\2\u00df"+
 		"\u00de\3\2\2\2\u00e0\'\3\2\2\2\u00e1\u00e2\7\17\2\2\u00e2\u00e3\5\6\4"+
 		"\2\u00e3\u00e4\5\16\b\2\u00e4\u00e5\5\6\4\2\u00e5\u00e6\7\16\2\2\u00e6"+
-		")\3\2\2\2\u00e7\u00ea\5,\27\2\u00e8\u00ea\5\66\34\2\u00e9\u00e7\3\2\2"+
+		")\3\2\2\2\u00e7\u00ea\5\66\34\2\u00e8\u00ea\5,\27\2\u00e9\u00e7\3\2\2"+
 		"\2\u00e9\u00e8\3\2\2\2\u00ea+\3\2\2\2\u00eb\u00ef\5\62\32\2\u00ec\u00ef"+
 		"\5\64\33\2\u00ed\u00ef\5.\30\2\u00ee\u00eb\3\2\2\2\u00ee\u00ec\3\2\2\2"+
 		"\u00ee\u00ed\3\2\2\2\u00ef-\3\2\2\2\u00f0\u00f2\7\23\2\2\u00f1\u00f3\5"+

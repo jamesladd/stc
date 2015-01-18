@@ -1,1 +1,1 @@
-a == nil ifTrue: []
+a == nil ifTrue: [].

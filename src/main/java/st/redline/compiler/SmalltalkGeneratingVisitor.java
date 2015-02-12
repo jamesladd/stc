@@ -17,6 +17,10 @@ import java.util.Stack;
 
 public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements SmalltalkVisitor<Void>, Opcodes {
 
+    private static final String[] SIGNATURES = {
+            "(Ljava/lang/String;)Lst/redline/core/ProtoObject;",
+            "(Lst/redline/core/ProtoObject;Ljava/lang/String;)Lst/redline/core/ProtoObject;"
+    };
     private static final Map<String, Integer> OPCODES = new HashMap<String, Integer>();
     private static final int BYTECODE_VERSION;
     static {
@@ -129,6 +133,11 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         pushReceiver(mv);
         pushLiteral(mv, name);
         mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "variableAt", "(Ljava/lang/String;)Lst/redline/core/ProtoObject;");
+    }
+
+    public void invokePerform(MethodVisitor mv, String selector, int argumentCount) {
+        pushLiteral(mv, selector);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/core/ProtoObject", "perform", SIGNATURES[argumentCount]);
     }
 
     public void visitLine(MethodVisitor mv, int line) {
@@ -428,7 +437,8 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             SmalltalkParser.OperandContext operand = ctx.operand();
             if (operand != null)
                 operand.accept(currentVisitor());
-            log("send BinaryMessage here");
+            visitLine(mv, binarySelector.getSymbol().getLine());
+            invokePerform(mv, binarySelector.getSymbol().getText(), 1);
             return null;
         }
 
@@ -460,6 +470,45 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitLiteral(@NotNull SmalltalkParser.LiteralContext ctx) {
             log("visitLiteral");
+            SmalltalkParser.ParsetimeLiteralContext parsetimeLiteral = ctx.parsetimeLiteral();
+            if (parsetimeLiteral != null)
+                return parsetimeLiteral.accept(currentVisitor());
+            SmalltalkParser.RuntimeLiteralContext runtimeLiteral = ctx.runtimeLiteral();
+            if (runtimeLiteral != null)
+                return runtimeLiteral.accept(currentVisitor());
+            throw new RuntimeException("vistLiteral no alternative found.");
+        }
+
+        public Void visitRuntimeLiteral(@NotNull SmalltalkParser.RuntimeLiteralContext ctx) {
+            log("visitRuntimeLiteral");
+            return null;
+        }
+
+        public Void visitParsetimeLiteral(@NotNull SmalltalkParser.ParsetimeLiteralContext ctx) {
+            log("visitParsetimeLiteral");
+            SmalltalkParser.PseudoVariableContext pseudoVariable = ctx.pseudoVariable();
+            if (pseudoVariable != null)
+                return pseudoVariable.accept(currentVisitor());
+            SmalltalkParser.NumberContext number = ctx.number();
+            if (number != null)
+                return number.accept(currentVisitor());
+            SmalltalkParser.CharConstantContext charConstant = ctx.charConstant();
+            if (charConstant != null)
+                return charConstant.accept(currentVisitor());
+            SmalltalkParser.LiteralArrayContext literalArray = ctx.literalArray();
+            if (literalArray != null)
+                return literalArray.accept(currentVisitor());
+            SmalltalkParser.StringContext string = ctx.string();
+            if (string != null)
+                return string.accept(currentVisitor());
+            SmalltalkParser.SymbolContext symbol = ctx.symbol();
+            if (symbol != null)
+                return symbol.accept(currentVisitor());
+            throw new RuntimeException("vistParsetimeLiteral no alternative found.");
+        }
+
+        public Void visitSymbol(@NotNull SmalltalkParser.SymbolContext ctx) {
+            log("visitSymbol #" + ctx.bareSymbol().IDENTIFIER().getSymbol().getText());
             return null;
         }
 

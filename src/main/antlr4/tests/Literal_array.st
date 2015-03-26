@@ -1,1 +1,1 @@
-#( 1234 $E 'hello' Symbol )
+#( 1234 $E 'hello' Symbol $$ $; $4 $. )

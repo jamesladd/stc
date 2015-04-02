@@ -1623,24 +1623,24 @@ public class SmalltalkParser extends Parser {
 		try {
 			setState(275);
 			switch (_input.LA(1)) {
-			case RESERVED_WORD:
+			case CHARACTER_CONSTANT:
 				enterOuterAlt(_localctx, 1);
 				{
-				setState(269); pseudoVariable();
+				setState(269); charConstant();
+				}
+				break;
+			case RESERVED_WORD:
+				enterOuterAlt(_localctx, 2);
+				{
+				setState(270); pseudoVariable();
 				}
 				break;
 			case MINUS:
 			case HEX:
 			case DIGIT:
-				enterOuterAlt(_localctx, 2);
-				{
-				setState(270); number();
-				}
-				break;
-			case CHARACTER_CONSTANT:
 				enterOuterAlt(_localctx, 3);
 				{
-				setState(271); charConstant();
+				setState(271); number();
 				}
 				break;
 			case LITARR_START:
@@ -2371,45 +2371,47 @@ public class SmalltalkParser extends Parser {
 	public final LiteralArrayRestContext literalArrayRest() throws RecognitionException {
 		LiteralArrayRestContext _localctx = new LiteralArrayRestContext(_ctx, getState());
 		enterRule(_localctx, 78, RULE_literalArrayRest);
-		int _la;
 		try {
+			int _alt;
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(354); ws();
-			setState(364);
+			setState(362);
 			_errHandler.sync(this);
-			_la = _input.LA(1);
-			while ((((_la) & ~0x3f) == 0 && ((1L << _la) & ((1L << STRING) | (1L << OPEN_PAREN) | (1L << BINARY_SELECTOR) | (1L << MINUS) | (1L << RESERVED_WORD) | (1L << IDENTIFIER) | (1L << HASH) | (1L << HEX) | (1L << LITARR_START) | (1L << DIGIT) | (1L << KEYWORD) | (1L << CHARACTER_CONSTANT))) != 0)) {
-				{
-				{
-				setState(358);
-				switch ( getInterpreter().adaptivePredict(_input,36,_ctx) ) {
-				case 1:
+			_alt = getInterpreter().adaptivePredict(_input,37,_ctx);
+			while ( _alt!=2 && _alt!=-1 ) {
+				if ( _alt==1 ) {
 					{
-					setState(355); parsetimeLiteral();
-					}
-					break;
+					{
+					setState(354); ws();
+					setState(358);
+					switch ( getInterpreter().adaptivePredict(_input,36,_ctx) ) {
+					case 1:
+						{
+						setState(355); parsetimeLiteral();
+						}
+						break;
 
-				case 2:
-					{
-					setState(356); bareLiteralArray();
-					}
-					break;
+					case 2:
+						{
+						setState(356); bareLiteralArray();
+						}
+						break;
 
-				case 3:
-					{
-					setState(357); bareSymbol();
+					case 3:
+						{
+						setState(357); bareSymbol();
+						}
+						break;
 					}
-					break;
+					}
+					} 
 				}
-				setState(360); ws();
-				}
-				}
-				setState(366);
+				setState(364);
 				_errHandler.sync(this);
-				_la = _input.LA(1);
+				_alt = getInterpreter().adaptivePredict(_input,37,_ctx);
 			}
-			setState(367); match(CLOSE_PAREN);
+			setState(365); ws();
+			setState(366); match(CLOSE_PAREN);
 			}
 		}
 		catch (RecognitionException re) {
@@ -2445,8 +2447,8 @@ public class SmalltalkParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(369); match(OPEN_PAREN);
-			setState(370); literalArrayRest();
+			setState(368); match(OPEN_PAREN);
+			setState(369); literalArrayRest();
 			}
 		}
 		catch (RecognitionException re) {
@@ -2490,17 +2492,17 @@ public class SmalltalkParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(372); unaryMessage();
-			setState(373); ws();
-			setState(375);
+			setState(371); unaryMessage();
+			setState(372); ws();
+			setState(374);
 			switch ( getInterpreter().adaptivePredict(_input,38,_ctx) ) {
 			case 1:
 				{
-				setState(374); unaryTail();
+				setState(373); unaryTail();
 				}
 				break;
 			}
-			setState(377); ws();
+			setState(376); ws();
 			}
 		}
 		catch (RecognitionException re) {
@@ -2538,8 +2540,8 @@ public class SmalltalkParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(379); ws();
-			setState(380); unarySelector();
+			setState(378); ws();
+			setState(379); unarySelector();
 			}
 		}
 		catch (RecognitionException re) {
@@ -2572,7 +2574,7 @@ public class SmalltalkParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(382); match(IDENTIFIER);
+			setState(381); match(IDENTIFIER);
 			}
 		}
 		catch (RecognitionException re) {
@@ -2609,16 +2611,16 @@ public class SmalltalkParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(385); 
+			setState(384); 
 			_errHandler.sync(this);
 			_la = _input.LA(1);
 			do {
 				{
 				{
-				setState(384); match(KEYWORD);
+				setState(383); match(KEYWORD);
 				}
 				}
-				setState(387); 
+				setState(386); 
 				_errHandler.sync(this);
 				_la = _input.LA(1);
 			} while ( _la==KEYWORD );
@@ -2656,7 +2658,7 @@ public class SmalltalkParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(389); variable();
+			setState(388); variable();
 			}
 		}
 		catch (RecognitionException re) {
@@ -2694,12 +2696,12 @@ public class SmalltalkParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(391); binaryMessage();
-			setState(393);
+			setState(390); binaryMessage();
+			setState(392);
 			switch ( getInterpreter().adaptivePredict(_input,40,_ctx) ) {
 			case 1:
 				{
-				setState(392); binaryTail();
+				setState(391); binaryTail();
 				}
 				break;
 			}
@@ -2747,20 +2749,20 @@ public class SmalltalkParser extends Parser {
 		try {
 			enterOuterAlt(_localctx, 1);
 			{
-			setState(395); ws();
-			setState(396); match(BINARY_SELECTOR);
-			setState(397); ws();
-			setState(400);
+			setState(394); ws();
+			setState(395); match(BINARY_SELECTOR);
+			setState(396); ws();
+			setState(399);
 			switch ( getInterpreter().adaptivePredict(_input,41,_ctx) ) {
 			case 1:
 				{
-				setState(398); unarySend();
+				setState(397); unarySend();
 				}
 				break;
 
 			case 2:
 				{
-				setState(399); operand();
+				setState(398); operand();
 				}
 				break;
 			}
@@ -2778,7 +2780,7 @@ public class SmalltalkParser extends Parser {
 	}
 
 	public static final String _serializedATN =
-		"\3\uacf5\uee8c\u4f5d\u8b0d\u4a45\u78bd\u1b2f\u3378\3\"\u0195\4\2\t\2\4"+
+		"\3\uacf5\uee8c\u4f5d\u8b0d\u4a45\u78bd\u1b2f\u3378\3\"\u0194\4\2\t\2\4"+
 		"\3\t\3\4\4\t\4\4\5\t\5\4\6\t\6\4\7\t\7\4\b\t\b\4\t\t\t\4\n\t\n\4\13\t"+
 		"\13\4\f\t\f\4\r\t\r\4\16\t\16\4\17\t\17\4\20\t\20\4\21\t\21\4\22\t\22"+
 		"\4\23\t\23\4\24\t\24\4\25\t\25\4\26\t\26\4\27\t\27\4\30\t\30\4\31\t\31"+
@@ -2804,12 +2806,12 @@ public class SmalltalkParser extends Parser {
 		"\u0135\3\"\5\"\u0139\n\"\3\"\6\"\u013c\n\"\r\"\16\"\u013d\3\"\3\"\6\""+
 		"\u0142\n\"\r\"\16\"\u0143\3#\3#\3$\3$\3%\3%\3%\3&\3&\3&\3&\3&\6&\u0152"+
 		"\n&\r&\16&\u0153\3&\3&\3&\3\'\3\'\6\'\u015b\n\'\r\'\16\'\u015c\3\'\5\'"+
-		"\u0160\n\'\3(\3(\3(\3)\3)\3)\3)\5)\u0169\n)\3)\3)\7)\u016d\n)\f)\16)\u0170"+
-		"\13)\3)\3)\3*\3*\3*\3+\3+\3+\5+\u017a\n+\3+\3+\3,\3,\3,\3-\3-\3.\6.\u0184"+
-		"\n.\r.\16.\u0185\3/\3/\3\60\3\60\5\60\u018c\n\60\3\61\3\61\3\61\3\61\3"+
-		"\61\5\61\u0193\n\61\3\61\2\62\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36 "+
+		"\u0160\n\'\3(\3(\3(\3)\3)\3)\3)\5)\u0169\n)\7)\u016b\n)\f)\16)\u016e\13"+
+		")\3)\3)\3)\3*\3*\3*\3+\3+\3+\5+\u0179\n+\3+\3+\3,\3,\3,\3-\3-\3.\6.\u0183"+
+		"\n.\r.\16.\u0184\3/\3/\3\60\3\60\5\60\u018b\n\60\3\61\3\61\3\61\3\61\3"+
+		"\61\5\61\u0192\n\61\3\61\2\62\2\4\6\b\n\f\16\20\22\24\26\30\32\34\36 "+
 		"\"$&(*,.\60\62\64\668:<>@BDFHJLNPRTVXZ\\^`\2\4\4\2\3\3\5\5\4\2\r\r\22"+
-		"\22\u019d\2b\3\2\2\2\4f\3\2\2\2\6o\3\2\2\2\br\3\2\2\2\n\u008c\3\2\2\2"+
+		"\22\u019c\2b\3\2\2\2\4f\3\2\2\2\6o\3\2\2\2\br\3\2\2\2\n\u008c\3\2\2\2"+
 		"\f\u008e\3\2\2\2\16\u009a\3\2\2\2\20\u009c\3\2\2\2\22\u00a3\3\2\2\2\24"+
 		"\u00a9\3\2\2\2\26\u00b7\3\2\2\2\30\u00b9\3\2\2\2\32\u00bf\3\2\2\2\34\u00c1"+
 		"\3\2\2\2\36\u00c5\3\2\2\2 \u00ca\3\2\2\2\"\u00cd\3\2\2\2$\u00d5\3\2\2"+
@@ -2817,9 +2819,9 @@ public class SmalltalkParser extends Parser {
 		"\3\2\2\2\60\u00fb\3\2\2\2\62\u00ff\3\2\2\2\64\u0107\3\2\2\2\66\u0115\3"+
 		"\2\2\28\u011b\3\2\2\2:\u011f\3\2\2\2<\u0124\3\2\2\2>\u0127\3\2\2\2@\u0130"+
 		"\3\2\2\2B\u0138\3\2\2\2D\u0145\3\2\2\2F\u0147\3\2\2\2H\u0149\3\2\2\2J"+
-		"\u014c\3\2\2\2L\u015f\3\2\2\2N\u0161\3\2\2\2P\u0164\3\2\2\2R\u0173\3\2"+
-		"\2\2T\u0176\3\2\2\2V\u017d\3\2\2\2X\u0180\3\2\2\2Z\u0183\3\2\2\2\\\u0187"+
-		"\3\2\2\2^\u0189\3\2\2\2`\u018d\3\2\2\2bc\5\4\3\2cd\7\2\2\3d\3\3\2\2\2"+
+		"\u014c\3\2\2\2L\u015f\3\2\2\2N\u0161\3\2\2\2P\u016c\3\2\2\2R\u0172\3\2"+
+		"\2\2T\u0175\3\2\2\2V\u017c\3\2\2\2X\u017f\3\2\2\2Z\u0182\3\2\2\2\\\u0186"+
+		"\3\2\2\2^\u0188\3\2\2\2`\u018c\3\2\2\2bc\5\4\3\2cd\7\2\2\3d\3\3\2\2\2"+
 		"eg\5\b\5\2fe\3\2\2\2fg\3\2\2\2gh\3\2\2\2hj\5\6\4\2ik\5\n\6\2ji\3\2\2\2"+
 		"jk\3\2\2\2k\5\3\2\2\2ln\t\2\2\2ml\3\2\2\2nq\3\2\2\2om\3\2\2\2op\3\2\2"+
 		"\2p\7\3\2\2\2qo\3\2\2\2rv\7\n\2\2st\5\6\4\2tu\7\22\2\2uw\3\2\2\2vs\3\2"+
@@ -2871,11 +2873,11 @@ public class SmalltalkParser extends Parser {
 		"\u0103\u0104\3\2\2\2\u0104\u0105\5\6\4\2\u0105\u0106\7\34\2\2\u0106\63"+
 		"\3\2\2\2\u0107\u0108\7\35\2\2\u0108\u010a\5\6\4\2\u0109\u010b\5\20\t\2"+
 		"\u010a\u0109\3\2\2\2\u010a\u010b\3\2\2\2\u010b\u010c\3\2\2\2\u010c\u010d"+
-		"\5\6\4\2\u010d\u010e\7\34\2\2\u010e\65\3\2\2\2\u010f\u0116\5D#\2\u0110"+
-		"\u0116\58\35\2\u0111\u0116\5<\37\2\u0112\u0116\5N(\2\u0113\u0116\5F$\2"+
-		"\u0114\u0116\5H%\2\u0115\u010f\3\2\2\2\u0115\u0110\3\2\2\2\u0115\u0111"+
-		"\3\2\2\2\u0115\u0112\3\2\2\2\u0115\u0113\3\2\2\2\u0115\u0114\3\2\2\2\u0116"+
-		"\67\3\2\2\2\u0117\u011c\5:\36\2\u0118\u011c\5> \2\u0119\u011c\5B\"\2\u011a"+
+		"\5\6\4\2\u010d\u010e\7\34\2\2\u010e\65\3\2\2\2\u010f\u0116\5<\37\2\u0110"+
+		"\u0116\5D#\2\u0111\u0116\58\35\2\u0112\u0116\5N(\2\u0113\u0116\5F$\2\u0114"+
+		"\u0116\5H%\2\u0115\u010f\3\2\2\2\u0115\u0110\3\2\2\2\u0115\u0111\3\2\2"+
+		"\2\u0115\u0112\3\2\2\2\u0115\u0113\3\2\2\2\u0115\u0114\3\2\2\2\u0116\67"+
+		"\3\2\2\2\u0117\u011c\5:\36\2\u0118\u011c\5> \2\u0119\u011c\5B\"\2\u011a"+
 		"\u011c\5@!\2\u011b\u0117\3\2\2\2\u011b\u0118\3\2\2\2\u011b\u0119\3\2\2"+
 		"\2\u011b\u011a\3\2\2\2\u011c9\3\2\2\2\u011d\u0120\5B\"\2\u011e\u0120\5"+
 		"@!\2\u011f\u011d\3\2\2\2\u011f\u011e\3\2\2\2\u0120\u0121\3\2\2\2\u0121"+
@@ -2900,25 +2902,24 @@ public class SmalltalkParser extends Parser {
 		"\u015c\3\2\2\2\u015c\u015a\3\2\2\2\u015c\u015d\3\2\2\2\u015d\u0160\3\2"+
 		"\2\2\u015e\u0160\5F$\2\u015f\u0158\3\2\2\2\u015f\u015a\3\2\2\2\u015f\u015e"+
 		"\3\2\2\2\u0160M\3\2\2\2\u0161\u0162\7\32\2\2\u0162\u0163\5P)\2\u0163O"+
-		"\3\2\2\2\u0164\u016e\5\6\4\2\u0165\u0169\5\66\34\2\u0166\u0169\5R*\2\u0167"+
+		"\3\2\2\2\u0164\u0168\5\6\4\2\u0165\u0169\5\66\34\2\u0166\u0169\5R*\2\u0167"+
 		"\u0169\5L\'\2\u0168\u0165\3\2\2\2\u0168\u0166\3\2\2\2\u0168\u0167\3\2"+
-		"\2\2\u0169\u016a\3\2\2\2\u016a\u016b\5\6\4\2\u016b\u016d\3\2\2\2\u016c"+
-		"\u0168\3\2\2\2\u016d\u0170\3\2\2\2\u016e\u016c\3\2\2\2\u016e\u016f\3\2"+
-		"\2\2\u016f\u0171\3\2\2\2\u0170\u016e\3\2\2\2\u0171\u0172\7\b\2\2\u0172"+
-		"Q\3\2\2\2\u0173\u0174\7\t\2\2\u0174\u0175\5P)\2\u0175S\3\2\2\2\u0176\u0177"+
-		"\5V,\2\u0177\u0179\5\6\4\2\u0178\u017a\5T+\2\u0179\u0178\3\2\2\2\u0179"+
-		"\u017a\3\2\2\2\u017a\u017b\3\2\2\2\u017b\u017c\5\6\4\2\u017cU\3\2\2\2"+
-		"\u017d\u017e\5\6\4\2\u017e\u017f\5X-\2\u017fW\3\2\2\2\u0180\u0181\7\22"+
-		"\2\2\u0181Y\3\2\2\2\u0182\u0184\7 \2\2\u0183\u0182\3\2\2\2\u0184\u0185"+
-		"\3\2\2\2\u0185\u0183\3\2\2\2\u0185\u0186\3\2\2\2\u0186[\3\2\2\2\u0187"+
-		"\u0188\5\32\16\2\u0188]\3\2\2\2\u0189\u018b\5`\61\2\u018a\u018c\5^\60"+
-		"\2\u018b\u018a\3\2\2\2\u018b\u018c\3\2\2\2\u018c_\3\2\2\2\u018d\u018e"+
-		"\5\6\4\2\u018e\u018f\7\r\2\2\u018f\u0192\5\6\4\2\u0190\u0193\5\36\20\2"+
-		"\u0191\u0193\5&\24\2\u0192\u0190\3\2\2\2\u0192\u0191\3\2\2\2\u0193a\3"+
-		"\2\2\2,fjox\u0088\u008c\u0093\u009a\u00a0\u00a9\u00b2\u00b7\u00c3\u00c8"+
-		"\u00d3\u00dd\u00e7\u00ec\u00f0\u00f4\u00fd\u0102\u010a\u0115\u011b\u011f"+
-		"\u0127\u012d\u0130\u0135\u0138\u013d\u0143\u0153\u015c\u015f\u0168\u016e"+
-		"\u0179\u0185\u018b\u0192";
+		"\2\2\u0169\u016b\3\2\2\2\u016a\u0164\3\2\2\2\u016b\u016e\3\2\2\2\u016c"+
+		"\u016a\3\2\2\2\u016c\u016d\3\2\2\2\u016d\u016f\3\2\2\2\u016e\u016c\3\2"+
+		"\2\2\u016f\u0170\5\6\4\2\u0170\u0171\7\b\2\2\u0171Q\3\2\2\2\u0172\u0173"+
+		"\7\t\2\2\u0173\u0174\5P)\2\u0174S\3\2\2\2\u0175\u0176\5V,\2\u0176\u0178"+
+		"\5\6\4\2\u0177\u0179\5T+\2\u0178\u0177\3\2\2\2\u0178\u0179\3\2\2\2\u0179"+
+		"\u017a\3\2\2\2\u017a\u017b\5\6\4\2\u017bU\3\2\2\2\u017c\u017d\5\6\4\2"+
+		"\u017d\u017e\5X-\2\u017eW\3\2\2\2\u017f\u0180\7\22\2\2\u0180Y\3\2\2\2"+
+		"\u0181\u0183\7 \2\2\u0182\u0181\3\2\2\2\u0183\u0184\3\2\2\2\u0184\u0182"+
+		"\3\2\2\2\u0184\u0185\3\2\2\2\u0185[\3\2\2\2\u0186\u0187\5\32\16\2\u0187"+
+		"]\3\2\2\2\u0188\u018a\5`\61\2\u0189\u018b\5^\60\2\u018a\u0189\3\2\2\2"+
+		"\u018a\u018b\3\2\2\2\u018b_\3\2\2\2\u018c\u018d\5\6\4\2\u018d\u018e\7"+
+		"\r\2\2\u018e\u0191\5\6\4\2\u018f\u0192\5\36\20\2\u0190\u0192\5&\24\2\u0191"+
+		"\u018f\3\2\2\2\u0191\u0190\3\2\2\2\u0192a\3\2\2\2,fjox\u0088\u008c\u0093"+
+		"\u009a\u00a0\u00a9\u00b2\u00b7\u00c3\u00c8\u00d3\u00dd\u00e7\u00ec\u00f0"+
+		"\u00f4\u00fd\u0102\u010a\u0115\u011b\u011f\u0127\u012d\u0130\u0135\u0138"+
+		"\u013d\u0143\u0153\u015c\u015f\u0168\u016c\u0178\u0184\u018a\u0191";
 	public static final ATN _ATN =
 		ATNSimulator.deserialize(_serializedATN.toCharArray());
 	static {

@@ -340,7 +340,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             SmalltalkParser.PrimitiveContext primitiveContext = ctx.primitive();
             if (primitiveContext != null)
                 return primitiveContext.accept(currentVisitor());
-            throw new RuntimeException("vistExpression no alternative found.");
+            throw new RuntimeException("visitExpression no alternative found.");
         }
 
         public Void visitPrimitive(@NotNull SmalltalkParser.PrimitiveContext ctx) {

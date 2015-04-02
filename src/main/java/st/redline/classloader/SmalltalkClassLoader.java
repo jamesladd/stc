@@ -57,6 +57,7 @@ public class SmalltalkClassLoader extends ClassLoader {
     }
 
     private void cacheClass(Class cls, String name) {
+        System.out.println("** cacheClass " + cls + " as " + name);
         classCache.put(name, cls);
     }
 

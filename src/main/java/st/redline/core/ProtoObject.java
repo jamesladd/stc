@@ -7,8 +7,8 @@ public class ProtoObject {
     private static final String DEFAULT_IMPORTED_PACKAGE = "st.redline.core";
     private ProtoObject selfClass;
 
-    public ProtoObject variableAt(String name) {
-        System.out.println("** variableAt " + name);
+    public ProtoObject reference(String name) {
+        System.out.println("** reference " + name);
         return resolveObject(name);
     }
 

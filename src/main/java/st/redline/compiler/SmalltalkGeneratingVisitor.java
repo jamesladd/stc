@@ -132,7 +132,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
     public void pushReference(MethodVisitor mv, String name) {
         pushReceiver(mv);
         pushLiteral(mv, name);
-        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "variableAt", "(Ljava/lang/String;)Lst/redline/core/ProtoObject;");
+        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "reference", "(Ljava/lang/String;)Lst/redline/core/ProtoObject;");
     }
 
     public void invokePerform(MethodVisitor mv, String selector, int argumentCount) {

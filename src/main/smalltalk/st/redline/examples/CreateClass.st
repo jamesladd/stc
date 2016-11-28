@@ -1,1 +1,1 @@
-ProtoObject < #MyObject.
+ProtoObject subclass: #MyObject.

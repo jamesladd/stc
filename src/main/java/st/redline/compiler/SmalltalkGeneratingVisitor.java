@@ -171,6 +171,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         private MethodVisitor mv;
         private HashMap<String, ExtendedTerminalNode> temporaries;
         private HashMap<String, ExtendedTerminalNode> arguments;
+        private Stack<StringBuilder> keywords = new Stack<StringBuilder>();
 
         public ClassGeneratorVisitor() {
             cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
@@ -287,6 +288,26 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             if (temporaries.containsKey(key))
                 throw new RuntimeException("Temporary '" + key + "' already defined.");
             temporaries.put(key, new ExtendedTerminalNode(node, index));
+        }
+
+        private int countOf(String input, char ch) {
+            int count = 0;
+            for (int i = 0, l = input.length(); i < l; i++)
+                if (input.charAt(i) == ch)
+                    count++;
+            return count;
+        }
+
+        private void initializeKeyword() {
+            keywords.push(new StringBuilder());
+        }
+
+        private void addToKeyword(String keyword) {
+            keywords.peek().append(keyword);
+        }
+
+        private String removeKeyword() {
+            return keywords.pop().toString();
         }
 
         private void initializeTemporaryVariableMap() {
@@ -444,14 +465,27 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitKeywordMessage(@NotNull SmalltalkParser.KeywordMessageContext ctx) {
             log("visitKeywordMessage");
+            initializeKeyword();
             for (SmalltalkParser.KeywordPairContext keywordPair : ctx.keywordPair())
                 keywordPair.accept(currentVisitor());
+            visitLine(mv, ctx.keywordPair().get(0).KEYWORD().getSymbol().getLine());
+            String keyword = removeKeyword();
+            // REMOVE ONCE WE HAVE SUCCESSFULLY PUSHED KEYWORD PAIR VALUES.
+            pushNull(mv); // REMOVE ONCE WE HAVE SUCCESSFULLY PUSHED KEYWORD PAIR VALUES.
+            invokePerform(mv, keyword, countOf(keyword, ':'));
             return null;
         }
 
         public Void visitKeywordPair(@NotNull SmalltalkParser.KeywordPairContext ctx) {
-            log("visitKeywordPair");
-            return null;
+            log("visitKeywordPair " + ctx.KEYWORD().getSymbol().getText());
+            TerminalNode keyword = ctx.KEYWORD();
+            String part = keyword.getSymbol().getText();
+            visitLine(mv, keyword.getSymbol().getLine());
+            addToKeyword(part);
+            SmalltalkParser.BinarySendContext binarySend = ctx.binarySend();
+            if (binarySend != null)
+                return binarySend.accept(currentVisitor());
+            throw new RuntimeException("visitKeywordPair binary send expected.");
         }
 
         public Void visitOperand(@NotNull SmalltalkParser.OperandContext ctx) {
@@ -465,7 +499,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             SmalltalkParser.SubexpressionContext subexpression = ctx.subexpression();
             if (subexpression != null)
                 return subexpression.accept(currentVisitor());
-            throw new RuntimeException("vistOperand no alternative found.");
+            throw new RuntimeException("visitOperand no alternative found.");
         }
 
         public Void visitLiteral(@NotNull SmalltalkParser.LiteralContext ctx) {
@@ -476,7 +510,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             SmalltalkParser.RuntimeLiteralContext runtimeLiteral = ctx.runtimeLiteral();
             if (runtimeLiteral != null)
                 return runtimeLiteral.accept(currentVisitor());
-            throw new RuntimeException("vistLiteral no alternative found.");
+            throw new RuntimeException("visitLiteral no alternative found.");
         }
 
         public Void visitRuntimeLiteral(@NotNull SmalltalkParser.RuntimeLiteralContext ctx) {
@@ -504,7 +538,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             SmalltalkParser.SymbolContext symbol = ctx.symbol();
             if (symbol != null)
                 return symbol.accept(currentVisitor());
-            throw new RuntimeException("vistParsetimeLiteral no alternative found.");
+            throw new RuntimeException("visitParsetimeLiteral no alternative found.");
         }
 
         public Void visitSymbol(@NotNull SmalltalkParser.SymbolContext ctx) {

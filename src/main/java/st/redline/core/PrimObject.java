@@ -7,6 +7,10 @@ public class PrimObject {
     private static final String DEFAULT_IMPORTED_PACKAGE = "st.redline.core";
     private PrimObject selfClass;
 
+    public void selfClass(PrimObject primClass) {
+        selfClass = primClass;
+    }
+
     public PrimObject reference(String name) {
         System.out.println("** reference " + name);
         return resolveObject(name);
@@ -33,7 +37,7 @@ public class PrimObject {
         return (SmalltalkClassLoader) getClass().getClassLoader();
     }
 
-    protected PrimObject sendMessages(PrimObject receiver, Context context) {
+    protected PrimObject sendMessages(PrimObject receiver, PrimContext context) {
         System.out.println("** sendMessages(" + receiver + "," + context + ")");
         return receiver;
     }
@@ -48,10 +52,30 @@ public class PrimObject {
     }
 
     protected PrimObject perform0(PrimObject foundInClass, String selector, PrimObject... arguments) {
-//        PrimObject cls = foundInClass;
-//        while (!cls.includesSelector(selector))
-//            cls = cls.superclass();
-//        return apply(cls.methodFor(selector), cls, selector, arguments);
-        return null;
+        PrimObject cls = foundInClass;
+        while (!cls.includesSelector(selector))
+            cls = cls.superclass();
+        return apply(cls.methodFor(selector), cls, selector, arguments);
+    }
+
+    protected PrimObject apply(PrimObject method, PrimObject foundInClass, String selector, PrimObject... arguments) {
+        System.out.println("apply: " + selector + " to " + this + " found in " + foundInClass);
+        return method.invoke(this, new PrimContext(this, foundInClass, selector, arguments));
+    }
+
+    protected PrimObject invoke(PrimObject receiver, PrimContext context) {
+        return this;
+    }
+
+    protected PrimObject methodFor(String selector) {
+        return null; // PrimDoesNotUnderstand.DOES_NOT_UNDERSTAND;
+    }
+
+    protected PrimObject superclass() {
+        throw new IllegalStateException("This receiver should not have received this message.");
+    }
+
+    protected boolean includesSelector(String selector) {
+        return true;
     }
 }

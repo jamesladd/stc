@@ -11,6 +11,8 @@ public class Bootstrapper {
 
     private void loadProtoObject(ClassLoader classLoader) {
         try {
+            // Loading the class causes the 'sendMessages' java method to be called
+            // which executes all the message sends of the Smalltalk source.
             classLoader.loadClass("st.redline.core.ProtoObject").newInstance();
         } catch (Exception e) {
             throw new RuntimeException(e);

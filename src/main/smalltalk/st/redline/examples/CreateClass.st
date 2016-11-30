@@ -1,1 +1,1 @@
-PrimObject subclass: #MyObject.
+ProtoObject subclass: #MyObject.

@@ -1,8 +1,6 @@
 package st.redline;
 
-import st.redline.classloader.SmalltalkClassLoader;
-import st.redline.classloader.SmalltalkSourceFinder;
-import st.redline.classloader.SourceFinder;
+import st.redline.classloader.*;
 
 public class Stic {
 
@@ -29,7 +27,11 @@ public class Stic {
     }
 
     private ClassLoader classLoader() {
-        return new SmalltalkClassLoader(currentClassLoader(), sourceFinder());
+        return new SmalltalkClassLoader(currentClassLoader(), sourceFinder(), bootstrapper());
+    }
+
+    private Bootstrapper bootstrapper() {
+        return new Bootstrapper();
     }
 
     private SourceFinder sourceFinder() {

@@ -11,14 +11,14 @@ public class SmalltalkClassLoader extends ClassLoader {
     private final HashMap<String, Class> classCache;
     private final HashMap<String, ProtoObject> objectCache;
 
-    public SmalltalkClassLoader(ClassLoader classLoader, SourceFinder sourceFinder) {
+    public SmalltalkClassLoader(ClassLoader classLoader, SourceFinder sourceFinder, Bootstrapper bootstrapper) {
         super(classLoader);
         this.sourceFinder = sourceFinder;
         this.classCache = new HashMap<String, Class>();
         this.objectCache = new HashMap<String, ProtoObject>();
 
-        // initialize Object cache with ProtoObject instance.
-        objectCache.put("st.redline.core.ProtoObject", new ProtoObject());
+        // initialize Object cache with bootstrapped objects.
+        bootstrapper.bootstrap(this);
     }
 
     public ProtoObject findObject(String name) {
@@ -41,6 +41,11 @@ public class SmalltalkClassLoader extends ClassLoader {
     private ProtoObject cachedObject(String name) {
         System.out.println("** cachedObject " + name);
         return objectCache.get(name);
+    }
+
+    public void cacheObject(String name, ProtoObject object) {
+        System.out.println("** cacheObject " + object + " as " + name);
+        objectCache.put(name, object);
     }
 
     public Class findClass(String name) throws ClassNotFoundException {

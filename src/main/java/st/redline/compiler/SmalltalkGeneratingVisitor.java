@@ -18,8 +18,8 @@ import java.util.Stack;
 public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements SmalltalkVisitor<Void>, Opcodes {
 
     private static final String[] SIGNATURES = {
-            "(Ljava/lang/String;)Lst/redline/core/ProtoObject;",
-            "(Lst/redline/core/ProtoObject;Ljava/lang/String;)Lst/redline/core/ProtoObject;"
+            "(Ljava/lang/String;)Lst/redline/core/PrimObject;",
+            "(Lst/redline/core/PrimObject;Ljava/lang/String;)Lst/redline/core/PrimObject;"
     };
     private static final Map<String, Integer> OPCODES = new HashMap<String, Integer>();
     private static final int BYTECODE_VERSION;
@@ -72,7 +72,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
     }
 
     private String superclassName() {
-        return "st/redline/core/ProtoObject";
+        return "st/redline/core/PrimObject";
     }
 
     private String contextName() {
@@ -120,24 +120,24 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
     public void pushTemporary(MethodVisitor mv, int index) {
         pushContext(mv);
         pushNumber(mv, index);
-        mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "temporaryAt", "(I)Lst/redline/core/ProtoObject;");
+        mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "temporaryAt", "(I)Lst/redline/core/PrimObject;");
     }
 
     public void pushArgument(MethodVisitor mv, int index) {
         pushContext(mv);
         pushNumber(mv, index);
-        mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "argumentAt", "(I)Lst/redline/core/ProtoObject;");
+        mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "argumentAt", "(I)Lst/redline/core/PrimObject;");
     }
 
     public void pushReference(MethodVisitor mv, String name) {
         pushReceiver(mv);
         pushLiteral(mv, name);
-        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "reference", "(Ljava/lang/String;)Lst/redline/core/ProtoObject;");
+        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "reference", "(Ljava/lang/String;)Lst/redline/core/PrimObject;");
     }
 
     public void invokePerform(MethodVisitor mv, String selector, int argumentCount) {
         pushLiteral(mv, selector);
-        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/core/ProtoObject", "perform", SIGNATURES[argumentCount]);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/core/PrimObject", "perform", SIGNATURES[argumentCount]);
     }
 
     public void visitLine(MethodVisitor mv, int line) {
@@ -166,7 +166,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
     private class ClassGeneratorVisitor extends SmalltalkBaseVisitor<Void> implements SmalltalkVisitor<Void>, Opcodes {
 
-        private final String SEND_MESSAGES_SIG = "(Lst/redline/core/ProtoObject;Lst/redline/core/Context;)Lst/redline/core/ProtoObject;";
+        private final String SEND_MESSAGES_SIG = "(Lst/redline/core/PrimObject;Lst/redline/core/Context;)Lst/redline/core/PrimObject;";
         private final ClassWriter cw;
         private MethodVisitor mv;
         private HashMap<String, ExtendedTerminalNode> temporaries;
@@ -224,7 +224,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             mv.visitTypeInsn(NEW, contextName());
             mv.visitInsn(DUP);
             mv.visitVarInsn(ALOAD, 0);
-            mv.visitMethodInsn(INVOKESPECIAL, contextName(), "<init>", "(Lst/redline/core/ProtoObject;)V");
+            mv.visitMethodInsn(INVOKESPECIAL, contextName(), "<init>", "(Lst/redline/core/PrimObject;)V");
             mv.visitVarInsn(ASTORE, 1);
 
             // call sendMessages with parameters: this & context

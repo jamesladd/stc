@@ -2,14 +2,14 @@ package st.redline.core;
 
 public class Context {
 
-    private final ProtoObject receiver;
-    private ProtoObject[] temporaries;
+    private final PrimObject receiver;
+    private PrimObject[] temporaries;
 
-    public Context(ProtoObject receiver) {
+    public Context(PrimObject receiver) {
         this.receiver = receiver;
     }
 
     public void initTemporaries(int count) {
-        temporaries = new ProtoObject[count];
+        temporaries = new PrimObject[count];
     }
 }

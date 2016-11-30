@@ -7,7 +7,7 @@ Boolean subclass: #False.
 - initialize
     "Mark the resulting objects falseness so internally we can distinguish a False instance."
     JVM aload: 1;
-        invokeVirtual: 'st/redline/lang/ProtoObject' method: 'markFalseness' matching: '()Lst/redline/lang/ProtoObject;'.
+        invokeVirtual: 'st/redline/lang/ProtoObject' method: 'markFalseness' matching: '()Lst/redline/lang/PrimObject;'.
 
 "category: controlling"
 

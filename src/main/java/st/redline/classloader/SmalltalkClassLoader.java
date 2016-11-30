@@ -1,7 +1,7 @@
 package st.redline.classloader;
 
 import st.redline.compiler.Compiler;
-import st.redline.core.ProtoObject;
+import st.redline.core.PrimObject;
 
 import java.util.HashMap;
 
@@ -9,20 +9,20 @@ public class SmalltalkClassLoader extends ClassLoader {
 
     private final SourceFinder sourceFinder;
     private final HashMap<String, Class> classCache;
-    private final HashMap<String, ProtoObject> objectCache;
+    private final HashMap<String, PrimObject> objectCache;
 
     public SmalltalkClassLoader(ClassLoader classLoader, SourceFinder sourceFinder, Bootstrapper bootstrapper) {
         super(classLoader);
         this.sourceFinder = sourceFinder;
         this.classCache = new HashMap<String, Class>();
-        this.objectCache = new HashMap<String, ProtoObject>();
+        this.objectCache = new HashMap<String, PrimObject>();
 
         // initialize Object cache with bootstrapped objects.
         bootstrapper.bootstrap(this);
     }
 
-    public ProtoObject findObject(String name) {
-        ProtoObject cls = cachedObject(name);
+    public PrimObject findObject(String name) {
+        PrimObject cls = cachedObject(name);
         if (cls != null)
             return cls;
         try {
@@ -38,12 +38,12 @@ public class SmalltalkClassLoader extends ClassLoader {
         throw new ObjectNotFoundException("Object '" + name + "' was not found.");
     }
 
-    private ProtoObject cachedObject(String name) {
+    private PrimObject cachedObject(String name) {
         System.out.println("** cachedObject " + name);
         return objectCache.get(name);
     }
 
-    public void cacheObject(String name, ProtoObject object) {
+    public void cacheObject(String name, PrimObject object) {
         System.out.println("** cacheObject " + object + " as " + name);
         objectCache.put(name, object);
     }

@@ -43,7 +43,7 @@ public class ProtoObject {
         return perform0(selector, arg1);
     }
 
-    protected ProtoObject perform0(String selector, ProtoObject ... arguments) {
+    protected ProtoObject perform0(String selector, ProtoObject... arguments) {
         return perform0(selfClass, selector, arguments);
     }
 

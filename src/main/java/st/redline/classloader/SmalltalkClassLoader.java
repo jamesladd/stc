@@ -10,6 +10,7 @@ public class SmalltalkClassLoader extends ClassLoader {
     private final SourceFinder sourceFinder;
     private final HashMap<String, Class> classCache;
     private final HashMap<String, PrimObject> objectCache;
+    private boolean bootstrapping;
 
     public SmalltalkClassLoader(ClassLoader classLoader, SourceFinder sourceFinder, Bootstrapper bootstrapper) {
         super(classLoader);
@@ -84,5 +85,17 @@ public class SmalltalkClassLoader extends ClassLoader {
 
     private Compiler compiler(Source source) {
         return new Compiler(source);
+    }
+
+    public void beginBootstrapping() {
+        bootstrapping = true;
+    }
+
+    public void endBootstrapping() {
+        bootstrapping = false;
+    }
+
+    public boolean isBootstrapping() {
+        return bootstrapping;
     }
 }

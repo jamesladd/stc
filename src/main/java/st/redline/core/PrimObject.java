@@ -36,10 +36,7 @@ public class PrimObject {
 
     public PrimObject smalltalkSymbol(Object value) {
         System.out.println("smalltalkSymbol " + value);
-        String symbol = (String) value;
-        PrimObject object = new PrimObject();
-        object.javaValue(symbol);
-        return object;
+        return instanceOfWith("Symbol", value);
 
 //        String symbol = (String) javaValue;
 //        SmalltalkClassLoader smalltalkClassLoader = classLoader();
@@ -48,6 +45,20 @@ public class PrimObject {
 //        PrimObject symbolObject = instanceOfWith("Symbol", symbol);
 //        smalltalkClassLoader.internSymbolAtPut(symbol, symbolObject);
 //        return symbolObject;
+    }
+
+    protected PrimObject instanceOfWith(String type, Object value) {
+        PrimObject instance = instanceOf(type);
+        instance.javaValue(value);
+        return instance;
+    }
+
+    protected PrimObject instanceOf(String type) {
+        return isBootstrapping() ? new PrimObject() : resolveObject(type).perform("new");
+    }
+
+    protected boolean isBootstrapping() {
+        return classLoader().isBootstrapping();
     }
 
     protected PrimObject findObject(String name) {
@@ -69,6 +80,11 @@ public class PrimObject {
     protected PrimObject sendMessages(PrimObject receiver, PrimContext context) {
         System.out.println("** sendMessages(" + receiver + "," + context + ")");
         return receiver;
+    }
+
+    public PrimObject perform(String selector) {
+        System.out.println("** perform(" + selector + ") " + this);
+        return perform0(selector);
     }
 
     public PrimObject perform(PrimObject arg1, String selector) {

@@ -7,8 +7,10 @@ import static st.redline.core.PrimNil.PRIM_NIL;
 public class Bootstrapper {
 
     public void bootstrap(SmalltalkClassLoader classLoader) {
+        classLoader.beginBootstrapping();
         setupPrimObject(classLoader);
         loadProtoObject(classLoader);
+        classLoader.endBootstrapping();
     }
 
     private void setupPrimObject(SmalltalkClassLoader classLoader) {

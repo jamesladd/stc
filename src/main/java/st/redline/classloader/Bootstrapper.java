@@ -10,8 +10,10 @@ public class Bootstrapper {
     }
 
     private void setupPrimObject(SmalltalkClassLoader classLoader) {
+        PrimNil primNil = new PrimNil();
         PrimObject primObject = new PrimObject();
         PrimClass primClass = new PrimClass();
+        primClass.superclass(primNil);
         primObject.selfClass(primClass);
         classLoader.cacheObject("st.redline.core.PrimObject", primObject);
     }

@@ -76,7 +76,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
     }
 
     private String contextName() {
-        return "st/redline/core/Context";
+        return "st/redline/core/PrimContext";
     }
 
     public byte[] generatedClassBytes() {
@@ -166,7 +166,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
     private class ClassGeneratorVisitor extends SmalltalkBaseVisitor<Void> implements SmalltalkVisitor<Void>, Opcodes {
 
-        private final String SEND_MESSAGES_SIG = "(Lst/redline/core/PrimObject;Lst/redline/core/Context;)Lst/redline/core/PrimObject;";
+        private final String SEND_MESSAGES_SIG = "(Lst/redline/core/PrimObject;Lst/redline/core/PrimContext;)Lst/redline/core/PrimObject;";
         private final ClassWriter cw;
         private MethodVisitor mv;
         private HashMap<String, ExtendedTerminalNode> temporaries;

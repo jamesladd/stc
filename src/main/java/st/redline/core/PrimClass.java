@@ -15,6 +15,10 @@ public class PrimClass extends PrimObject {
         return methods.get(selector);
     }
 
+    public void superclass(PrimObject superclass) {
+        this.superclass = superclass;
+    }
+
     protected PrimObject superclass() {
         return superclass;
     }

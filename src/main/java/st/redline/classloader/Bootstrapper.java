@@ -8,12 +8,12 @@ public class Bootstrapper {
 
     public void bootstrap(SmalltalkClassLoader classLoader) {
         classLoader.beginBootstrapping();
-        setupPrimObject(classLoader);
+        createPrimObject(classLoader);
         loadProtoObject(classLoader);
         classLoader.endBootstrapping();
     }
 
-    private void setupPrimObject(SmalltalkClassLoader classLoader) {
+    private void createPrimObject(SmalltalkClassLoader classLoader) {
         PrimObject primObject = new PrimObject();
         PrimClass primClass = new PrimClass();
         primClass.superclass(PRIM_NIL);

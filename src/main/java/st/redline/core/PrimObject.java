@@ -2,10 +2,23 @@ package st.redline.core;
 
 import st.redline.classloader.SmalltalkClassLoader;
 
+import static st.redline.core.PrimDoesNotUnderstand.PRIM_DOES_NOT_UNDERSTAND;
+
 public class PrimObject {
 
     private static final String DEFAULT_IMPORTED_PACKAGE = "st.redline.core";
     private PrimObject selfClass;
+    private Object javaValue;
+
+    public String toString() {
+        if (javaValue != null)
+            return javaValue.toString();
+        return super.toString();
+    }
+
+    public void javaValue(Object object) {
+        javaValue = object;
+    }
 
     public void selfClass(PrimObject primClass) {
         selfClass = primClass;
@@ -47,18 +60,18 @@ public class PrimObject {
         return perform0(selector, arg1);
     }
 
-    protected PrimObject perform0(String selector, PrimObject... arguments) {
+    protected PrimObject perform0(String selector, PrimObject ... arguments) {
         return perform0(selfClass, selector, arguments);
     }
 
-    protected PrimObject perform0(PrimObject foundInClass, String selector, PrimObject... arguments) {
+    protected PrimObject perform0(PrimObject foundInClass, String selector, PrimObject ... arguments) {
         PrimObject cls = foundInClass;
         while (!cls.includesSelector(selector))
             cls = cls.superclass();
         return apply(cls.methodFor(selector), cls, selector, arguments);
     }
 
-    protected PrimObject apply(PrimObject method, PrimObject foundInClass, String selector, PrimObject... arguments) {
+    protected PrimObject apply(PrimObject method, PrimObject foundInClass, String selector, PrimObject ... arguments) {
         System.out.println("apply: #" + selector + " to " + this + " found in " + foundInClass);
         return method.invoke(this, new PrimContext(this, foundInClass, selector, arguments));
     }
@@ -68,7 +81,7 @@ public class PrimObject {
     }
 
     protected PrimObject methodFor(String selector) {
-        return null; // PrimDoesNotUnderstand.DOES_NOT_UNDERSTAND;
+        return PRIM_DOES_NOT_UNDERSTAND;
     }
 
     protected PrimObject superclass() {

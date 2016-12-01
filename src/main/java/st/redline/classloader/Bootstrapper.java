@@ -2,6 +2,8 @@ package st.redline.classloader;
 
 import st.redline.core.*;
 
+import static st.redline.core.PrimNil.PRIM_NIL;
+
 public class Bootstrapper {
 
     public void bootstrap(SmalltalkClassLoader classLoader) {
@@ -10,10 +12,9 @@ public class Bootstrapper {
     }
 
     private void setupPrimObject(SmalltalkClassLoader classLoader) {
-        PrimNil primNil = new PrimNil();
         PrimObject primObject = new PrimObject();
         PrimClass primClass = new PrimClass();
-        primClass.superclass(primNil);
+        primClass.superclass(PRIM_NIL);
         primObject.selfClass(primClass);
         classLoader.cacheObject("st.redline.core.PrimObject", primObject);
     }

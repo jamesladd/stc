@@ -19,7 +19,25 @@ public class PrimContext {
         this.arguments = arguments;
     }
 
+    public String selector() {
+        return selector;
+    }
+
+    public PrimObject[] arguments() {
+        return arguments;
+    }
+
     public void initTemporaries(int count) {
         temporaries = new PrimObject[count];
+    }
+
+    public PrimObject[] selectorAndArguments() {
+        System.out.println("selectorAndArguments: " + selector);
+        PrimObject selectorObject = new PrimObject();
+        selectorObject.javaValue(selector);
+        PrimObject[] selectorAndArguments = new PrimObject[arguments.length + 1];
+        selectorAndArguments[0] = selectorObject;
+        System.arraycopy(arguments, 0, selectorAndArguments, 1, arguments.length);
+        return selectorAndArguments;
     }
 }

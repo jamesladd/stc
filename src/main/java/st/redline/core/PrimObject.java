@@ -34,6 +34,22 @@ public class PrimObject {
         return findObject(importFor(name));
     }
 
+    public PrimObject smalltalkSymbol(Object value) {
+        System.out.println("smalltalkSymbol " + value);
+        String symbol = (String) value;
+        PrimObject object = new PrimObject();
+        object.javaValue(symbol);
+        return object;
+
+//        String symbol = (String) javaValue;
+//        SmalltalkClassLoader smalltalkClassLoader = classLoader();
+//        if (smalltalkClassLoader.isInternedSymbol(symbol))
+//            return smalltalkClassLoader.internedSymbolAt(symbol);
+//        PrimObject symbolObject = instanceOfWith("Symbol", symbol);
+//        smalltalkClassLoader.internSymbolAtPut(symbol, symbolObject);
+//        return symbolObject;
+    }
+
     protected PrimObject findObject(String name) {
         return classLoader().findObject(name);
     }

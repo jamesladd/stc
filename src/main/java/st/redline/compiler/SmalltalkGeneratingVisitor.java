@@ -162,6 +162,13 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         }
     }
 
+    public void pushNewObject(MethodVisitor mv, String type, String value, int line) {
+        visitLine(mv, line);
+        pushReceiver(mv);
+        pushLiteral(mv, value);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/core/PrimObject", type, "(Ljava/lang/Object;)Lst/redline/core/PrimObject;");
+    }
+
     // ------------------------------
 
     private class ClassGeneratorVisitor extends SmalltalkBaseVisitor<Void> implements SmalltalkVisitor<Void>, Opcodes {
@@ -470,8 +477,6 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
                 keywordPair.accept(currentVisitor());
             visitLine(mv, ctx.keywordPair().get(0).KEYWORD().getSymbol().getLine());
             String keyword = removeKeyword();
-            // REMOVE ONCE WE HAVE SUCCESSFULLY PUSHED KEYWORD PAIR VALUES.
-            pushNull(mv); // REMOVE ONCE WE HAVE SUCCESSFULLY PUSHED KEYWORD PAIR VALUES.
             invokePerform(mv, keyword, countOf(keyword, ':'));
             return null;
         }
@@ -543,6 +548,8 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitSymbol(@NotNull SmalltalkParser.SymbolContext ctx) {
             log("visitSymbol #" + ctx.bareSymbol().IDENTIFIER().getSymbol().getText());
+            TerminalNode node = ctx.bareSymbol().IDENTIFIER();
+            pushNewObject(mv, "smalltalkSymbol", node.getSymbol().getText(), node.getSymbol().getLine());
             return null;
         }
 

@@ -35,4 +35,8 @@ public class PrimClass extends PrimObject {
     protected PrimObject superclass() {
         return superclass;
     }
+
+    public void addMethod(String selector, PrimObject method) {
+        methods.put(selector, method);
+    }
 }

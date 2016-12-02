@@ -21,6 +21,7 @@ public class Bootstrapper {
         PrimClass primMeta = new PrimClass(true);
         primMeta.superclass(PRIM_NIL);
         primMeta.selfClass(PRIM_NIL);
+        primMeta.addMethod("subclass:", new PrimSubclass());
         PrimClass primClass = new PrimClass();
         primClass.selfClass(primMeta);
         classLoader.cacheObject("st.redline.core.PrimClass", primClass);

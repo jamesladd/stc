@@ -32,7 +32,6 @@ public class PrimContext {
     }
 
     public PrimObject[] selectorAndArguments() {
-        System.out.println("selectorAndArguments: " + selector);
         PrimObject selectorObject = new PrimObject();
         selectorObject.javaValue(selector);
         PrimObject[] selectorAndArguments = new PrimObject[arguments.length + 1];

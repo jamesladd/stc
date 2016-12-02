@@ -23,6 +23,7 @@ public class SmalltalkClassLoader extends ClassLoader {
     }
 
     public PrimObject findObject(String name) {
+        System.out.println("** findObject " + name);
         PrimObject cls = cachedObject(name);
         if (cls != null)
             return cls;

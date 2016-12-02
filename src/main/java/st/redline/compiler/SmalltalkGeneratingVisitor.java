@@ -19,7 +19,11 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
     private static final String[] SIGNATURES = {
             "(Ljava/lang/String;)Lst/redline/core/PrimObject;",
-            "(Lst/redline/core/PrimObject;Ljava/lang/String;)Lst/redline/core/PrimObject;"
+            "(Lst/redline/core/PrimObject;Ljava/lang/String;)Lst/redline/core/PrimObject;",
+            "(Lst/redline/core/PrimObject;Lst/redline/core/PrimObject;Ljava/lang/String;)Lst/redline/core/PrimObject;",
+            "(Lst/redline/core/PrimObject;Lst/redline/core/PrimObject;Lst/redline/core/PrimObject;Ljava/lang/String;)Lst/redline/core/PrimObject;",
+            "(Lst/redline/core/PrimObject;Lst/redline/core/PrimObject;Lst/redline/core/PrimObject;Lst/redline/core/PrimObject;Ljava/lang/String;)Lst/redline/core/PrimObject;",
+            "(Lst/redline/core/PrimObject;Lst/redline/core/PrimObject;Lst/redline/core/PrimObject;Lst/redline/core/PrimObject;Lst/redline/core/PrimObject;Ljava/lang/String;)Lst/redline/core/PrimObject;"
     };
     private static final Map<String, Integer> OPCODES = new HashMap<String, Integer>();
     private static final int BYTECODE_VERSION;
@@ -544,6 +548,13 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             if (symbol != null)
                 return symbol.accept(currentVisitor());
             throw new RuntimeException("visitParsetimeLiteral no alternative found.");
+        }
+
+        public Void visitString(@NotNull SmalltalkParser.StringContext ctx) {
+            log("visitString " + ctx.STRING().getSymbol().getText());
+            TerminalNode node = ctx.STRING();
+            pushNewObject(mv, "smalltalkString", node.getSymbol().getText(), node.getSymbol().getLine());
+            return null;
         }
 
         public Void visitSymbol(@NotNull SmalltalkParser.SymbolContext ctx) {

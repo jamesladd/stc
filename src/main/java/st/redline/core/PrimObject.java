@@ -34,8 +34,11 @@ public class PrimObject {
         return findObject(importFor(name));
     }
 
+    public PrimObject smalltalkString(Object value) {
+        return instanceOfWith("String", value);
+    }
+
     public PrimObject smalltalkSymbol(Object value) {
-        System.out.println("smalltalkSymbol " + value);
         return instanceOfWith("Symbol", value);
 
 //        String symbol = (String) javaValue;
@@ -92,6 +95,26 @@ public class PrimObject {
         return perform0(selector, arg1);
     }
 
+    public PrimObject perform(PrimObject arg1, PrimObject arg2, String selector) {
+        System.out.println("** perform(" + arg1 + "," + arg2 + "," + selector + ") " + this);
+        return perform0(selector, arg1, arg2);
+    }
+
+    public PrimObject perform(PrimObject arg1, PrimObject arg2, PrimObject arg3, String selector) {
+        System.out.println("** perform(" + arg1 + "," + arg2 + "," + arg3 + "," + selector + ") " + this);
+        return perform0(selector, arg1, arg2);
+    }
+
+    public PrimObject perform(PrimObject arg1, PrimObject arg2, PrimObject arg3, PrimObject arg4, String selector) {
+        System.out.println("** perform(" + arg1 + "," + arg2 + "," + arg3 + "," + arg4 + "," + selector + ") " + this);
+        return perform0(selector, arg1, arg2);
+    }
+
+    public PrimObject perform(PrimObject arg1, PrimObject arg2, PrimObject arg3, PrimObject arg4, PrimObject arg5, String selector) {
+        System.out.println("** perform(" + arg1 + "," + arg2 + "," + arg3 + "," + arg4 + "," + arg5 + "," + selector + ") " + this);
+        return perform0(selector, arg1, arg2);
+    }
+
     protected PrimObject perform0(String selector, PrimObject ... arguments) {
         return perform0(selfClass, selector, arguments);
     }
@@ -104,7 +127,7 @@ public class PrimObject {
     }
 
     protected PrimObject apply(PrimObject method, PrimObject foundInClass, String selector, PrimObject ... arguments) {
-        System.out.println("apply: #" + selector + " to " + this + " found in " + foundInClass);
+        System.out.println("** apply: #" + selector + " to " + this + " found in " + foundInClass);
         return method.invoke(this, new PrimContext(this, foundInClass, selector, arguments));
     }
 

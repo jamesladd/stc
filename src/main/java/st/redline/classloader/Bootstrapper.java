@@ -8,22 +8,22 @@ public class Bootstrapper {
 
     public void bootstrap(SmalltalkClassLoader classLoader) {
         classLoader.beginBootstrapping();
-        createPrimObject(classLoader);
+        createPrimClass(classLoader);
         loadKernelObjects(classLoader);
         classLoader.endBootstrapping();
     }
 
     private void loadKernelObjects(SmalltalkClassLoader classLoader) {
-        loadObject(classLoader, "st.redline.core.ProtoObject");
+        loadObject(classLoader, "st.redline.core.Object");
     }
 
-    private void createPrimObject(SmalltalkClassLoader classLoader) {
+    private void createPrimClass(SmalltalkClassLoader classLoader) {
+        PrimClass primMeta = new PrimClass(true);
+        primMeta.superclass(PRIM_NIL);
+        primMeta.selfClass(PRIM_NIL);
         PrimClass primClass = new PrimClass();
-        primClass.superclass(PRIM_NIL);
-        primClass.selfClass(PRIM_NIL);
-        PrimObject primObject = new PrimClass();
-        primObject.selfClass(primClass);
-        classLoader.cacheObject("st.redline.core.PrimObject", primObject);
+        primClass.selfClass(primMeta);
+        classLoader.cacheObject("st.redline.core.PrimClass", primClass);
     }
 
     private void loadObject(ClassLoader classLoader, String name) {

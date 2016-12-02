@@ -4,8 +4,21 @@ import java.util.*;
 
 public class PrimClass extends PrimObject {
 
+    private boolean meta;
     private PrimObject superclass;
     private Map<String, PrimObject> methods = new HashMap<String, PrimObject>();
+
+    public PrimClass() {
+        this(false);
+    }
+
+    public PrimClass(boolean isMeta) {
+        this.meta = isMeta;
+    }
+
+    public boolean isMeta() {
+        return meta;
+    }
 
     public boolean includesSelector(String selector) {
         return methods.containsKey(selector);

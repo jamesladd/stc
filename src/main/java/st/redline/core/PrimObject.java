@@ -7,12 +7,14 @@ import static st.redline.core.PrimDoesNotUnderstand.PRIM_DOES_NOT_UNDERSTAND;
 public class PrimObject {
 
     private static final String DEFAULT_IMPORTED_PACKAGE = "st.redline.core";
-    private PrimObject selfClass;
+    private PrimClass selfClass;
     private Object javaValue;
 
     public String toString() {
         if (javaValue != null)
             return javaValue.toString();
+        if (selfClass != null)
+            return selfClass.toString();
         return super.toString();
     }
 
@@ -24,8 +26,12 @@ public class PrimObject {
         return javaValue;
     }
 
-    public void selfClass(PrimObject primClass) {
+    public void selfClass(PrimClass primClass) {
         selfClass = primClass;
+    }
+
+    public PrimClass selfClass() {
+        return selfClass;
     }
 
     public PrimObject reference(String name) {

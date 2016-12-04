@@ -16,8 +16,32 @@ public class Bootstrapper {
     }
 
     private void createKernelObjectsHierarchy(SmalltalkClassLoader classLoader) {
-        PrimClass object = new PrimClass();
+        PrimObject primClass = classLoader.cachedObject("st.redline.core.PrimClass");
+        PrimClass object = createKernelObject("Object", primClass, primClass);
+        PrimClass behavior = createKernelObject("Behavior", primClass, object);
+        PrimClass classDescription = createKernelObject("ClassDescription", primClass, behavior);
+        PrimClass klass = createKernelObject("Class", primClass, classDescription);
+        PrimClass metaclass = createKernelObject("Metaclass", primClass, classDescription);
+        PrimClass undefinedObject = createKernelObject("UndefinedObject", primClass, object);
+
+        object.selfClass().superclass(klass);
+
         classLoader.cacheObject("st.redline.core.Object", object);
+        classLoader.cacheObject("st.redline.core.Behavior", behavior);
+        classLoader.cacheObject("st.redline.core.ClassDescription", classDescription);
+        classLoader.cacheObject("st.redline.core.Class", klass);
+        classLoader.cacheObject("st.redline.core.Metaclass", metaclass);
+        classLoader.cacheObject("st.redline.core.UndefinedObject", undefinedObject);
+    }
+
+    private PrimClass createKernelObject(String name, PrimObject baseClass, PrimObject superclass) {
+        PrimClass primMeta = new PrimClass(name,true);
+        primMeta.superclass(superclass);
+        primMeta.selfClass((PrimClass) baseClass);
+        PrimClass primClass = new PrimClass(name);
+        primClass.superclass(baseClass);
+        primClass.selfClass(primMeta);
+        return primClass;
     }
 
     private void setContextClassLoader(SmalltalkClassLoader classLoader) {
@@ -26,15 +50,23 @@ public class Bootstrapper {
 
     private void loadKernelObjects(SmalltalkClassLoader classLoader) {
         loadObject(classLoader, "st.redline.core.Object");
+        loadObject(classLoader, "st.redline.core.Behavior");
+        loadObject(classLoader, "st.redline.core.ClassDescription");
+        loadObject(classLoader, "st.redline.core.Class");
+        loadObject(classLoader, "st.redline.core.Metaclass");
+        loadObject(classLoader, "st.redline.core.UndefinedObject");
     }
 
     private void createPrimClass(SmalltalkClassLoader classLoader) {
-        PrimClass primMeta = new PrimClass(true);
+        PrimSubclass subclassMethod = new PrimSubclass();
+        PrimClass primMeta = new PrimClass("PrimClass",true);
         primMeta.superclass(PRIM_NIL);
         primMeta.selfClass(PRIM_NIL);
-        primMeta.addMethod("subclass:", new PrimSubclass());
-        PrimClass primClass = new PrimClass();
+        primMeta.addMethod("subclass:", subclassMethod);
+        PrimClass primClass = new PrimClass("PrimClass");
+        primClass.superclass(PRIM_NIL);
         primClass.selfClass(primMeta);
+        primClass.addMethod("subclass:", subclassMethod);
         classLoader.cacheObject("st.redline.core.PrimClass", primClass);
     }
 

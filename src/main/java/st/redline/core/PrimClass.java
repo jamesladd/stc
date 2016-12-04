@@ -5,15 +5,31 @@ import java.util.*;
 public class PrimClass extends PrimObject {
 
     private boolean meta;
+    private String name;
     private PrimObject superclass;
     private Map<String, PrimObject> methods = new HashMap<String, PrimObject>();
 
     public PrimClass() {
-        this(false);
+        this("", false);
     }
 
     public PrimClass(boolean isMeta) {
+        this("", isMeta);
+    }
+
+    public PrimClass(String name) {
+        this(name, false);
+    }
+
+    public PrimClass(String name, boolean isMeta) {
         this.meta = isMeta;
+        this.name = name;
+    }
+
+    public String toString() {
+        if (meta)
+            return name + " class";
+        return name;
     }
 
     public boolean isMeta() {

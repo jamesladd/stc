@@ -1,6 +1,6 @@
 package st.redline.core;
 
-public class PrimNil extends PrimObject {
+public class PrimNil extends PrimClass {
 
     public static final PrimNil PRIM_NIL = new PrimNil();
 

@@ -40,7 +40,7 @@ public class SmalltalkClassLoader extends ClassLoader {
         throw new ObjectNotFoundException("Object '" + name + "' was not found.");
     }
 
-    private PrimObject cachedObject(String name) {
+    protected PrimObject cachedObject(String name) {
         System.out.println("** cachedObject " + name);
         return objectCache.get(name);
     }

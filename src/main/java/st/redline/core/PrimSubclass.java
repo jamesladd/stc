@@ -8,7 +8,7 @@ public class PrimSubclass extends PrimObject {
         PrimObject subclass = receiver.resolveObject(subclassName);
         if (subclass != null)
             return subclass;
-        throw new RuntimeException("TODO: what should happen here?");
+        throw new RuntimeException("PrimSubclass should be overridden by now.");
     }
 
     private String subclassName(PrimContext context) {

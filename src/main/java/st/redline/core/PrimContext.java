@@ -39,4 +39,8 @@ public class PrimContext {
         System.arraycopy(arguments, 0, selectorAndArguments, 1, arguments.length);
         return selectorAndArguments;
     }
+
+    public Object argumentJavaValueAt(int index) {
+        return arguments[index].javaValue();
+    }
 }

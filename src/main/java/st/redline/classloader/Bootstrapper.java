@@ -7,10 +7,21 @@ import static st.redline.core.PrimNil.PRIM_NIL;
 public class Bootstrapper {
 
     public void bootstrap(SmalltalkClassLoader classLoader) {
+        setContextClassLoader(classLoader);
         classLoader.beginBootstrapping();
         createPrimClass(classLoader);
+        createKernelObjectsHierarchy(classLoader);
         loadKernelObjects(classLoader);
         classLoader.endBootstrapping();
+    }
+
+    private void createKernelObjectsHierarchy(SmalltalkClassLoader classLoader) {
+        PrimClass object = new PrimClass();
+        classLoader.cacheObject("st.redline.core.Object", object);
+    }
+
+    private void setContextClassLoader(SmalltalkClassLoader classLoader) {
+        Thread.currentThread().setContextClassLoader(classLoader);
     }
 
     private void loadKernelObjects(SmalltalkClassLoader classLoader) {

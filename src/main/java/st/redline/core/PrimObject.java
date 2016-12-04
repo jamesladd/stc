@@ -20,6 +20,10 @@ public class PrimObject {
         javaValue = object;
     }
 
+    public Object javaValue() {
+        return javaValue;
+    }
+
     public void selfClass(PrimObject primClass) {
         selfClass = primClass;
     }
@@ -77,7 +81,7 @@ public class PrimObject {
     }
 
     protected SmalltalkClassLoader classLoader() {
-        return (SmalltalkClassLoader) getClass().getClassLoader();
+        return (SmalltalkClassLoader) Thread.currentThread().getContextClassLoader();
     }
 
     protected PrimObject sendMessages(PrimObject receiver, PrimContext context) {

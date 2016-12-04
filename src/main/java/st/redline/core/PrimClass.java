@@ -27,7 +27,7 @@ public class PrimClass extends PrimObject {
     }
 
     public String toString() {
-        if (meta)
+        if (isMeta())
             return name + " class";
         return name;
     }

@@ -162,7 +162,7 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
     }
 
     public String end() {
-        return hasMethods() ? METHOD_END + NEWLINE + classInitializer() : "";
+        return hasMethods() ? METHOD_END + NEWLINE : "";
     }
 
     private String classInitializer() {

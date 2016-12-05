@@ -23,6 +23,11 @@ public class Bootstrapper {
         PrimClass klass = createKernelObject("Class", primClass, classDescription);
         PrimClass metaclass = createKernelObject("Metaclass", primClass, classDescription);
         PrimClass undefinedObject = createKernelObject("UndefinedObject", primClass, object);
+        PrimClass collection = createKernelObject("Collection", primClass, object);
+        PrimClass sequenceableCollection = createKernelObject("SequenceableCollection", primClass, collection);
+        PrimClass arrayedCollection = createKernelObject("ArrayedCollection", primClass, sequenceableCollection);
+        PrimClass string = createKernelObject("String", primClass, arrayedCollection);
+        PrimClass symbol = createKernelObject("Symbol", primClass, string);
 
         object.selfClass().superclass(klass);
 
@@ -32,6 +37,11 @@ public class Bootstrapper {
         classLoader.cacheObject("st.redline.core.Class", klass);
         classLoader.cacheObject("st.redline.core.Metaclass", metaclass);
         classLoader.cacheObject("st.redline.core.UndefinedObject", undefinedObject);
+        classLoader.cacheObject("st.redline.core.Collection", collection);
+        classLoader.cacheObject("st.redline.core.SequenceableCollection", sequenceableCollection);
+        classLoader.cacheObject("st.redline.core.ArrayedCollection", arrayedCollection);
+        classLoader.cacheObject("st.redline.core.String", string);
+        classLoader.cacheObject("st.redline.core.Symbol", symbol);
     }
 
     private PrimClass createKernelObject(String name, PrimObject baseClass, PrimObject superclass) {
@@ -55,6 +65,11 @@ public class Bootstrapper {
         loadObject(classLoader, "st.redline.core.Class");
         loadObject(classLoader, "st.redline.core.Metaclass");
         loadObject(classLoader, "st.redline.core.UndefinedObject");
+        loadObject(classLoader, "st.redline.core.Collection");
+        loadObject(classLoader, "st.redline.core.SequenceableCollection");
+        loadObject(classLoader, "st.redline.core.ArrayedCollection");
+        loadObject(classLoader, "st.redline.core.String");
+        loadObject(classLoader, "st.redline.core.Symbol");
     }
 
     private void createPrimClass(SmalltalkClassLoader classLoader) {

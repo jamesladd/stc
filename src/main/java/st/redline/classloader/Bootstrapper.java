@@ -8,6 +8,7 @@ public class Bootstrapper {
 
     public void bootstrap(SmalltalkClassLoader classLoader) {
         setContextClassLoader(classLoader);
+
         classLoader.beginBootstrapping();
         createPrimClass(classLoader);
         createKernelObjectsHierarchy(classLoader);
@@ -30,6 +31,18 @@ public class Bootstrapper {
         PrimClass symbol = createKernelObject("Symbol", primClass, string);
 
         object.selfClass().superclass(klass);
+
+        object.selfClass().selfClass(metaclass);
+        behavior.selfClass().selfClass(metaclass);
+        classDescription.selfClass().selfClass(metaclass);
+        klass.selfClass().selfClass(metaclass);
+        metaclass.selfClass().selfClass(metaclass);
+        undefinedObject.selfClass().selfClass(metaclass);
+        collection.selfClass().selfClass(metaclass);
+        sequenceableCollection.selfClass().selfClass(metaclass);
+        arrayedCollection.selfClass().selfClass(metaclass);
+        string.selfClass().selfClass(metaclass);
+        symbol.selfClass().selfClass(metaclass);
 
         classLoader.cacheObject("st.redline.core.Object", object);
         classLoader.cacheObject("st.redline.core.Behavior", behavior);

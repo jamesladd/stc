@@ -577,8 +577,9 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
                 pushTrue(mv);
             else if ("false".equals(name))
                 pushFalse(mv);
+            else if ("super".equals(name))
+                throw new RuntimeException("visitPseudoVariable TODO - handle 'super'.");
             else
-                // need to add 'super' here.
                 throw new RuntimeException("visitPseudoVariable unknown variable.");
             return null;
         }

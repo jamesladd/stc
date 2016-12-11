@@ -7,6 +7,11 @@ import java.util.HashMap;
 
 public class SmalltalkClassLoader extends ClassLoader {
 
+    // Special Object instance values set during bootstrapping.
+    private static PrimObject NIL;
+    private static PrimObject TRUE;
+    private static PrimObject FALSE;
+
     private final SourceFinder sourceFinder;
     private final HashMap<String, Class> classCache;
     private final HashMap<String, PrimObject> objectCache;
@@ -98,5 +103,29 @@ public class SmalltalkClassLoader extends ClassLoader {
 
     public boolean isBootstrapping() {
         return bootstrapping;
+    }
+
+    public void nilInstance(PrimObject nil) {
+        NIL = nil;
+    }
+
+    public PrimObject nilInstance() {
+        return NIL;
+    }
+
+    public void falseInstance(PrimObject instance) {
+        FALSE = instance;
+    }
+
+    public PrimObject falseInstance() {
+        return FALSE;
+    }
+
+    public void trueInstance(PrimObject instance) {
+        TRUE = instance;
+    }
+
+    public PrimObject trueInstance() {
+        return TRUE;
     }
 }

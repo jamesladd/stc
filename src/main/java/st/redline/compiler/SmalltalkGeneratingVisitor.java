@@ -139,6 +139,21 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "reference", "(Ljava/lang/String;)Lst/redline/core/PrimObject;");
     }
 
+    public void pushNil(MethodVisitor mv) {
+        pushReceiver(mv);
+        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "referenceNil", "()Lst/redline/core/PrimObject;");
+    }
+
+    public void pushTrue(MethodVisitor mv) {
+        pushReceiver(mv);
+        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "referenceTrue", "()Lst/redline/core/PrimObject;");
+    }
+
+    public void pushFalse(MethodVisitor mv) {
+        pushReceiver(mv);
+        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "referenceFalse", "()Lst/redline/core/PrimObject;");
+    }
+
     public void invokePerform(MethodVisitor mv, String selector, int argumentCount) {
         pushLiteral(mv, selector);
         mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/core/PrimObject", "perform", SIGNATURES[argumentCount]);
@@ -548,6 +563,24 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             if (symbol != null)
                 return symbol.accept(currentVisitor());
             throw new RuntimeException("visitParsetimeLiteral no alternative found.");
+        }
+
+        public Void visitPseudoVariable(@NotNull SmalltalkParser.PseudoVariableContext ctx) {
+            log("visitPseudoVariable " + ctx.RESERVED_WORD().getSymbol().getText());
+            TerminalNode pseudoVariable = ctx.RESERVED_WORD();
+            String name = pseudoVariable.getSymbol().getText();
+            if ("self".equals(name))
+                pushReceiver(mv);
+            else if ("nil".equals(name))
+                pushNil(mv);
+            else if ("true".equals(name))
+                pushTrue(mv);
+            else if ("false".equals(name))
+                pushFalse(mv);
+            else
+                // need to add 'super' here.
+                throw new RuntimeException("visitPseudoVariable unknown variable.");
+            return null;
         }
 
         public Void visitString(@NotNull SmalltalkParser.StringContext ctx) {

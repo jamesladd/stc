@@ -17,6 +17,8 @@ public class Bootstrapper {
     }
 
     private void createKernelObjectsHierarchy(SmalltalkClassLoader classLoader) {
+
+        // Create Kernel Objects and Classes we need to start Runtime.
         PrimObject primClass = classLoader.cachedObject("st.redline.core.PrimClass");
         PrimClass object = createKernelObject("Object", primClass, primClass);
         PrimClass behavior = createKernelObject("Behavior", primClass, object);
@@ -24,32 +26,55 @@ public class Bootstrapper {
         PrimClass klass = createKernelObject("Class", primClass, classDescription);
         PrimClass metaclass = createKernelObject("Metaclass", primClass, classDescription);
         PrimClass undefinedObject = createKernelObject("UndefinedObject", primClass, object);
+        PrimClass booleanObject = createKernelObject("Boolean", primClass, object);
+        PrimClass trueObject = createKernelObject("True", primClass, booleanObject);
+        PrimClass falseObject = createKernelObject("False", primClass, booleanObject);
         PrimClass collection = createKernelObject("Collection", primClass, object);
         PrimClass sequenceableCollection = createKernelObject("SequenceableCollection", primClass, collection);
         PrimClass arrayedCollection = createKernelObject("ArrayedCollection", primClass, sequenceableCollection);
         PrimClass string = createKernelObject("String", primClass, arrayedCollection);
         PrimClass symbol = createKernelObject("Symbol", primClass, string);
 
+        // Initialise special Smalltalk circular hierarchy.
         object.selfClass().superclass(klass);
 
+        // Fixup class and metaclass references.
         object.selfClass().selfClass(metaclass);
         behavior.selfClass().selfClass(metaclass);
         classDescription.selfClass().selfClass(metaclass);
         klass.selfClass().selfClass(metaclass);
         metaclass.selfClass().selfClass(metaclass);
         undefinedObject.selfClass().selfClass(metaclass);
+        booleanObject.selfClass().selfClass(metaclass);
         collection.selfClass().selfClass(metaclass);
         sequenceableCollection.selfClass().selfClass(metaclass);
         arrayedCollection.selfClass().selfClass(metaclass);
         string.selfClass().selfClass(metaclass);
         symbol.selfClass().selfClass(metaclass);
 
+        // Create special instances, referred to with pseudo variables.
+        PrimObject nil = new PrimObject();
+        nil.selfClass(undefinedObject);
+        classLoader.nilInstance(nil);
+
+        PrimObject trueInstance = new PrimObject();
+        trueInstance.selfClass(trueObject);
+        classLoader.trueInstance(trueInstance);
+
+        PrimObject falseInstance = new PrimObject();
+        falseInstance.selfClass(falseObject);
+        classLoader.falseInstance(falseInstance);
+
+        // Load the hierarchy and attached their methods.
         classLoader.cacheObject("st.redline.core.Object", object);
         classLoader.cacheObject("st.redline.core.Behavior", behavior);
         classLoader.cacheObject("st.redline.core.ClassDescription", classDescription);
         classLoader.cacheObject("st.redline.core.Class", klass);
         classLoader.cacheObject("st.redline.core.Metaclass", metaclass);
         classLoader.cacheObject("st.redline.core.UndefinedObject", undefinedObject);
+        classLoader.cacheObject("st.redline.core.Boolean", booleanObject);
+        classLoader.cacheObject("st.redline.core.True", trueObject);
+        classLoader.cacheObject("st.redline.core.False", falseObject);
         classLoader.cacheObject("st.redline.core.Collection", collection);
         classLoader.cacheObject("st.redline.core.SequenceableCollection", sequenceableCollection);
         classLoader.cacheObject("st.redline.core.ArrayedCollection", arrayedCollection);

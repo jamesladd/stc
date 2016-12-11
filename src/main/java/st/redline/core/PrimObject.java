@@ -7,6 +7,7 @@ import static st.redline.core.PrimDoesNotUnderstand.PRIM_DOES_NOT_UNDERSTAND;
 public class PrimObject {
 
     private static final String DEFAULT_IMPORTED_PACKAGE = "st.redline.core";
+
     private PrimClass selfClass;
     private Object javaValue;
 
@@ -32,6 +33,21 @@ public class PrimObject {
 
     public PrimClass selfClass() {
         return selfClass;
+    }
+
+    public PrimObject referenceNil() {
+        System.out.println("** referenceNil");
+        return classLoader().nilInstance();
+    }
+
+    public PrimObject referenceTrue() {
+        System.out.println("** referenceTrue");
+        return classLoader().trueInstance();
+    }
+
+    public PrimObject referenceFalse() {
+        System.out.println("** referenceFalse");
+        return classLoader().falseInstance();
     }
 
     public PrimObject reference(String name) {

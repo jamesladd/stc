@@ -26,6 +26,7 @@ public class Bootstrapper {
         PrimClass klass = createKernelObject("Class", primClass, classDescription);
         PrimClass metaclass = createKernelObject("Metaclass", primClass, classDescription);
         PrimClass undefinedObject = createKernelObject("UndefinedObject", primClass, object);
+        PrimClass blockClosure = createKernelObject("BlockClosure", primClass, object);
         PrimClass booleanObject = createKernelObject("Boolean", primClass, object);
         PrimClass trueObject = createKernelObject("True", primClass, booleanObject);
         PrimClass falseObject = createKernelObject("False", primClass, booleanObject);
@@ -45,6 +46,7 @@ public class Bootstrapper {
         klass.selfClass().selfClass(metaclass);
         metaclass.selfClass().selfClass(metaclass);
         undefinedObject.selfClass().selfClass(metaclass);
+        blockClosure.selfClass().selfClass(metaclass);
         booleanObject.selfClass().selfClass(metaclass);
         collection.selfClass().selfClass(metaclass);
         sequenceableCollection.selfClass().selfClass(metaclass);
@@ -72,6 +74,7 @@ public class Bootstrapper {
         classLoader.cacheObject("st.redline.core.Class", klass);
         classLoader.cacheObject("st.redline.core.Metaclass", metaclass);
         classLoader.cacheObject("st.redline.core.UndefinedObject", undefinedObject);
+        classLoader.cacheObject("st.redline.core.BlockClosure", blockClosure);
         classLoader.cacheObject("st.redline.core.Boolean", booleanObject);
         classLoader.cacheObject("st.redline.core.True", trueObject);
         classLoader.cacheObject("st.redline.core.False", falseObject);
@@ -103,6 +106,10 @@ public class Bootstrapper {
         loadObject(classLoader, "st.redline.core.Class");
         loadObject(classLoader, "st.redline.core.Metaclass");
         loadObject(classLoader, "st.redline.core.UndefinedObject");
+        loadObject(classLoader, "st.redline.core.BlockCloser");
+        loadObject(classLoader, "st.redline.core.Boolean");
+        loadObject(classLoader, "st.redline.core.True");
+        loadObject(classLoader, "st.redline.core.False");
         loadObject(classLoader, "st.redline.core.Collection");
         loadObject(classLoader, "st.redline.core.SequenceableCollection");
         loadObject(classLoader, "st.redline.core.ArrayedCollection");

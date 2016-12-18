@@ -58,6 +58,10 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         return visitors.peek();
     }
 
+    private SmalltalkVisitor<Void> popCurrentVisitor() {
+        return visitors.pop();
+    }
+
     private void log(String output) {
         System.out.println(output);
         System.out.flush();
@@ -197,10 +201,14 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         private MethodVisitor mv;
         private HashMap<String, ExtendedTerminalNode> temporaries;
         private HashMap<String, ExtendedTerminalNode> arguments;
-        private Stack<StringBuilder> keywords = new Stack<StringBuilder>();
+        private Stack<KeywordRecord> keywords = new Stack<KeywordRecord>();
 
         public ClassGeneratorVisitor() {
-            cw = new ClassWriter(ClassWriter.COMPUTE_MAXS);
+            this(new ClassWriter(ClassWriter.COMPUTE_MAXS));
+        }
+
+        public ClassGeneratorVisitor(ClassWriter classWriter) {
+            cw = classWriter;
         }
 
         public Void visitScript(SmalltalkParser.ScriptContext ctx) {
@@ -324,20 +332,29 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             return count;
         }
 
+        private boolean haveKeyword() {
+            return !keywords.isEmpty();
+        }
+
         private void initializeKeyword() {
-            keywords.push(new StringBuilder());
+            keywords.push(new KeywordRecord());
         }
 
         private void addToKeyword(String keyword) {
-            keywords.peek().append(keyword);
+            keywords.peek().keyword.append(keyword);
+        }
+
+        private void addArgumentToKeyword(String firstArgument) {
+            assert keywords.peek().firstArgument.length() == 0;
+            keywords.peek().firstArgument.append(firstArgument);
         }
 
         private String removeKeyword() {
-            return keywords.pop().toString();
+            return keywords.pop().keyword.toString();
         }
 
-        private String peekKeyword() {
-            return keywords.peek().toString();
+        private KeywordRecord peekKeyword() {
+            return keywords.peek();
         }
 
         private void initializeTemporaryVariableMap() {
@@ -607,7 +624,10 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         public Void visitSymbol(@NotNull SmalltalkParser.SymbolContext ctx) {
             log("visitSymbol #" + ctx.bareSymbol().IDENTIFIER().getSymbol().getText());
             TerminalNode node = ctx.bareSymbol().IDENTIFIER();
-            pushNewObject(mv, "smalltalkSymbol", node.getSymbol().getText(), node.getSymbol().getLine());
+            String symbol = node.getSymbol().getText();
+            if (haveKeyword())
+                addArgumentToKeyword(symbol);
+            pushNewObject(mv, "smalltalkSymbol", symbol, node.getSymbol().getLine());
             return null;
         }
 
@@ -870,5 +890,14 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         OPCODES.put("MULTIANEWARRAY", 197);
         OPCODES.put("IFNULL", 198);
         OPCODES.put("IFNONNULL", 199);
+    }
+
+    private class KeywordRecord {
+        public StringBuilder keyword = new StringBuilder();
+        public StringBuilder firstArgument = new StringBuilder();
+
+        public String toString() {
+            return keyword + " - " + firstArgument;
+        }
     }
 }

@@ -336,6 +336,10 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             return keywords.pop().toString();
         }
 
+        private String peekKeyword() {
+            return keywords.peek().toString();
+        }
+
         private void initializeTemporaryVariableMap() {
             temporaries = new HashMap<String, ExtendedTerminalNode>();
         }
@@ -539,7 +543,16 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitRuntimeLiteral(@NotNull SmalltalkParser.RuntimeLiteralContext ctx) {
             log("visitRuntimeLiteral");
-            return null;
+            SmalltalkParser.BlockContext block = ctx.block();
+            if (block != null)
+                return block.accept(currentVisitor());
+            SmalltalkParser.DynamicDictionaryContext dynamicDictionary = ctx.dynamicDictionary();
+            if (dynamicDictionary != null)
+                return dynamicDictionary.accept(currentVisitor());
+            SmalltalkParser.DynamicArrayContext dynamicArray = ctx.dynamicArray();
+            if (dynamicArray != null)
+                return dynamicArray.accept(currentVisitor());
+            throw new RuntimeException("visitRuntimeLiteral no alternative found.");
         }
 
         public Void visitParsetimeLiteral(@NotNull SmalltalkParser.ParsetimeLiteralContext ctx) {
@@ -609,6 +622,11 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
                 pushArgument(mv, indexOfArgument(name));
             else
                 pushReference(mv, name);
+            return null;
+        }
+
+        public Void visitBlock(@NotNull SmalltalkParser.BlockContext ctx) {
+            log("visitBlock " + peekKeyword());
             return null;
         }
 

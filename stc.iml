@@ -20,7 +20,7 @@
     <orderEntry type="module-library">
       <library>
         <CLASSES>
-          <root url="jar://$MODULE_DIR$/lib/asm-all-4.2.jar!/" />
+          <root url="jar://$MODULE_DIR$/lib/asm-all-5.0.3.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
@@ -28,4 +28,3 @@
     </orderEntry>
   </component>
 </module>
-

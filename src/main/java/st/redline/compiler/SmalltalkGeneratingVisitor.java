@@ -28,11 +28,11 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
     private static final Map<String, Integer> OPCODES = new HashMap<String, Integer>();
     private static final int BYTECODE_VERSION;
     static {
-        int compareTo17 = new BigDecimal(System.getProperty("java.specification.version")).compareTo(new BigDecimal("1.7"));
-        if (compareTo17 >= 0) {
-            BYTECODE_VERSION = V1_7;
+        int compareTo18 = new BigDecimal(System.getProperty("java.specification.version")).compareTo(new BigDecimal("1.8"));
+        if (compareTo18 >= 0) {
+            BYTECODE_VERSION = V1_8;
         } else {
-            BYTECODE_VERSION = V1_6;
+            throw new RuntimeException("Java 1.8 or above required.");
         }
     }
 
@@ -124,39 +124,39 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
     public void pushTemporary(MethodVisitor mv, int index) {
         pushContext(mv);
         pushNumber(mv, index);
-        mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "temporaryAt", "(I)Lst/redline/core/PrimObject;");
+        mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "temporaryAt", "(I)Lst/redline/core/PrimObject;", false);
     }
 
     public void pushArgument(MethodVisitor mv, int index) {
         pushContext(mv);
         pushNumber(mv, index);
-        mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "argumentAt", "(I)Lst/redline/core/PrimObject;");
+        mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "argumentAt", "(I)Lst/redline/core/PrimObject;", false);
     }
 
     public void pushReference(MethodVisitor mv, String name) {
         pushReceiver(mv);
         pushLiteral(mv, name);
-        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "reference", "(Ljava/lang/String;)Lst/redline/core/PrimObject;");
+        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "reference", "(Ljava/lang/String;)Lst/redline/core/PrimObject;", false);
     }
 
     public void pushNil(MethodVisitor mv) {
         pushReceiver(mv);
-        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "referenceNil", "()Lst/redline/core/PrimObject;");
+        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "referenceNil", "()Lst/redline/core/PrimObject;", false);
     }
 
     public void pushTrue(MethodVisitor mv) {
         pushReceiver(mv);
-        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "referenceTrue", "()Lst/redline/core/PrimObject;");
+        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "referenceTrue", "()Lst/redline/core/PrimObject;", false);
     }
 
     public void pushFalse(MethodVisitor mv) {
         pushReceiver(mv);
-        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "referenceFalse", "()Lst/redline/core/PrimObject;");
+        mv.visitMethodInsn(INVOKEVIRTUAL, superclassName(), "referenceFalse", "()Lst/redline/core/PrimObject;", false);
     }
 
     public void invokePerform(MethodVisitor mv, String selector, int argumentCount) {
         pushLiteral(mv, selector);
-        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/core/PrimObject", "perform", SIGNATURES[argumentCount]);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/core/PrimObject", "perform", SIGNATURES[argumentCount], false);
     }
 
     public void visitLine(MethodVisitor mv, int line) {
@@ -185,7 +185,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         visitLine(mv, line);
         pushReceiver(mv);
         pushLiteral(mv, value);
-        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/core/PrimObject", type, "(Ljava/lang/Object;)Lst/redline/core/PrimObject;");
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/core/PrimObject", type, "(Ljava/lang/Object;)Lst/redline/core/PrimObject;", false);
     }
 
     // ------------------------------
@@ -244,20 +244,20 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             mv.visitLabel(l0);
             mv.visitLineNumber(0, l0);
             mv.visitVarInsn(ALOAD, 0);
-            mv.visitMethodInsn(INVOKESPECIAL, superclassName(), "<init>", "()V");
+            mv.visitMethodInsn(INVOKESPECIAL, superclassName(), "<init>", "()V", false);
 
             // create a Context
             mv.visitTypeInsn(NEW, contextName());
             mv.visitInsn(DUP);
             mv.visitVarInsn(ALOAD, 0);
-            mv.visitMethodInsn(INVOKESPECIAL, contextName(), "<init>", "(Lst/redline/core/PrimObject;)V");
+            mv.visitMethodInsn(INVOKESPECIAL, contextName(), "<init>", "(Lst/redline/core/PrimObject;)V", false);
             mv.visitVarInsn(ASTORE, 1);
 
             // call sendMessages with parameters: this & context
             mv.visitVarInsn(ALOAD, 0);
             mv.visitVarInsn(ALOAD, 0); // receiver
             mv.visitVarInsn(ALOAD, 1); // context
-            mv.visitMethodInsn(INVOKEVIRTUAL, fullClassName(), "sendMessages", SEND_MESSAGES_SIG);
+            mv.visitMethodInsn(INVOKEVIRTUAL, fullClassName(), "sendMessages", SEND_MESSAGES_SIG, false);
             mv.visitInsn(POP);
 
             mv.visitInsn(RETURN);
@@ -286,7 +286,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             visitLine(mv, lineNumberOfFirstTemporary());
             pushContext(mv);
             pushNumber(mv, temporaries.size());
-            mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "initTemporaries", "(I)V");
+            mv.visitMethodInsn(INVOKEVIRTUAL, contextName(), "initTemporaries", "(I)V", false);
         }
 
         private int lineNumberOfFirstTemporary() {
@@ -671,6 +671,8 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         OPCODES.put("V1_5", 49);
         OPCODES.put("V1_6", 50);
         OPCODES.put("V1_7", 51);
+        OPCODES.put("V1_7", 51);
+        OPCODES.put("V1_8", 52);
         OPCODES.put("ACC_PUBLIC", 1);
         OPCODES.put("ACC_PRIVATE", 2);
         OPCODES.put("ACC_PROTECTED", 4);

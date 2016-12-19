@@ -724,6 +724,13 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 //            SmalltalkParser.SequenceContext blockSequence = ctx.sequence();
 //            if (blockSequence != null)
 //                return blockSequence.accept(currentVisitor());
+
+            // *** OUTPUT A MESSAGE FOR NOW ***
+            mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+            mv.visitLdcInsn("HELLO WORLD from inside your Lambda");
+            mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+            mv.visitVarInsn(ALOAD, 0);
+
             closeBlockLambdaMethod();
             return null;
         }

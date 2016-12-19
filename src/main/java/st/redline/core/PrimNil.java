@@ -12,7 +12,6 @@ public class PrimNil extends PrimClass {
         super(name);
     }
 
-
     public boolean includesSelector(String selector) {
         return true;
     }

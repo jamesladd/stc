@@ -20,39 +20,40 @@ public class Bootstrapper {
 
         // Create Kernel Objects and Classes we need to start Runtime.
         PrimObject primClass = classLoader.cachedObject("st.redline.core.PrimClass");
-        PrimClass object = createKernelObject("Object", primClass, primClass);
-        PrimClass behavior = createKernelObject("Behavior", primClass, object);
-        PrimClass classDescription = createKernelObject("ClassDescription", primClass, behavior);
-        PrimClass klass = createKernelObject("Class", primClass, classDescription);
-        PrimClass metaclass = createKernelObject("Metaclass", primClass, classDescription);
-        PrimClass undefinedObject = createKernelObject("UndefinedObject", primClass, object);
-        PrimClass blockClosure = createKernelObject("BlockClosure", primClass, object);
-        PrimClass booleanObject = createKernelObject("Boolean", primClass, object);
-        PrimClass trueObject = createKernelObject("True", primClass, booleanObject);
-        PrimClass falseObject = createKernelObject("False", primClass, booleanObject);
-        PrimClass collection = createKernelObject("Collection", primClass, object);
-        PrimClass sequenceableCollection = createKernelObject("SequenceableCollection", primClass, collection);
-        PrimClass arrayedCollection = createKernelObject("ArrayedCollection", primClass, sequenceableCollection);
-        PrimClass string = createKernelObject("String", primClass, arrayedCollection);
-        PrimClass symbol = createKernelObject("Symbol", primClass, string);
+        PrimClass object = createKernelObject("Object", primClass);
+        PrimClass behavior = createKernelObject("Behavior", object);
+        PrimClass classDescription = createKernelObject("ClassDescription", behavior);
+        PrimClass klass = createKernelObject("Class", classDescription);
+        PrimClass metaclass = createKernelObject("Metaclass", classDescription);
+        PrimClass undefinedObject = createKernelObject("UndefinedObject", object);
+        PrimClass booleanObject = createKernelObject("Boolean", object);
+        PrimClass trueObject = createKernelObject("True", booleanObject);
+        PrimClass falseObject = createKernelObject("False", booleanObject);
+        PrimClass collection = createKernelObject("Collection", object);
+        PrimClass sequenceableCollection = createKernelObject("SequenceableCollection", collection);
+        PrimClass arrayedCollection = createKernelObject("ArrayedCollection", sequenceableCollection);
+        PrimClass string = createKernelObject("String", arrayedCollection);
+        PrimClass symbol = createKernelObject("Symbol", string);
 
         // Initialise special Smalltalk circular hierarchy.
         object.selfClass().superclass(klass);
 
-        // Fixup class and metaclass references.
+        // Fixup class metaclass references.
         object.selfClass().selfClass(metaclass);
         behavior.selfClass().selfClass(metaclass);
         classDescription.selfClass().selfClass(metaclass);
         klass.selfClass().selfClass(metaclass);
         metaclass.selfClass().selfClass(metaclass);
         undefinedObject.selfClass().selfClass(metaclass);
-        blockClosure.selfClass().selfClass(metaclass);
         booleanObject.selfClass().selfClass(metaclass);
         collection.selfClass().selfClass(metaclass);
         sequenceableCollection.selfClass().selfClass(metaclass);
         arrayedCollection.selfClass().selfClass(metaclass);
         string.selfClass().selfClass(metaclass);
         symbol.selfClass().selfClass(metaclass);
+
+        // Add basicAddSelector:withMethod: to Behaviour
+        behavior.selfClass().addMethod("basicAddSelector:withMethod:", new PrimAddMethod());
 
         // Create special instances, referred to with pseudo variables.
         PrimObject nil = new PrimObject();
@@ -74,7 +75,6 @@ public class Bootstrapper {
         classLoader.cacheObject("st.redline.core.Class", klass);
         classLoader.cacheObject("st.redline.core.Metaclass", metaclass);
         classLoader.cacheObject("st.redline.core.UndefinedObject", undefinedObject);
-        classLoader.cacheObject("st.redline.core.BlockClosure", blockClosure);
         classLoader.cacheObject("st.redline.core.Boolean", booleanObject);
         classLoader.cacheObject("st.redline.core.True", trueObject);
         classLoader.cacheObject("st.redline.core.False", falseObject);
@@ -85,12 +85,11 @@ public class Bootstrapper {
         classLoader.cacheObject("st.redline.core.Symbol", symbol);
     }
 
-    private PrimClass createKernelObject(String name, PrimObject baseClass, PrimObject superclass) {
+    private PrimClass createKernelObject(String name, PrimObject superclass) {
         PrimClass primMeta = new PrimClass(name,true);
-        primMeta.superclass(superclass);
-        primMeta.selfClass((PrimClass) baseClass);
+        primMeta.superclass(superclass.selfClass());
         PrimClass primClass = new PrimClass(name);
-        primClass.superclass(baseClass);
+        primClass.superclass(superclass);
         primClass.selfClass(primMeta);
         return primClass;
     }
@@ -106,7 +105,6 @@ public class Bootstrapper {
         loadObject(classLoader, "st.redline.core.Class");
         loadObject(classLoader, "st.redline.core.Metaclass");
         loadObject(classLoader, "st.redline.core.UndefinedObject");
-        loadObject(classLoader, "st.redline.core.BlockCloser");
         loadObject(classLoader, "st.redline.core.Boolean");
         loadObject(classLoader, "st.redline.core.True");
         loadObject(classLoader, "st.redline.core.False");

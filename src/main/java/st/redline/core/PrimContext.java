@@ -40,7 +40,11 @@ public class PrimContext {
         return selectorAndArguments;
     }
 
+    public PrimObject argumentAt(int index) {
+        return arguments[index];
+    }
+
     public Object argumentJavaValueAt(int index) {
-        return arguments[index].javaValue();
+        return argumentAt(index).javaValue();
     }
 }

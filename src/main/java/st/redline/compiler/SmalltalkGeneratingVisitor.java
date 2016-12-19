@@ -236,6 +236,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             System.out.println("openJavaClass: " + fullClassName());
             cw.visit(BYTECODE_VERSION, ACC_PUBLIC + ACC_SUPER, fullClassName(), null, superclassName(), null);
             cw.visitSource(className() + sourceFileExtension(), null);
+            cw.visitInnerClass("java/lang/invoke/MethodHandles$Lookup", "java/lang/invoke/MethodHandles", "Lookup", ACC_PUBLIC + ACC_FINAL + ACC_STATIC);
             makeJavaClassInitializer();
         }
 

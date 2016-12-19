@@ -10,7 +10,7 @@ public class Bootstrapper {
         setContextClassLoader(classLoader);
 
         classLoader.beginBootstrapping();
-        createPrimClass(classLoader);
+        createPrimObject(classLoader);
         createKernelObjectsHierarchy(classLoader);
         loadKernelObjects(classLoader);
         classLoader.endBootstrapping();
@@ -19,8 +19,8 @@ public class Bootstrapper {
     private void createKernelObjectsHierarchy(SmalltalkClassLoader classLoader) {
 
         // Create Kernel Objects and Classes we need to start Runtime.
-        PrimObject primClass = classLoader.cachedObject("st.redline.core.PrimClass");
-        PrimClass object = createKernelObject("Object", primClass);
+        PrimObject primObject = classLoader.cachedObject("st.redline.core.PrimObject");
+        PrimClass object = createKernelObject("Object", primObject);
         PrimClass behavior = createKernelObject("Behavior", object);
         PrimClass classDescription = createKernelObject("ClassDescription", behavior);
         PrimClass klass = createKernelObject("Class", classDescription);
@@ -36,24 +36,10 @@ public class Bootstrapper {
         PrimClass symbol = createKernelObject("Symbol", string);
 
         // Initialise special Smalltalk circular hierarchy.
-        object.selfClass().superclass(klass);
-
-        // Fixup class metaclass references.
-        object.selfClass().selfClass(metaclass);
-        behavior.selfClass().selfClass(metaclass);
-        classDescription.selfClass().selfClass(metaclass);
-        klass.selfClass().selfClass(metaclass);
-        metaclass.selfClass().selfClass(metaclass);
-        undefinedObject.selfClass().selfClass(metaclass);
-        booleanObject.selfClass().selfClass(metaclass);
-        collection.selfClass().selfClass(metaclass);
-        sequenceableCollection.selfClass().selfClass(metaclass);
-        arrayedCollection.selfClass().selfClass(metaclass);
-        string.selfClass().selfClass(metaclass);
-        symbol.selfClass().selfClass(metaclass);
+        ((PrimClass) object.selfClass()).superclass(klass);
 
         // Add basicAddSelector:withMethod: to Behaviour
-        behavior.selfClass().addMethod("basicAddSelector:withMethod:", new PrimAddMethod());
+        ((PrimClass) behavior.selfClass()).addMethod("basicAddSelector:withMethod:", new PrimAddMethod());
 
         // Create special instances, referred to with pseudo variables.
         PrimObject nil = new PrimObject();
@@ -115,17 +101,10 @@ public class Bootstrapper {
         loadObject(classLoader, "st.redline.core.Symbol");
     }
 
-    private void createPrimClass(SmalltalkClassLoader classLoader) {
-        PrimSubclass subclassMethod = new PrimSubclass();
-        PrimClass primMeta = new PrimClass("PrimClass",true);
-        primMeta.superclass(PRIM_NIL);
-        primMeta.selfClass(PRIM_NIL);
-        primMeta.addMethod("subclass:", subclassMethod);
-        PrimClass primClass = new PrimClass("PrimClass");
-        primClass.superclass(PRIM_NIL);
-        primClass.selfClass(primMeta);
-        primClass.addMethod("subclass:", subclassMethod);
-        classLoader.cacheObject("st.redline.core.PrimClass", primClass);
+    private void createPrimObject(SmalltalkClassLoader classLoader) {
+        PrimObject primObject = new PrimObject();
+        primObject.selfClass(primObject);
+        classLoader.cacheObject("st.redline.core.PrimObject", primObject);
     }
 
     private void loadObject(ClassLoader classLoader, String name) {

@@ -2,6 +2,8 @@ package st.redline.core;
 
 public class PrimSubclass extends PrimObject {
 
+    public static final PrimObject PRIM_SUBCLASS = new PrimSubclass();
+
     protected PrimObject invoke(PrimObject receiver, PrimContext context) {
         System.out.println("PrimSubclass invoke");
         String subclassName = subclassName(context);

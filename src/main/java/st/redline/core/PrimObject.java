@@ -3,18 +3,19 @@ package st.redline.core;
 import st.redline.classloader.SmalltalkClassLoader;
 
 import static st.redline.core.PrimDoesNotUnderstand.PRIM_DOES_NOT_UNDERSTAND;
+import static st.redline.core.PrimSubclass.PRIM_SUBCLASS;
 
 public class PrimObject {
 
     private static final String DEFAULT_IMPORTED_PACKAGE = "st.redline.core";
 
-    private PrimClass selfClass;
+    private PrimObject selfClass;
     private Object javaValue;
 
     public String toString() {
         if (javaValue != null)
             return javaValue.toString();
-        if (selfClass != null)
+        if (selfClass != null && selfClass != this)
             return selfClass.toString();
         return super.toString();
     }
@@ -27,11 +28,11 @@ public class PrimObject {
         return javaValue;
     }
 
-    public void selfClass(PrimClass primClass) {
-        selfClass = primClass;
+    public void selfClass(PrimObject primObject) {
+        selfClass = primObject;
     }
 
-    public PrimClass selfClass() {
+    public PrimObject selfClass() {
         return selfClass;
     }
 
@@ -167,6 +168,8 @@ public class PrimObject {
     }
 
     protected PrimObject methodFor(String selector) {
+        if ("subclass:".equals(selector))
+            return PRIM_SUBCLASS;
         return PRIM_DOES_NOT_UNDERSTAND;
     }
 
@@ -176,5 +179,9 @@ public class PrimObject {
 
     protected boolean includesSelector(String selector) {
         return true;
+    }
+
+    public boolean isMeta() {
+        return false;
     }
 }

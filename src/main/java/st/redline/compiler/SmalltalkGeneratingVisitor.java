@@ -46,12 +46,16 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
     }
 
     private void makeClassGeneratorCurrentVisitor() {
-        visitors.push(new ClassGeneratorVisitor());
+        pushCurrentVisitor(new ClassGeneratorVisitor());
     }
 
     public Void visitScript(@NotNull SmalltalkParser.ScriptContext ctx) {
         currentVisitor().visitScript(ctx);
         return null;
+    }
+
+    private void pushCurrentVisitor(SmalltalkVisitor<Void> visitor) {
+        visitors.push(visitor);
     }
 
     private SmalltalkVisitor<Void> currentVisitor() {
@@ -202,6 +206,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         private HashMap<String, ExtendedTerminalNode> temporaries;
         private HashMap<String, ExtendedTerminalNode> arguments;
         private Stack<KeywordRecord> keywords = new Stack<KeywordRecord>();
+        private int blockNumber = 0;
 
         public ClassGeneratorVisitor() {
             this(new ClassWriter(ClassWriter.COMPUTE_MAXS));
@@ -648,6 +653,11 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitBlock(@NotNull SmalltalkParser.BlockContext ctx) {
             log("visitBlock " + peekKeyword());
+            KeywordRecord keywordRecord = peekKeyword();
+            String name = makeBlockMethodName(keywordRecord);
+            pushCurrentVisitor(new BlockGeneratorVisitor(cw, name));
+            ctx.accept(currentVisitor());
+            popCurrentVisitor();
             return null;
         }
 
@@ -659,7 +669,68 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         public Void visitVariable(@NotNull SmalltalkParser.VariableContext ctx) {
             throw new RuntimeException("visitVariable should have been handed before now.");
         }
+
+        private String makeBlockMethodName(KeywordRecord keywordRecord) {
+            StringBuilder name = new StringBuilder();
+            name.append("block$")
+                    .append(className())
+                    .append('$');
+            if (keywordRecord.firstArgument.length() == 0) {
+                blockNumber++;
+                name.append(blockNumber);
+            } else
+                name.append(keywordRecord.firstArgument.toString().replaceAll(":", "_"));
+            return name.toString();
+        }
     }
+
+
+    private class BlockGeneratorVisitor extends ClassGeneratorVisitor {
+
+        private final ClassWriter cw;
+        private MethodVisitor mv;
+        private String blockName;
+        private boolean rootBlock = true;
+
+        public BlockGeneratorVisitor(ClassWriter cw, String name) {
+            super(cw);
+            this.cw = cw;
+            this.blockName = name;
+        }
+
+        public Void visitBlock(@NotNull SmalltalkParser.BlockContext ctx) {
+            log("visitBlock " + blockName);
+            if (!rootBlock)
+                throw new RuntimeException("TODO: Handle block within a block.");
+            openBlockLambdaMethod();
+            SmalltalkParser.BlockParamListContext blockParamList = ctx.blockParamList();
+            if (blockParamList != null)
+                return blockParamList.accept(currentVisitor());
+//            SmalltalkParser.SequenceContext blockSequence = ctx.sequence();
+//            if (blockSequence != null)
+//                return blockSequence.accept(currentVisitor());
+            closeBlockLambdaMethod();
+            return null;
+        }
+
+        public Void visitBlockParamList(@NotNull SmalltalkParser.BlockParamListContext ctx) {
+            log("visitBlockParamList");
+            return null;
+        }
+
+        private void closeBlockLambdaMethod() {
+            mv.visitInsn(ARETURN);
+            mv.visitMaxs(0, 0);
+            mv.visitEnd();
+        }
+
+        private void openBlockLambdaMethod() {
+            mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, blockName, "(Ljava/lang/Object;)Ljava/lang/Object;", null, null);
+            mv.visitCode();
+            mv.visitVarInsn(ALOAD, 0);
+        }
+    }
+
 
     private class ExtendedTerminalNode {
 
@@ -894,6 +965,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
     }
 
     private class KeywordRecord {
+
         public StringBuilder keyword = new StringBuilder();
         public StringBuilder firstArgument = new StringBuilder();
 

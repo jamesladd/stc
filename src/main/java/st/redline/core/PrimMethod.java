@@ -12,10 +12,6 @@ public class PrimMethod extends PrimObject {
 
     protected PrimObject invoke(PrimObject receiver, PrimContext context) {
         System.out.println("PrimMethod invoke");
-        return lambdaBlock().apply(receiver, context);
-    }
-
-    private LambdaBlock lambdaBlock() {
-        return (LambdaBlock) javaValue();
+        return ((LambdaBlock) javaValue()).apply(receiver, context);
     }
 }

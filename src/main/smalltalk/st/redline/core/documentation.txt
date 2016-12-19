@@ -6,8 +6,8 @@ Boostrapping:
 The following classes make up the minimum set of classes required to bootstrap Redline Smalltalk to a point where
 development is possible:
 
-  ArrayedCollection, Behavior, BlockClosure, Boolean, Class, ClassDescription, Collection, False, Object,
-  SequenceableCollection, String, Symbol, True, UndefinedObject.
+  Object, Behavior, ClassDescription, Class, Metaclass, UndefinedObject, Boolean, True, False, Collection,
+  SequenceableCollection, ArrayedCollection, String, Symbol.
 
 
 Source Code Formatting Guidelines:

@@ -6,6 +6,9 @@ public class PrimAddMethod extends PrimObject {
         System.out.println("PrimAddMethod invoke");
         String selector = selector(context);
         PrimObject method = method(context);
+        if (!(method instanceof PrimMethod)) {
+            method = new PrimMethod((LambdaBlock) method.javaValue());
+        }
         ((PrimClass) receiver).addMethod(selector, method);
         return receiver;
     }

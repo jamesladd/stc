@@ -66,6 +66,11 @@ public class PrimObject {
         return instanceOfWith("Block", value);
     }
 
+    public PrimObject smalltalkMethod(Object value) {
+        System.out.println("** smalltalkMethod " + value);
+        return instanceOfWith("Method", value);
+    }
+
     public PrimObject smalltalkString(Object value) {
         return instanceOfWith("String", value);
     }

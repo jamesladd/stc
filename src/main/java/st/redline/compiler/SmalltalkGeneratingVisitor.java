@@ -191,13 +191,21 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
     }
 
     private void pushNewBlock(MethodVisitor mv, String className, String name, String sig, int line) {
+        pushNewLambda(mv, className,name, sig, line);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/core/PrimObject", "smalltalkBlock", "(Ljava/lang/Object;)Lst/redline/core/PrimObject;", false);
+    }
+
+    private void pushNewMethod(MethodVisitor mv, String className, String name, String sig, int line) {
+        pushNewLambda(mv, className,name, sig, line);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/core/PrimObject", "smalltalkMethod", "(Ljava/lang/Object;)Lst/redline/core/PrimObject;", false);
+    }
+
+    private void pushNewLambda(MethodVisitor mv, String className, String name, String sig, int line) {
         visitLine(mv, line);
         pushReceiver(mv);
         mv.visitInvokeDynamicInsn("apply", "()Lst/redline/core/LambdaBlock;",
                 new Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"), new Object[]{Type.getType(sig), new Handle(Opcodes.H_INVOKESTATIC, className, name, sig), Type.getType(sig)});
-        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/core/PrimObject", "smalltalkBlock", "(Ljava/lang/Object;)Lst/redline/core/PrimObject;", false);
     }
-
 
     // ------------------------------
 
@@ -661,7 +669,10 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             pushCurrentVisitor(new BlockGeneratorVisitor(cw, name));
             ctx.accept(currentVisitor());
             popCurrentVisitor();
-            pushNewBlock(mv, fullClassName(), name, SEND_MESSAGES_SIG, ctx.BLOCK_START().getSymbol().getLine());
+            if (keywordRecord.keyword.toString().contains("withMethod:"))
+                pushNewMethod(mv, fullClassName(), name, SEND_MESSAGES_SIG, ctx.BLOCK_START().getSymbol().getLine());
+            else
+                pushNewBlock(mv, fullClassName(), name, SEND_MESSAGES_SIG, ctx.BLOCK_START().getSymbol().getLine());
             return null;
         }
 

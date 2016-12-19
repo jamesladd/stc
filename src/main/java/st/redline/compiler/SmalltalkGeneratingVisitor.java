@@ -1,19 +1,13 @@
 package st.redline.compiler;
 
-import org.antlr.v4.runtime.Token;
-import org.antlr.v4.runtime.misc.NotNull;
-import org.antlr.v4.runtime.tree.TerminalNode;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
-import st.redline.classloader.Source;
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.*;
+import org.antlr.v4.runtime.tree.*;
+import org.objectweb.asm.*;
+import st.redline.classloader.*;
 
-import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
+import java.math.*;
+import java.util.*;
 
 public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements SmalltalkVisitor<Void>, Opcodes {
 
@@ -196,11 +190,20 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/core/PrimObject", type, "(Ljava/lang/Object;)Lst/redline/core/PrimObject;", false);
     }
 
+    private void pushNewBlock(MethodVisitor mv, String className, String name, String sig, int line) {
+        visitLine(mv, line);
+        pushReceiver(mv);
+        mv.visitInvokeDynamicInsn("apply", "()Lst/redline/core/LambdaBlock;",
+                new Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"), new Object[]{Type.getType(sig), new Handle(Opcodes.H_INVOKESTATIC, className, name, sig), Type.getType(sig)});
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/core/PrimObject", "smalltalkBlock", "(Ljava/lang/Object;)Lst/redline/core/PrimObject;", false);
+    }
+
+
     // ------------------------------
 
     private class ClassGeneratorVisitor extends SmalltalkBaseVisitor<Void> implements SmalltalkVisitor<Void>, Opcodes {
 
-        private final String SEND_MESSAGES_SIG = "(Lst/redline/core/PrimObject;Lst/redline/core/PrimContext;)Lst/redline/core/PrimObject;";
+        protected final String SEND_MESSAGES_SIG = "(Lst/redline/core/PrimObject;Lst/redline/core/PrimContext;)Lst/redline/core/PrimObject;";
         private final ClassWriter cw;
         private MethodVisitor mv;
         private HashMap<String, ExtendedTerminalNode> temporaries;
@@ -658,6 +661,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             pushCurrentVisitor(new BlockGeneratorVisitor(cw, name));
             ctx.accept(currentVisitor());
             popCurrentVisitor();
+            pushNewBlock(mv, fullClassName(), name, SEND_MESSAGES_SIG, ctx.BLOCK_START().getSymbol().getLine());
             return null;
         }
 
@@ -725,7 +729,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         }
 
         private void openBlockLambdaMethod() {
-            mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, blockName, "(Ljava/lang/Object;)Ljava/lang/Object;", null, null);
+            mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, blockName, SEND_MESSAGES_SIG, null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
         }

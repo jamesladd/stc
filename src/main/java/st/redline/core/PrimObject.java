@@ -60,6 +60,11 @@ public class PrimObject {
         return findObject(importFor(name));
     }
 
+    public PrimObject smalltalkBlock(Object value) {
+        System.out.println("** smalltalkBlock " + value);
+        return instanceOfWith("Block", value);
+    }
+
     public PrimObject smalltalkString(Object value) {
         return instanceOfWith("String", value);
     }

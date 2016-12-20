@@ -2,8 +2,6 @@ package st.redline.classloader;
 
 import st.redline.core.*;
 
-import static st.redline.core.PrimNil.PRIM_NIL;
-
 public class Bootstrapper {
 
     public void bootstrap(SmalltalkClassLoader classLoader) {
@@ -26,6 +24,8 @@ public class Bootstrapper {
         PrimClass klass = createKernelObject("Class", classDescription);
         PrimClass metaclass = createKernelObject("Metaclass", classDescription);
         PrimClass undefinedObject = createKernelObject("UndefinedObject", object);
+        PrimClass blockClosure = createKernelObject("BlockClosure", object);
+        PrimClass compiledMethod = createKernelObject("CompiledMethod", object);
         PrimClass booleanObject = createKernelObject("Boolean", object);
         PrimClass trueObject = createKernelObject("True", booleanObject);
         PrimClass falseObject = createKernelObject("False", booleanObject);
@@ -54,13 +54,15 @@ public class Bootstrapper {
         falseInstance.selfClass(falseObject);
         classLoader.falseInstance(falseInstance);
 
-        // Load the hierarchy and attached their methods.
+        // Load the hierarchy which will attached their methods.
         classLoader.cacheObject("st.redline.core.Object", object);
         classLoader.cacheObject("st.redline.core.Behavior", behavior);
         classLoader.cacheObject("st.redline.core.ClassDescription", classDescription);
         classLoader.cacheObject("st.redline.core.Class", klass);
         classLoader.cacheObject("st.redline.core.Metaclass", metaclass);
         classLoader.cacheObject("st.redline.core.UndefinedObject", undefinedObject);
+        classLoader.cacheObject("st.redline.core.BlockClosure", blockClosure);
+        classLoader.cacheObject("st.redline.core.CompiledMethod", compiledMethod);
         classLoader.cacheObject("st.redline.core.Boolean", booleanObject);
         classLoader.cacheObject("st.redline.core.True", trueObject);
         classLoader.cacheObject("st.redline.core.False", falseObject);
@@ -91,6 +93,8 @@ public class Bootstrapper {
         loadObject(classLoader, "st.redline.core.Class");
         loadObject(classLoader, "st.redline.core.Metaclass");
         loadObject(classLoader, "st.redline.core.UndefinedObject");
+        loadObject(classLoader, "st.redline.core.BlockClosure");
+        loadObject(classLoader, "st.redline.core.CompiledMethod");
         loadObject(classLoader, "st.redline.core.Boolean");
         loadObject(classLoader, "st.redline.core.True");
         loadObject(classLoader, "st.redline.core.False");

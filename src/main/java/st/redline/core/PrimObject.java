@@ -63,12 +63,12 @@ public class PrimObject {
 
     public PrimObject smalltalkBlock(Object value) {
         System.out.println("** smalltalkBlock " + value);
-        return instanceOfWith("Block", value);
+        return instanceOfWith("BlockClosure", value);
     }
 
     public PrimObject smalltalkMethod(Object value) {
         System.out.println("** smalltalkMethod " + value);
-        return instanceOfWith("Method", value);
+        return instanceOfWith("CompiledMethod", value);
     }
 
     public PrimObject smalltalkString(Object value) {
@@ -164,7 +164,7 @@ public class PrimObject {
     }
 
     protected PrimObject apply(PrimObject method, PrimObject foundInClass, String selector, PrimObject ... arguments) {
-        System.out.println("** apply: #" + selector + " to " + this + " found in " + foundInClass);
+        System.out.println("** apply: #" + selector + " found in " + foundInClass + " to " + this);
         return method.invoke(this, new PrimContext(this, foundInClass, selector, arguments));
     }
 

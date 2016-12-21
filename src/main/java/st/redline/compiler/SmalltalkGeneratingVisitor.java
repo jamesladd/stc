@@ -741,12 +741,14 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         }
 
         private void closeBlockLambdaMethod() {
+            log("closeBlockLambdaMethod: " + blockName);
             mv.visitInsn(ARETURN);
             mv.visitMaxs(0, 0);
             mv.visitEnd();
         }
 
         private void openBlockLambdaMethod() {
+            log("openBlockLambdaMethod: " + blockName);
             mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, blockName, SEND_MESSAGES_SIG, null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);

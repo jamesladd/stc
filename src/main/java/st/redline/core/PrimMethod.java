@@ -12,6 +12,8 @@ public class PrimMethod extends PrimObject {
 
     protected PrimObject invoke(PrimObject receiver, PrimContext context) {
         System.out.println("PrimMethod invoke");
-        return ((LambdaBlock) javaValue()).apply(receiver, context);
+        // We send receiver as first _and_ second argument as LambdaBlock's are static
+        // and we need receiver in argument slot 1
+        return ((LambdaBlock) javaValue()).apply(receiver, receiver, context);
     }
 }

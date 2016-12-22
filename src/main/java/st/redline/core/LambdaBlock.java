@@ -2,5 +2,5 @@ package st.redline.core;
 
 public interface LambdaBlock {
 
-    PrimObject apply(PrimObject receiver, PrimContext context);
+    PrimObject apply(PrimObject thiz, PrimObject receiver, PrimContext context);
 }

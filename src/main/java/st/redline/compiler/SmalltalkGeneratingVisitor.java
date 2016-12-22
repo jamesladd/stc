@@ -211,7 +211,8 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
     private class ClassGeneratorVisitor extends SmalltalkBaseVisitor<Void> implements SmalltalkVisitor<Void>, Opcodes {
 
-        protected final String SEND_MESSAGES_SIG = "(Lst/redline/core/PrimObject;Lst/redline/core/PrimContext;)Lst/redline/core/PrimObject;";
+        protected final String LAMBDA_BLOCK_SIG = "(Lst/redline/core/PrimObject;Lst/redline/core/PrimObject;Lst/redline/core/PrimContext;)Lst/redline/core/PrimObject;";
+        private final String SEND_MESSAGES_SIG = "(Lst/redline/core/PrimObject;Lst/redline/core/PrimContext;)Lst/redline/core/PrimObject;";
         private final ClassWriter cw;
         private MethodVisitor mv;
         private HashMap<String, ExtendedTerminalNode> temporaries;
@@ -670,9 +671,9 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             ctx.accept(currentVisitor());
             popCurrentVisitor();
             if (keywordRecord.keyword.toString().contains("withMethod:"))
-                pushNewMethod(mv, fullClassName(), name, SEND_MESSAGES_SIG, ctx.BLOCK_START().getSymbol().getLine());
+                pushNewMethod(mv, fullClassName(), name, LAMBDA_BLOCK_SIG, ctx.BLOCK_START().getSymbol().getLine());
             else
-                pushNewBlock(mv, fullClassName(), name, SEND_MESSAGES_SIG, ctx.BLOCK_START().getSymbol().getLine());
+                pushNewBlock(mv, fullClassName(), name, LAMBDA_BLOCK_SIG, ctx.BLOCK_START().getSymbol().getLine());
             return null;
         }
 
@@ -749,7 +750,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         private void openBlockLambdaMethod() {
             log("openBlockLambdaMethod: " + blockName);
-            mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, blockName, SEND_MESSAGES_SIG, null, null);
+            mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, blockName, LAMBDA_BLOCK_SIG, null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 0);
         }

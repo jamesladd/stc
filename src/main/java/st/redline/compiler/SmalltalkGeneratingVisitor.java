@@ -212,9 +212,9 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
     private class ClassGeneratorVisitor extends SmalltalkBaseVisitor<Void> implements SmalltalkVisitor<Void>, Opcodes {
 
         protected final String LAMBDA_BLOCK_SIG = "(Lst/redline/core/PrimObject;Lst/redline/core/PrimObject;Lst/redline/core/PrimContext;)Lst/redline/core/PrimObject;";
+        protected MethodVisitor mv;
         private final String SEND_MESSAGES_SIG = "(Lst/redline/core/PrimObject;Lst/redline/core/PrimContext;)Lst/redline/core/PrimObject;";
         private final ClassWriter cw;
-        private MethodVisitor mv;
         private HashMap<String, ExtendedTerminalNode> temporaries;
         private HashMap<String, ExtendedTerminalNode> arguments;
         private Stack<KeywordRecord> keywords = new Stack<KeywordRecord>();
@@ -406,6 +406,11 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitStatementAnswer(@NotNull SmalltalkParser.StatementAnswerContext ctx) {
             log("visitStatementAnswer");
+            SmalltalkParser.AnswerContext answer = ctx.answer();
+            visitLine(mv, answer.CARROT().getSymbol().getLine());
+            SmalltalkParser.ExpressionContext expression = answer.expression();
+            expression.accept(currentVisitor());
+            mv.visitInsn(ARETURN);
             return null;
         }
 
@@ -704,9 +709,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
     private class BlockGeneratorVisitor extends ClassGeneratorVisitor {
 
         private final ClassWriter cw;
-        private MethodVisitor mv;
         private String blockName;
-        private boolean rootBlock = true;
 
         public BlockGeneratorVisitor(ClassWriter cw, String name) {
             super(cw);
@@ -716,34 +719,43 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitBlock(@NotNull SmalltalkParser.BlockContext ctx) {
             log("visitBlock " + blockName);
-            if (!rootBlock)
-                throw new RuntimeException("TODO: Handle block within a block.");
             openBlockLambdaMethod();
             SmalltalkParser.BlockParamListContext blockParamList = ctx.blockParamList();
             if (blockParamList != null)
-                return blockParamList.accept(currentVisitor());
-//            SmalltalkParser.SequenceContext blockSequence = ctx.sequence();
-//            if (blockSequence != null)
-//                return blockSequence.accept(currentVisitor());
-
-            // *** OUTPUT A MESSAGE FOR NOW ***
-            mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-            mv.visitLdcInsn("HELLO WORLD from inside your Lambda");
-            mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
-            mv.visitVarInsn(ALOAD, 0);
-
-            closeBlockLambdaMethod();
+                blockParamList.accept(currentVisitor());
+            SmalltalkParser.SequenceContext blockSequence = ctx.sequence();
+            if (blockSequence != null)
+                blockSequence.accept(currentVisitor());
+            closeBlockLambdaMethod(noAnswer(blockSequence));
             return null;
+        }
+
+        private boolean noAnswer(SmalltalkParser.SequenceContext blockSequence) {
+            if (blockSequence == null)
+                return true;
+            SmalltalkParser.StatementsContext statements = blockSequence.statements();
+            if (statements == null)
+                return true;
+            List<ParseTree> list = statements.children;
+            for (ParseTree parseTree : list) {
+                System.out.println("******");
+                System.out.println(parseTree);
+                if (parseTree instanceof SmalltalkParser.AnswerContext)
+                    return false;
+            }
+            return true;
         }
 
         public Void visitBlockParamList(@NotNull SmalltalkParser.BlockParamListContext ctx) {
             log("visitBlockParamList");
+            pushReceiver(mv);
             return null;
         }
 
-        private void closeBlockLambdaMethod() {
+        private void closeBlockLambdaMethod(boolean answerRequired) {
             log("closeBlockLambdaMethod: " + blockName);
-            mv.visitInsn(ARETURN);
+            if (answerRequired)
+                mv.visitInsn(ARETURN);
             mv.visitMaxs(0, 0);
             mv.visitEnd();
         }
@@ -752,7 +764,6 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             log("openBlockLambdaMethod: " + blockName);
             mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, blockName, LAMBDA_BLOCK_SIG, null, null);
             mv.visitCode();
-            mv.visitVarInsn(ALOAD, 0);
         }
     }
 

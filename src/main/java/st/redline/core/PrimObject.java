@@ -165,7 +165,9 @@ public class PrimObject {
 
     protected PrimObject apply(PrimObject method, PrimObject foundInClass, String selector, PrimObject ... arguments) {
         System.out.println("** apply: #" + selector + " found in " + foundInClass + " to " + this);
-        return method.invoke(this, new PrimContext(this, foundInClass, selector, arguments));
+        PrimObject result = method.invoke(this, new PrimContext(this, foundInClass, selector, arguments));
+        System.out.println("** result: " + String.valueOf(result));
+        return result; //method.invoke(this, new PrimContext(this, foundInClass, selector, arguments));
     }
 
     protected PrimObject invoke(PrimObject receiver, PrimContext context) {

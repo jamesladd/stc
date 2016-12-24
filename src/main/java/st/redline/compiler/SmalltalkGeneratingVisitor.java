@@ -457,6 +457,14 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             return null;
         }
 
+        public Void visitUnarySelector(@NotNull SmalltalkParser.UnarySelectorContext ctx) {
+            log("visitUnarySelector " + ctx.IDENTIFIER().getSymbol().getText());
+            TerminalNode selectorNode = ctx.IDENTIFIER();
+            visitLine(mv, selectorNode.getSymbol().getLine());
+            invokePerform(mv, ctx.IDENTIFIER().getSymbol().getText(), 0);
+            return null;
+        }
+
         public Void visitBinarySend(@NotNull SmalltalkParser.BinarySendContext ctx) {
             log("visitBinarySend");
             ctx.unarySend().accept(currentVisitor());
@@ -516,6 +524,9 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitUnaryMessage(@NotNull SmalltalkParser.UnaryMessageContext ctx) {
             log("visitUnaryMessage");
+            SmalltalkParser.UnarySelectorContext unarySelector = ctx.unarySelector();
+            if (unarySelector != null)
+                unarySelector.accept(currentVisitor());
             return null;
         }
 

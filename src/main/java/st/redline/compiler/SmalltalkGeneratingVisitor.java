@@ -461,7 +461,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             log("visitUnarySelector " + ctx.IDENTIFIER().getSymbol().getText());
             TerminalNode selectorNode = ctx.IDENTIFIER();
             visitLine(mv, selectorNode.getSymbol().getLine());
-            invokePerform(mv, ctx.IDENTIFIER().getSymbol().getText(), 0);
+            invokePerform(mv, selectorNode.getSymbol().getText(), 0);
             return null;
         }
 

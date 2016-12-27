@@ -219,6 +219,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         private HashMap<String, ExtendedTerminalNode> arguments;
         private Stack<KeywordRecord> keywords = new Stack<KeywordRecord>();
         private int blockNumber = 0;
+        private boolean referencedJVM = false;
 
         public ClassGeneratorVisitor() {
             this(new ClassWriter(ClassWriter.COMPUTE_MAXS));
@@ -226,6 +227,11 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public ClassGeneratorVisitor(ClassWriter classWriter) {
             cw = classWriter;
+        }
+
+        public ClassGeneratorVisitor(ClassWriter classWriter, MethodVisitor methodVisitor) {
+            cw = classWriter;
+            mv = methodVisitor;
         }
 
         public Void visitScript(SmalltalkParser.ScriptContext ctx) {
@@ -342,7 +348,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             temporaries.put(key, new ExtendedTerminalNode(node, index));
         }
 
-        private int countOf(String input, char ch) {
+        protected int countOf(String input, char ch) {
             int count = 0;
             for (int i = 0, l = input.length(); i < l; i++)
                 if (input.charAt(i) == ch)
@@ -354,11 +360,11 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             return !keywords.isEmpty();
         }
 
-        private void initializeKeyword() {
+        protected void initializeKeyword() {
             keywords.push(new KeywordRecord());
         }
 
-        private void addToKeyword(String keyword) {
+        protected void addToKeyword(String keyword) {
             keywords.peek().keyword.append(keyword);
         }
 
@@ -367,7 +373,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             keywords.peek().firstArgument.append(firstArgument);
         }
 
-        private String removeKeyword() {
+        protected String removeKeyword() {
             return keywords.pop().keyword.toString();
         }
 
@@ -485,8 +491,17 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitKeywordSend(@NotNull SmalltalkParser.KeywordSendContext ctx) {
             log("visitKeywordSend");
+            referencedJVM = false;
             ctx.binarySend().accept(currentVisitor());
-            ctx.keywordMessage().accept(currentVisitor());
+            if (!referencedJVM)
+                ctx.keywordMessage().accept(currentVisitor());
+            else {
+                // Left hand side of keyword message is special identifier 'JVM'.
+                referencedJVM = false;
+                pushCurrentVisitor(new JVMGeneratorVisitor(cw, mv));
+                ctx.keywordMessage().accept(currentVisitor());
+                popCurrentVisitor();
+            }
             return null;
         }
 
@@ -674,6 +689,8 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
                 pushTemporary(mv, indexOfTemporary(name));
             else if (isArgument(name))
                 pushArgument(mv, indexOfArgument(name));
+            else if ("JVM".equals(name))
+                referencedJVM = true;
             else
                 pushReference(mv, name);
             return null;
@@ -779,6 +796,69 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
     }
 
 
+    private class JVMGeneratorVisitor extends ClassGeneratorVisitor {
+
+        private final MethodVisitor mv;
+        private final List<Object> arguments = new ArrayList<Object>();
+
+        public JVMGeneratorVisitor(ClassWriter cw, MethodVisitor mv) {
+            super(cw, mv);
+            this.mv = mv;
+        }
+
+        public Void visitKeywordMessage(@NotNull SmalltalkParser.KeywordMessageContext ctx) {
+            log("visitKeywordMessage");
+            initializeKeyword();
+            for (SmalltalkParser.KeywordPairContext keywordPair : ctx.keywordPair())
+                keywordPair.accept(currentVisitor());
+            visitLine(mv, ctx.keywordPair().get(0).KEYWORD().getSymbol().getLine());
+            String keyword = removeKeyword();
+            JVMWriter jvmWriter = JVM_WRITERS.get(keyword);
+            if (jvmWriter == null)
+                throw new RuntimeException("JVM keyword not recognized.");
+            jvmWriter.write(mv, arguments);
+            return null;
+        }
+
+        public Void visitKeywordPair(@NotNull SmalltalkParser.KeywordPairContext ctx) {
+            log("visitKeywordPair " + ctx.KEYWORD().getSymbol().getText());
+            TerminalNode keyword = ctx.KEYWORD();
+            String part = keyword.getSymbol().getText();
+            visitLine(mv, keyword.getSymbol().getLine());
+            addToKeyword(part);
+            SmalltalkParser.BinarySendContext binarySend = ctx.binarySend();
+            arguments.add(argumentFrom(binarySend));
+            return null;
+        }
+
+        private Object argumentFrom(SmalltalkParser.BinarySendContext binarySend) {
+            SmalltalkParser.UnarySendContext unarySend = binarySend.unarySend();
+            if (unarySend != null) {
+                SmalltalkParser.OperandContext operand = unarySend.operand();
+                if (operand != null) {
+                    SmalltalkParser.LiteralContext literal = operand.literal();
+                    if (literal != null) {
+                        SmalltalkParser.ParsetimeLiteralContext parsetimeLiteral = literal.parsetimeLiteral();
+                        if (parsetimeLiteral != null) {
+                            SmalltalkParser.StringContext string = parsetimeLiteral.string();
+                            if (string != null) {
+                                String raw = string.STRING().getSymbol().getText();
+                                return raw.substring(1, raw.length() - 1);
+                            }
+                            SmalltalkParser.NumberContext number = parsetimeLiteral.number();
+                            if (number != null) {
+                                return number.getText();
+                            }
+                            throw new RuntimeException("Unhandled JVM keyword argument.");
+                        }
+                    }
+                }
+            }
+            throw new RuntimeException("JVM keyword argument expected.");
+        }
+    }
+
+
     private class ExtendedTerminalNode {
 
         private final TerminalNode node;
@@ -800,6 +880,37 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         public Token getSymbol() {
             return node.getSymbol();
         }
+    }
+
+
+    private class KeywordRecord {
+
+        public StringBuilder keyword = new StringBuilder();
+        public StringBuilder firstArgument = new StringBuilder();
+
+        public String toString() {
+            return keyword + " - " + firstArgument;
+        }
+    }
+
+
+    private interface JVMWriter {
+
+        void write(MethodVisitor mv, List<Object> arguments);
+    }
+
+    private static final Map<String, JVMWriter> JVM_WRITERS = new HashMap<String, JVMWriter>();
+    static {
+        JVM_WRITERS.put("aload:", new JVMWriter() {
+            public void write(MethodVisitor mv, List<Object> arguments) {
+                mv.visitVarInsn(ALOAD, Integer.valueOf(String.valueOf(arguments.get(0))));
+            }
+        });
+        JVM_WRITERS.put("invokeVirtual:method:matching:", new JVMWriter() {
+            public void write(MethodVisitor mv, List<Object> arguments) {
+                mv.visitMethodInsn(INVOKEVIRTUAL, String.valueOf(arguments.get(0)), String.valueOf(arguments.get(1)), String.valueOf(arguments.get(2)), false);
+            }
+        });
     }
 
     static {
@@ -1009,15 +1120,5 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         OPCODES.put("MULTIANEWARRAY", 197);
         OPCODES.put("IFNULL", 198);
         OPCODES.put("IFNONNULL", 199);
-    }
-
-    private class KeywordRecord {
-
-        public StringBuilder keyword = new StringBuilder();
-        public StringBuilder firstArgument = new StringBuilder();
-
-        public String toString() {
-            return keyword + " - " + firstArgument;
-        }
     }
 }

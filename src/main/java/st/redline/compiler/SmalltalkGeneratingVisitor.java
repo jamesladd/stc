@@ -766,10 +766,10 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
                 return true;
             List<ParseTree> list = statements.children;
             for (ParseTree parseTree : list) {
-                System.out.println("******");
-                System.out.println(parseTree);
                 if (parseTree instanceof SmalltalkParser.AnswerContext)
                     return false;
+                System.out.println("******");
+                System.out.println(parseTree);
             }
             return true;
         }

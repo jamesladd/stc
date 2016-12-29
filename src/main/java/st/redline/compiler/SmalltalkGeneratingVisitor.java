@@ -730,7 +730,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             pushCurrentVisitor(new BlockGeneratorVisitor(cw, name));
             ctx.accept(currentVisitor());
             popCurrentVisitor();
-            if (keywordRecord.keyword.toString().contains("withMethod:"))
+            if (keywordRecord.keyword.toString().endsWith("withMethod:"))
                 pushNewMethod(mv, fullClassName(), name, LAMBDA_BLOCK_SIG, ctx.BLOCK_START().getSymbol().getLine());
             else
                 pushNewBlock(mv, fullClassName(), name, LAMBDA_BLOCK_SIG, ctx.BLOCK_START().getSymbol().getLine());

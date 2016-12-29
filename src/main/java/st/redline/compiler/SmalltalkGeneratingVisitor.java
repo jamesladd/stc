@@ -1,6 +1,5 @@
 package st.redline.compiler;
 
-import org.antlr.v4.runtime.*;
 import org.antlr.v4.runtime.misc.*;
 import org.antlr.v4.runtime.tree.*;
 import org.objectweb.asm.*;
@@ -671,13 +670,32 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         }
 
         public Void visitSymbol(@NotNull SmalltalkParser.SymbolContext ctx) {
-            log("visitSymbol #" + ctx.bareSymbol().IDENTIFIER().getSymbol().getText());
-            TerminalNode node = ctx.bareSymbol().IDENTIFIER();
-            String symbol = node.getSymbol().getText();
+            log("visitSymbol #" + nodeFor(ctx).getText());
+            BasicNode node = nodeFor(ctx);
+            String symbol = node.getText();
             if (haveKeyword())
                 addArgumentToKeyword(symbol);
-            pushNewObject(mv, "smalltalkSymbol", symbol, node.getSymbol().getLine());
+            pushNewObject(mv, "smalltalkSymbol", symbol, node.getLine());
             return null;
+        }
+
+        private BasicNode nodeFor(SmalltalkParser.SymbolContext ctx) {
+            SmalltalkParser.BareSymbolContext bareSymbolContext = ctx.bareSymbol();
+            TerminalNode node = bareSymbolContext.IDENTIFIER();
+            if (node != null)
+                return new ExtendedTerminalNode(node, 0);
+            node = bareSymbolContext.BINARY_SELECTOR();
+            if (node != null)
+                return new ExtendedTerminalNode(node, 0);
+            List<TerminalNode> k = bareSymbolContext.KEYWORD();
+            if (k != null && !k.isEmpty()) {
+                int line = k.get(0).getSymbol().getLine();
+                StringBuilder text = new StringBuilder();
+                for (TerminalNode n : k)
+                    text.append(n.getSymbol().getText());
+                return new BasicNode(line, text.toString(), 0);
+            }
+            throw new RuntimeException("Node cannot be determined from context.");
         }
 
         public Void visitReference(@NotNull SmalltalkParser.ReferenceContext ctx) {
@@ -874,13 +892,15 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
     }
 
 
-    private class ExtendedTerminalNode {
+    private class BasicNode {
 
-        private final TerminalNode node;
         private final int index;
+        private final int line;
+        private final String text;
 
-        public ExtendedTerminalNode(TerminalNode node, int index) {
-            this.node = node;
+        public BasicNode(int line, String text, int index) {
+            this.line = line;
+            this.text = text;
             this.index = index;
         }
 
@@ -889,11 +909,18 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         }
 
         public int getLine() {
-            return getSymbol().getLine();
+            return line;
         }
 
-        public Token getSymbol() {
-            return node.getSymbol();
+        public String getText() {
+            return text;
+        }
+    }
+
+    private class ExtendedTerminalNode extends BasicNode {
+
+        public ExtendedTerminalNode(TerminalNode node, int index) {
+            super(node.getSymbol().getLine(), node.getSymbol().getText(), index);
         }
     }
 

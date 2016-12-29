@@ -39,7 +39,7 @@ public class Bootstrapper {
         ((PrimClass) object.selfClass()).superclass(klass);
 
         // Add basicAddSelector:withMethod: to Behaviour
-        ((PrimClass) behavior.selfClass()).addMethod("basicAddSelector:withMethod:", new PrimAddMethod());
+        ((PrimClass) behavior).addMethod("basicAddSelector:withMethod:", new PrimAddMethod());
 
         // Create special instances, referred to with pseudo variables.
         PrimObject nil = new PrimObject();

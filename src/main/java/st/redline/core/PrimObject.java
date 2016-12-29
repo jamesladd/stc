@@ -191,4 +191,10 @@ public class PrimObject {
     public boolean isMeta() {
         return false;
     }
+
+    public PrimObject primitiveNew() {
+        PrimObject object = new PrimObject();
+        object.selfClass(this);
+        return object;
+    }
 }

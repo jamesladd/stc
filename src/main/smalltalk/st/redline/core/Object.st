@@ -2,6 +2,12 @@
 
 PrimObject subclass: #Object.
 
+"category: initialise-release"
+
+- initialize
+    "Subclasses should redefine this method to perform initializations on instance creation"
+    ^ self.
+
 "category: accessing"
 
 - yourself

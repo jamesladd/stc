@@ -10,5 +10,5 @@ Object subclass: #Behavior.
 
 - basicNew
     "Primitive. Answer an instance of the receiver (which is a class)."
-    JVM aload: 1.
-    JVM invokeVirtual: 'st/redline/core/PrimObject' method: 'primitiveNew' matching: '()Lst/redline/core/PrimObject;'.
+    JVM aload: 1;
+        invokeVirtual: 'st/redline/core/PrimObject' method: 'primitiveNew' matching: '()Lst/redline/core/PrimObject;'.

@@ -509,10 +509,10 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             log("visitCascade");
             SmalltalkParser.BinarySendContext binarySend = ctx.binarySend();
             if (binarySend != null)
-                return binarySend.accept(currentVisitor());
+                binarySend.accept(currentVisitor());
             SmalltalkParser.KeywordSendContext keywordSend = ctx.keywordSend();
             if (keywordSend != null)
-                return keywordSend.accept(currentVisitor());
+                keywordSend.accept(currentVisitor());
             for (SmalltalkParser.MessageContext message : ctx.message())
                 message.accept(currentVisitor());
             return null;
@@ -799,11 +799,21 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
     private class JVMGeneratorVisitor extends ClassGeneratorVisitor {
 
         private final MethodVisitor mv;
-        private final List<Object> arguments = new ArrayList<Object>();
+        private List<Object> arguments = new ArrayList<Object>();
 
         public JVMGeneratorVisitor(ClassWriter cw, MethodVisitor mv) {
             super(cw, mv);
             this.mv = mv;
+        }
+
+        public Void visitMessage(@NotNull SmalltalkParser.MessageContext ctx) {
+            log("visitMessage");
+            // Message is right side of Cascade so duplicate stack as receiver of next send.
+            pushDuplicate(mv);
+            SmalltalkParser.KeywordMessageContext keywordMessage = ctx.keywordMessage();
+            if (keywordMessage != null)
+                return keywordMessage.accept(currentVisitor());
+            throw new RuntimeException("visitMessage no alternative found.");
         }
 
         public Void visitKeywordMessage(@NotNull SmalltalkParser.KeywordMessageContext ctx) {
@@ -818,6 +828,11 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
                 throw new RuntimeException("JVM keyword not recognized.");
             jvmWriter.write(mv, arguments);
             return null;
+        }
+
+        protected void initializeKeyword() {
+            super.initializeKeyword();
+            arguments = new ArrayList<Object>();
         }
 
         public Void visitKeywordPair(@NotNull SmalltalkParser.KeywordPairContext ctx) {

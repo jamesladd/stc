@@ -392,8 +392,17 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
             return arguments.get(key).getIndex();
         }
 
-        private void initializeArgumentsMap() {
+        protected void initializeArgumentsMap() {
             arguments = new HashMap<String, ExtendedTerminalNode>();
+        }
+
+        protected void addArgumentToMap(ExtendedTerminalNode node) {
+            log("addArgumentToMap " + node.getText());
+            assert !arguments.containsKey(node.getText());
+            String key = node.getText();
+            if (key.startsWith(":"))  // <- block arguments are prefixed with ':'
+                key = key.substring(1);
+            arguments.put(key, node);
         }
 
         public Void visitStatementExpressions(@NotNull SmalltalkParser.StatementExpressionsContext ctx) {
@@ -794,7 +803,14 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitBlockParamList(@NotNull SmalltalkParser.BlockParamListContext ctx) {
             log("visitBlockParamList");
-            pushReceiver(mv);
+            initializeArgumentsMap();
+            int index = 0;
+            int n = ctx.getChildCount();
+            for(int i = 0; i < n; ++i) {
+                ParseTree c = ctx.getChild(i);
+                if (c instanceof TerminalNode)
+                    addArgumentToMap(new ExtendedTerminalNode((TerminalNode) c, index++));
+            }
             return null;
         }
 

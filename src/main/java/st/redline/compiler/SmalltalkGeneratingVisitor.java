@@ -422,6 +422,7 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitExpression(@NotNull SmalltalkParser.ExpressionContext ctx) {
             log("visitExpression");
+            referencedJVM = false;
             SmalltalkParser.BinarySendContext binarySend = ctx.binarySend();
             if (binarySend != null)
                 return binarySend.accept(currentVisitor());
@@ -491,13 +492,11 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitKeywordSend(@NotNull SmalltalkParser.KeywordSendContext ctx) {
             log("visitKeywordSend");
-            referencedJVM = false;
             ctx.binarySend().accept(currentVisitor());
             if (!referencedJVM)
                 ctx.keywordMessage().accept(currentVisitor());
             else {
                 // Left hand side of keyword message is special identifier 'JVM'.
-                referencedJVM = false;
                 pushCurrentVisitor(new JVMGeneratorVisitor(cw, mv));
                 ctx.keywordMessage().accept(currentVisitor());
                 popCurrentVisitor();

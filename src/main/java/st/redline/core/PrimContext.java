@@ -19,6 +19,10 @@ public class PrimContext {
         this.arguments = arguments;
     }
 
+    public PrimObject receiver() {
+        return receiver;
+    }
+
     public String selector() {
         return selector;
     }

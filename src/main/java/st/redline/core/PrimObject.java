@@ -193,7 +193,10 @@ public class PrimObject {
     }
 
     public PrimObject primitiveSubclass(PrimContext primContext) {
-        return this;
+        System.out.println("primitiveSubclass: " + primContext.argumentJavaValueAt(0));
+        if (isBootstrapping())
+            return PRIM_SUBCLASS.invoke(primContext.receiver(), primContext);
+        throw new RuntimeException("Handle primitiveSubclass after bootstrapping.");
     }
 
     public PrimObject primitiveNew() {

@@ -192,6 +192,10 @@ public class PrimObject {
         return false;
     }
 
+    public PrimObject primitiveSubclass(Object object) {
+        return this;
+    }
+
     public PrimObject primitiveNew() {
         PrimObject object = new PrimObject();
         object.selfClass(this);

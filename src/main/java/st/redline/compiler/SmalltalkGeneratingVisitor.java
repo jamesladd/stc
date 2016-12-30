@@ -842,8 +842,6 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
 
         public Void visitMessage(@NotNull SmalltalkParser.MessageContext ctx) {
             log("visitMessage");
-            // Message is right side of Cascade so duplicate stack as receiver of next send.
-            pushDuplicate(mv);
             SmalltalkParser.KeywordMessageContext keywordMessage = ctx.keywordMessage();
             if (keywordMessage != null)
                 return keywordMessage.accept(currentVisitor());
@@ -967,6 +965,11 @@ public class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> imple
         JVM_WRITERS.put("invokeVirtual:method:matching:", new JVMWriter() {
             public void write(MethodVisitor mv, List<Object> arguments) {
                 mv.visitMethodInsn(INVOKEVIRTUAL, String.valueOf(arguments.get(0)), String.valueOf(arguments.get(1)), String.valueOf(arguments.get(2)), false);
+            }
+        });
+        JVM_WRITERS.put("invokeStatic:method:matching:", new JVMWriter() {
+            public void write(MethodVisitor mv, List<Object> arguments) {
+                mv.visitMethodInsn(INVOKESTATIC, String.valueOf(arguments.get(0)), String.valueOf(arguments.get(1)), String.valueOf(arguments.get(2)), false);
             }
         });
     }

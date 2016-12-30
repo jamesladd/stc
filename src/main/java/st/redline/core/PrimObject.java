@@ -192,7 +192,7 @@ public class PrimObject {
         return false;
     }
 
-    public PrimObject primitiveSubclass(Object object) {
+    public PrimObject primitiveSubclass(PrimContext primContext) {
         return this;
     }
 

@@ -13,4 +13,4 @@ ClassDescription subclass: #Class.
      initialize the new class and categorize it."
     JVM aload: 1;
         aload: 2;
-        invokeVirtual: 'st/redline/core/PrimObject' method: 'primitiveSubclass' matching: '(Ljava/lang/Object;)Lst/redline/core/PrimObject;'.
+        invokeVirtual: 'st/redline/core/PrimObject' method: 'primitiveSubclass' matching: '(Lst/redline/core/PrimContext;)Lst/redline/core/PrimObject;'.

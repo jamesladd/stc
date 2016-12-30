@@ -194,30 +194,31 @@ public class PrimObject {
 
     public PrimObject primitiveSubclass(PrimContext primContext) {
         System.out.println("primitiveSubclass: " + primContext.argumentJavaValueAt(0));
-        String subclassName = String.valueOf(primContext.argumentJavaValueAt(0));
-        PrimObject receiver = primContext.receiver();
-        PrimObject newClass = new PrimClass(subclassName);
-        PrimObject newMeta = new PrimClass(subclassName, true);
-        boolean bootstrapping = isBootstrapping();
-
-        if (bootstrapping) {
-            newClass = receiver.resolveObject(subclassName);
-            if (newClass == null)
-                throw new RuntimeException("New class is unexpectedly null.");
-            newMeta = newClass.selfClass();
-        }
-
-        newClass.selfClass(newMeta);
-        ((PrimClass) newClass).superclass(receiver);
-        ((PrimClass) newMeta).superclass(receiver.selfClass());
-
-        if (!bootstrapping)
-            classLoader().cacheObject(subclassName, newClass);
-
-        // TODO - Add other definitions to appropriate objects.
-        System.out.println("TODO - Add other definitions to appropriate objects.");
-
-        return newClass;
+        return PRIM_SUBCLASS.invoke(this, primContext);
+//        String subclassName = String.valueOf(primContext.argumentJavaValueAt(0));
+//        PrimObject receiver = primContext.receiver();
+//        PrimObject newClass = new PrimClass(subclassName);
+//        PrimObject newMeta = new PrimClass(subclassName, true);
+//        boolean bootstrapping = isBootstrapping();
+//
+//        if (bootstrapping) {
+//            newClass = receiver.resolveObject(subclassName);
+//            if (newClass == null)
+//                throw new RuntimeException("New class is unexpectedly null.");
+//            newMeta = newClass.selfClass();
+//        }
+//
+//        newClass.selfClass(newMeta);
+//        ((PrimClass) newClass).superclass(receiver);
+//        ((PrimClass) newMeta).superclass(receiver.selfClass());
+//
+//        if (!bootstrapping)
+//            classLoader().cacheObject(subclassName, newClass);
+//
+//        // TODO - Add other definitions to appropriate objects.
+//        System.out.println("TODO - Add other definitions to appropriate objects.");
+//
+//        return newClass;
     }
 
     public PrimObject primitiveNew() {

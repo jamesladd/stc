@@ -107,8 +107,6 @@ public class PrimObject {
 
     protected String importFor(String name) {
         System.out.println("** importFor: " + name + " from: " + this);
-//        if (selfClass != null && selfClass.isMeta())
-//            return selfClass.importFor(name);
         String imports = classLoader().findPackage(this, name);
         if (imports != null)
             return imports;
@@ -121,7 +119,6 @@ public class PrimObject {
 
     protected PrimObject sendMessages(PrimObject receiver, PrimContext context) {
         System.out.println("** sendMessages(" + receiver + "," + context + ")");
-        classLoader().registerPackage("cls", this);
         return receiver;
     }
 

@@ -107,21 +107,12 @@ public class PrimObject {
 
     protected String importFor(String name) {
         System.out.println("** importFor: " + name + " from: " + this);
-        if (selfClass != null && selfClass.isMeta())
-            return selfClass.importFor(name);
-        return globalImportFor(name);
-    }
-
-    protected String globalImportFor(String name) {
-        System.out.println("** globalImportFor: " + name + " from: " + this);
-        String fullName = classLoader().findPackage(name);
-        if (fullName != null)
-            return fullName;
-
-        if (!name.startsWith(DEFAULT_IMPORTED_PACKAGE))
-            return DEFAULT_IMPORTED_PACKAGE + '.' + name;
-
-        return null;
+//        if (selfClass != null && selfClass.isMeta())
+//            return selfClass.importFor(name);
+        String imports = classLoader().findPackage(this, name);
+        if (imports != null)
+            return imports;
+        return DEFAULT_IMPORTED_PACKAGE + '.' + name;
     }
 
     protected SmalltalkClassLoader classLoader() {
@@ -130,6 +121,7 @@ public class PrimObject {
 
     protected PrimObject sendMessages(PrimObject receiver, PrimContext context) {
         System.out.println("** sendMessages(" + receiver + "," + context + ")");
+        classLoader().registerPackage("cls", this);
         return receiver;
     }
 

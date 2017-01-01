@@ -4,6 +4,7 @@ import st.redline.compiler.Compiler;
 import st.redline.core.PrimObject;
 
 import java.util.HashMap;
+import java.util.Map;
 
 public class SmalltalkClassLoader extends ClassLoader {
 
@@ -13,9 +14,9 @@ public class SmalltalkClassLoader extends ClassLoader {
     private static PrimObject FALSE;
 
     private final SourceFinder sourceFinder;
-    private final HashMap<String, Class> classCache;
-    private final HashMap<String, PrimObject> objectCache;
-    private final HashMap<String, String> packageCache;
+    private final Map<String, Class> classCache;
+    private final Map<String, PrimObject> objectCache;
+    private final Map<Object, Map<String, String>> packageCache;
     private boolean bootstrapping;
 
     public SmalltalkClassLoader(ClassLoader classLoader, SourceFinder sourceFinder, Bootstrapper bootstrapper) {
@@ -23,20 +24,27 @@ public class SmalltalkClassLoader extends ClassLoader {
         this.sourceFinder = sourceFinder;
         this.classCache = new HashMap<String, Class>();
         this.objectCache = new HashMap<String, PrimObject>();
-        this.packageCache = new HashMap<String, String>();
+        this.packageCache = new HashMap<Object, Map<String, String>>();
 
         // initialize Object cache with bootstrapped objects.
         bootstrapper.bootstrap(this);
     }
 
-    public void registerPackage(String name, String fullName) {
-        System.out.println("** registerPackage: " +  name + " " + fullName);
-        packageCache.put(name, fullName);
+    public void registerPackage(String name, PrimObject group) {
+        System.out.println("** registerPackage: " +  name + " " + group);
+        // NOTE: For some reason getClass().getPackage() returns NULL.
+        String className = group.getClass().getName();
+        String groupName = className.substring(0, className.lastIndexOf('.'));
+        Map<String, String> imports = packageCache.getOrDefault(groupName, new HashMap<>());
+        imports.put(name, groupName + '.' + name);
+        packageCache.put(groupName, imports);
     }
 
-    public String findPackage(String name) {
-        System.out.println("** findPackage: " + name);
-        return packageCache.get(name);
+    public String findPackage(PrimObject group, String name) {
+        System.out.println("** findPackage: " + group + " " + name);
+        String className = group.getClass().getName();
+        String groupName = className.substring(0, className.lastIndexOf('.'));
+        return packageCache.get(groupName).get(name);
     }
 
     public PrimObject findObject(String name) {

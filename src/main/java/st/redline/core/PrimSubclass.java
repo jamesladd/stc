@@ -33,8 +33,8 @@ public class PrimSubclass extends PrimObject {
 
         if (!bootstrapping) {
             SmalltalkClassLoader classLoader = classLoader();
-            String fullName = classLoader.findPackage(subclassName);
-            classLoader.cacheObject(fullName, newClass);
+//            String fullName = classLoader.findPackage(subclassName);
+            classLoader.cacheObject(subclassName, newClass);
         }
 
         return newClass;

@@ -55,11 +55,4 @@ public class PrimClass extends PrimObject {
     public void addMethod(String selector, PrimObject method) {
         methods.put(selector, method);
     }
-
-    protected String importFor(String name) {
-        System.out.println("** importFor: " + name + " from: " + this);
-        // TODO: look in local class imports.
-        return globalImportFor(name);
-    }
-
 }

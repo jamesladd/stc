@@ -15,6 +15,7 @@ public class SmalltalkClassLoader extends ClassLoader {
     private final SourceFinder sourceFinder;
     private final HashMap<String, Class> classCache;
     private final HashMap<String, PrimObject> objectCache;
+    private final HashMap<String, String> packageCache;
     private boolean bootstrapping;
 
     public SmalltalkClassLoader(ClassLoader classLoader, SourceFinder sourceFinder, Bootstrapper bootstrapper) {
@@ -22,9 +23,20 @@ public class SmalltalkClassLoader extends ClassLoader {
         this.sourceFinder = sourceFinder;
         this.classCache = new HashMap<String, Class>();
         this.objectCache = new HashMap<String, PrimObject>();
+        this.packageCache = new HashMap<String, String>();
 
         // initialize Object cache with bootstrapped objects.
         bootstrapper.bootstrap(this);
+    }
+
+    public void registerPackage(String name, String fullName) {
+        System.out.println("** registerPackage: " +  name + " " + fullName);
+        packageCache.put(name, fullName);
+    }
+
+    public String findPackage(String name) {
+        System.out.println("** findPackage: " + name);
+        return packageCache.get(name);
     }
 
     public PrimObject findObject(String name) {

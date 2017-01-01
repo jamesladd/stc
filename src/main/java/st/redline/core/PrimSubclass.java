@@ -1,5 +1,7 @@
 package st.redline.core;
 
+import st.redline.classloader.SmalltalkClassLoader;
+
 public class PrimSubclass extends PrimObject {
 
     public static final PrimObject PRIM_SUBCLASS = new PrimSubclass();
@@ -29,8 +31,11 @@ public class PrimSubclass extends PrimObject {
         // TODO - Add other definitions to appropriate objects.
         System.out.println("TODO - Add other definitions to appropriate objects.");
 
-        if (!bootstrapping)
-            classLoader().cacheObject(subclassName, newClass);
+        if (!bootstrapping) {
+            SmalltalkClassLoader classLoader = classLoader();
+            String fullName = classLoader.findPackage(subclassName);
+            classLoader.cacheObject(fullName, newClass);
+        }
 
         return newClass;
     }

@@ -34,7 +34,7 @@ public class PrimSubclass extends PrimObject {
         if (!bootstrapping) {
             SmalltalkClassLoader classLoader = classLoader();
 //            String fullName = classLoader.findPackage(subclassName);
-            classLoader.cacheObject(subclassName, newClass);
+            classLoader.cacheObject("st.redline.examples." + subclassName, newClass);
         }
 
         return newClass;

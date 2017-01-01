@@ -106,6 +106,7 @@ public class PrimObject {
     }
 
     protected String importFor(String name) {
+        System.out.println("** importFor: " + name + " from: " + this);
         if (selfClass != null && selfClass.isMeta())
             return selfClass.importFor(name);
         if (!name.startsWith(DEFAULT_IMPORTED_PACKAGE))

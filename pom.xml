@@ -38,207 +38,116 @@
       <email>ladd.james@gmail.com</email>
     </developer>
   </developers>
-  
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
-  
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven-compiler-plugin-version>3.6.1</maven-compiler-plugin-version>
+        <maven-shade-plugin-version>3.0.0</maven-shade-plugin-version>
+        <maven-surefire-plugin-version>2.20</maven-surefire-plugin-version>
+        <build-helper-maven-plugin-version>3.0.0</build-helper-maven-plugin-version>
+        <junit-version>4.12</junit-version>
+        <antlr4-version>4.7</antlr4-version>
+        <common-logging-version>1.2</common-logging-version>
+        <asm-all-version>5.1</asm-all-version>
+    </properties>
+
   <dependencies>
     <dependency>
       <groupId>org.antlr</groupId>
       <artifactId>antlr4-maven-plugin</artifactId>
-      <version>4.7</version>
+      <version>${antlr4-version}</version>
     </dependency>
     <dependency>
       <groupId>org.ow2.asm</groupId>
       <artifactId>asm-all</artifactId>
-      <version>5.1</version>
+      <version>${asm-all-version}</version>
     </dependency>
     <dependency>
         <groupId>commons-logging</groupId>
         <artifactId>commons-logging</artifactId>
-        <version>1.2</version>
+        <version>${common-logging-version}</version>
     </dependency>
-
   </dependencies>
-  
-  <build>
-    <defaultGoal>install</defaultGoal>
-      <resources>
-          <resource>
-              <directory>${project.basedir}/src/main/smalltalk</directory>
-              <includes>
-                  <include>**/*.st</include>
-              </includes>
-          </resource>
-      </resources>
-      <testResources>
-          <testResource>
-              <directory>${project.basedir}/src/test/java</directory>
-              <includes>
-                  <include>**/*.st</include>
-              </includes>
-          </testResource>
-          <testResource>
-              <directory>${project.basedir}/src/test/smalltalk</directory>
-              <includes>
-                  <include>**/*.st</include>
-              </includes>
-          </testResource>
-      </testResources>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
-        <configuration>
-          <source>1.8</source>
-          <target>1.8</target>
-        </configuration>
-      </plugin>
-    <plugin>
-      <artifactId>maven-dependency-plugin</artifactId>
-      <executions>
-        <execution>
-          <phase>process-sources</phase>
-               <goals>
-                    <goal>copy-dependencies</goal>
-                </goals>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>${build-helper-maven-plugin-version}</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>${basedir}/target/generated-sources</source>
+                                <source>${basedir}/target/generated-test-sources</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${maven-compiler-plugin-version}</version>
                 <configuration>
-                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <source>${maven.compiler.source}</source>
+                    <target>${maven.compiler.target}</target>
+                    <compilerArgument>-Werror</compilerArgument>
+                    <compilerArgument>-Xlint:deprecation</compilerArgument>
+                    <compilerArgument>-Xlint:unchecked</compilerArgument>
                 </configuration>
-            </execution>
-        </executions>
-    </plugin>
-<plugin>
-                                <groupId>org.apache.maven.plugins</groupId>
-                                <artifactId>maven-shade-plugin</artifactId>
-                                <version>2.4.3</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven-surefire-plugin-version}</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${maven-shade-plugin-version}</version>
                 <configuration>
                     <createDependencyReducedPom>false</createDependencyReducedPom>
                 </configuration>
-                                <executions>
-                                        <execution>
-                                                <phase>package</phase>
-                                                <goals>
-                                                        <goal>shade</goal>
-                                                </goals>
-<configuration>
- <artifactSet>
-                <excludes>
-                  <exclude>org.antlr:antlr4-maven-plugin:*</exclude>
-                  <exclude>org.antlr:antlr-runtime:*</exclude>
-                  <exclude>org.antlr:antlr4:*</exclude>
-                  <exclude>antlr:antlr:*</exclude>
-                  <exclude>org.antlr:stringtemplate:*</exclude>
-                  <exclude>org.antlr:ST4:*</exclude>
-                  <exclude>org.sonatype.sisu:*</exclude>
-                  <exclude>org.codehaus.plexus:*</exclude>
-                  <exclude>org.apache.maven.wagon:*</exclude>
-                  <exclude>classworlds:*</exclude>
-                  <exclude>junit:*</exclude>
-                  <exclude>org.apache.maven:*</exclude>
-                  <exclude>log4j:*</exclude>
-                  <exclude>backport-util-concurrent:*</exclude>
-                </excludes>
-              </artifactSet>                         
-<transformers>
-                            <transformer
-                                implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                <!-- Main class -->
-                                <mainClass>st.redline.Stic</mainClass>
-                            </transformer>
-                     </transformers>
-                    </configuration>
-                                        </execution>
-                                </executions>
-                        </plugin>
-    </plugins>
-  </build>
-  
-  <profiles>
-
-      <profile>
-          <id>dev</id>
-          <activation>
-              <activeByDefault>true</activeByDefault>
-          </activation>
-          <build>
-              <plugins>
-                  <plugin>
-                      <groupId>org.codehaus.mojo</groupId>
-                      <artifactId>exec-maven-plugin</artifactId>
-                      <version>1.2.1</version>
-                      <executions>
-                          <execution>
-                              <phase>integration-test</phase>
-                              <goals>
-                                  <goal>exec</goal>
-                              </goals>
-                              <configuration>
-                                  <executable>java</executable>
-                                  <workingDirectory>${project.build.directory}</workingDirectory>
-                                  <arguments>
-                                      <argument>-cp</argument>
-                                      <argument>classes${path.separator}test-classes${path.separator}lib/antlr-runtime-3.4.jar${path.separator}lib/asm-4.1.jar</argument>
-                                      <argument>st.redline.Stic</argument>
-                                      <argument>st.redline.kernel.TestRunner</argument>
-                                  </arguments>
-                              </configuration>
-                          </execution>
-                      </executions>
-                      <configuration>
-                          <workingDirectory>${project.build.directory}</workingDirectory>
-                      </configuration>
-                  </plugin>
-              </plugins>
-          </build>
-      </profile>
-
-    <profile>
-      <id>no-tests</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-surefire-plugin</artifactId>
-            <configuration>
-              <skip>true</skip>
-            </configuration>
-          </plugin>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>junit:*:*</exclude>
+                                    <exclude>org.antlr:antlr-runtime:*:*</exclude>
+                                    <exclude>org.antlr:antlr4-maven-plugin:*:*</exclude>
+                                    <exclude>org.antlr:ST4:*</exclude>
+                                    <exclude>org.junit.platform:*:*</exclude>
+                                    <exclude>org.junit.jupiter:*:*</exclude>
+                                    <exclude>org.sonatype.sisu:*:*</exclude>
+                                    <exclude>org.sonatype.plexus:*:*</exclude>
+                                    <exclude>org.codehaus.plexus:*:*</exclude>
+                                    <exclude>org.glassfish:*:*</exclude>
+                                    <exclude>com.ibm.icu:*:*</exclude>
+                                    <exclude>org.abego.treelayout:*:*</exclude>
+                                    <exclude>org.apache.maven:*:*</exclude>
+                                    <exclude>org.apache.maven.wagon:*:*</exclude>
+                                    <exclude>backport-util-concurrent:*</exclude>
+                                    <exclude>classworlds:*</exclude>
+                                </excludes>
+                            </artifactSet>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
-      </build>
-    </profile>
-
-    <profile>
-      <id>release-sign-artifacts</id>
-      <activation>
-        <property>
-          <name>performRelease</name>
-          <value>true</value>
-        </property>
-      </activation>
-      <build>
-        <plugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-gpg-plugin</artifactId>
-            <version>1.4</version>
-            <executions>
-              <execution>
-                <id>sign-artifacts</id>
-                <phase>verify</phase>
-                <goals>
-                  <goal>sign</goal>
-                </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>    
-    </profile>
-  </profiles>
+    </build>
 </project>

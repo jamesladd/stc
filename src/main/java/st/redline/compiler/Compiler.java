@@ -58,7 +58,7 @@ public class Compiler {
 
     private String sourceContents() {
         String src = source.contents();
-        LOG.info(src);
+        LOG.info("preprocessed source:\n\n" + src);
         return src;
     }
 

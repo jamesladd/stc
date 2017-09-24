@@ -1,6 +1,9 @@
 /* Redline Smalltalk, Copyright (c) James C. Ladd. All rights reserved. See LICENSE in the root of this distribution. */
 package st.redline.classloader;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+
 import java.io.*;
 import java.util.*;
 import java.util.jar.*;
@@ -8,6 +11,8 @@ import java.util.jar.*;
 import static st.redline.classloader.SmalltalkSourceFile.*;
 
 public class SmalltalkSourceFinder implements SourceFinder {
+
+    private static Log LOG = LogFactory.getLog(SmalltalkSourceFinder.class);
 
     private final SourceFactory sourceFactory;
     private final String[] classPaths;
@@ -18,6 +23,7 @@ public class SmalltalkSourceFinder implements SourceFinder {
     }
 
     public Source find(String name) {
+        LOG.info(name);
         String filename = toFilename(name);
         File file = new File(filename);
         if (file.exists())

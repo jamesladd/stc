@@ -43,7 +43,7 @@ public class SmalltalkSourceFinder implements SourceFinder {
         return sources;
     }
 
-    public List<Source> findInPath(String packagePath, String classPath) {
+    private List<Source> findInPath(String packagePath, String classPath) {
         if (isJar(classPath)) {
             return findSourceInInJar(packagePath, classPath);
         } else
@@ -85,7 +85,7 @@ public class SmalltalkSourceFinder implements SourceFinder {
         }
     }
 
-    public JarFile createJarFile(String classPath) throws IOException {
+    private JarFile createJarFile(String classPath) throws IOException {
         return new JarFile(classPath);
     }
 
@@ -105,7 +105,7 @@ public class SmalltalkSourceFinder implements SourceFinder {
 
         private final String name;
 
-        public SourceNotFound(String name) {
+        SourceNotFound(String name) {
             this.name = name;
         }
 

@@ -38,21 +38,16 @@ public class Compiler {
     }
 
     private Generator createGenerator(ParseTree tree) {
-        return new Generator(tree, createVisitor());
+        return new Generator(tree, createVisitor(new ByteCodeEmitter()));
     }
 
-    private SmalltalkGeneratingVisitor createVisitor() {
-        return new SmalltalkGeneratingVisitor(source);
+    private SmalltalkGeneratingVisitor createVisitor(Emitter emitter) {
+        return new SmalltalkGeneratingVisitor(source, emitter);
     }
 
     private ParseTree parse(String input) {
         SmalltalkLexer lexer = new SmalltalkLexer(new ANTLRInputStream(input));
         SmalltalkParser parser = new SmalltalkParser(new CommonTokenStream(lexer));
-
-        // dump tree
-        // System.out.println(parser.script().toStringTree(parser));
-        // System.out.flush();
-
         return parser.script();
     }
 

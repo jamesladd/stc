@@ -15,6 +15,6 @@ public class Generator {
 
     public byte[] generate() {
         visitor.visit(tree);
-        return visitor.generatedClassBytes();
+        return visitor.generatedBytes();
     }
 }

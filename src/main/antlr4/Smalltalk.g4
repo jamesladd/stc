@@ -5,10 +5,10 @@
  */
 grammar Smalltalk;
 
-script : sequence EOF;
-sequence : temps? ws statements?;
+script : sequence ws EOF;
+sequence : temps? ws statements? ws;
 ws : (SEPARATOR | COMMENT)*;
-temps : PIPE (ws IDENTIFIER)+ ws PIPE;
+temps : ws PIPE (ws IDENTIFIER)+ ws PIPE;
 statements : answer ws # StatementAnswer
            | expressions ws PERIOD ws answer # StatementExpressionsAnswer
            | expressions PERIOD? ws # StatementExpressions
@@ -30,7 +30,7 @@ operand : literal | reference | subexpression;
 subexpression : OPEN_PAREN ws expression ws CLOSE_PAREN;
 literal : runtimeLiteral | parsetimeLiteral;
 runtimeLiteral : dynamicDictionary | dynamicArray | block;
-block : BLOCK_START blockParamList? ws? (PIPE ws)? sequence? BLOCK_END;
+block : BLOCK_START blockParamList? ws (PIPE ws)? sequence BLOCK_END;
 blockParamList : (ws BLOCK_PARAM)+;
 dynamicDictionary : DYNDICT_START ws expressions? ws DYNARR_END;
 dynamicArray : DYNARR_START ws expressions? ws DYNARR_END;
@@ -45,7 +45,7 @@ pseudoVariable : RESERVED_WORD;
 string : STRING;
 symbol : HASH bareSymbol;
 primitive : LT ws KEYWORD ws DIGIT+ ws GT;
-bareSymbol : (IDENTIFIER | BINARY_SELECTOR) | KEYWORD+ | string;
+bareSymbol : (IDENTIFIER | BINARY_SELECTOR) | KEYWORD+ | string | PIPE+;
 literalArray : LITARR_START literalArrayRest;
 literalArrayRest : (ws (parsetimeLiteral | bareLiteralArray | bareSymbol))* ws CLOSE_PAREN;
 bareLiteralArray : OPEN_PAREN literalArrayRest;

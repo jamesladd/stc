@@ -1,6 +1,9 @@
+/* Redline Smalltalk, Copyright (c) James C. Ladd. All rights reserved. See LICENSE in the root of this distribution. */
 package st.redline;
 
 import st.redline.classloader.*;
+
+import java.io.*;
 
 public class Stic {
 
@@ -23,19 +26,27 @@ public class Stic {
     }
 
     private Class loadScript(String name) throws ClassNotFoundException {
-        return classLoader().loadClass(name);
+        return classLoader().loadScript(name);
     }
 
-    private ClassLoader classLoader() {
-        return new SmalltalkClassLoader(currentClassLoader(), sourceFinder(), bootstrapper());
-    }
-
-    private Bootstrapper bootstrapper() {
-        return new Bootstrapper();
+    private SmalltalkClassLoader classLoader() {
+        return new SmalltalkClassLoader(currentClassLoader(), sourceFinder());
     }
 
     private SourceFinder sourceFinder() {
-        return new SmalltalkSourceFinder();
+        return new SmalltalkSourceFinder(sourceFactory(), classPaths());
+    }
+
+    private SourceFactory sourceFactory() {
+        return new SourceFactory();
+    }
+
+    public String[] classPaths() {
+        return classPath().split(File.pathSeparator);
+    }
+
+    private String classPath() {
+        return System.getProperty("java.class.path");
     }
 
     private ClassLoader currentClassLoader() {
@@ -47,7 +58,7 @@ public class Stic {
     }
 
     private String defaultScriptName() {
-        return "st.redline.NoArguments";
+        return "st.redline.script.NoArguments";
     }
 
     private String firstArgument() {

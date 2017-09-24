@@ -1,6 +1,5 @@
-// Generated from Smalltalk.g4 by ANTLR 4.1
+// Generated from Smalltalk.g4 by ANTLR 4.7
 package st.redline.compiler;
-import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
 
 /**
@@ -12,404 +11,357 @@ import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
  * operations with no return type.
  */
 public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements SmalltalkVisitor<T> {
-	public byte[] generatedClassBytes() { return null; }
-	/**
-	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
-	 */
-	@Override public T visitSymbol(@NotNull SmalltalkParser.SymbolContext ctx) { return visitChildren(ctx); }
+
+	public byte[] generatedClassBytes() { return null; };
 
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitUnaryTail(@NotNull SmalltalkParser.UnaryTailContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitScript(SmalltalkParser.ScriptContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitBlockParamList(@NotNull SmalltalkParser.BlockParamListContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitSequence(SmalltalkParser.SequenceContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitKeywords(@NotNull SmalltalkParser.KeywordsContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitWs(SmalltalkParser.WsContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitKeywordSend(@NotNull SmalltalkParser.KeywordSendContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitTemps(SmalltalkParser.TempsContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitUnaryMessage(@NotNull SmalltalkParser.UnaryMessageContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitStatementAnswer(SmalltalkParser.StatementAnswerContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitTemps(@NotNull SmalltalkParser.TempsContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitStatementExpressionsAnswer(SmalltalkParser.StatementExpressionsAnswerContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitStFloat(@NotNull SmalltalkParser.StFloatContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitStatementExpressions(SmalltalkParser.StatementExpressionsContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitReference(@NotNull SmalltalkParser.ReferenceContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitAnswer(SmalltalkParser.AnswerContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitNumber(@NotNull SmalltalkParser.NumberContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitExpression(SmalltalkParser.ExpressionContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitDynamicDictionary(@NotNull SmalltalkParser.DynamicDictionaryContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitExpressions(SmalltalkParser.ExpressionsContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitBlock(@NotNull SmalltalkParser.BlockContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitExpressionList(SmalltalkParser.ExpressionListContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitHex(@NotNull SmalltalkParser.HexContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitCascade(SmalltalkParser.CascadeContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitStatementExpressions(@NotNull SmalltalkParser.StatementExpressionsContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitMessage(SmalltalkParser.MessageContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitLiteralArrayRest(@NotNull SmalltalkParser.LiteralArrayRestContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitAssignment(SmalltalkParser.AssignmentContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitCascade(@NotNull SmalltalkParser.CascadeContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitVariable(SmalltalkParser.VariableContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitStInteger(@NotNull SmalltalkParser.StIntegerContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitBinarySend(SmalltalkParser.BinarySendContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitBinarySend(@NotNull SmalltalkParser.BinarySendContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitUnarySend(SmalltalkParser.UnarySendContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitExpressions(@NotNull SmalltalkParser.ExpressionsContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitKeywordSend(SmalltalkParser.KeywordSendContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitScript(@NotNull SmalltalkParser.ScriptContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitKeywordMessage(SmalltalkParser.KeywordMessageContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitStatementExpressionsAnswer(@NotNull SmalltalkParser.StatementExpressionsAnswerContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitKeywordPair(SmalltalkParser.KeywordPairContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitSequence(@NotNull SmalltalkParser.SequenceContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitOperand(SmalltalkParser.OperandContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitExpressionList(@NotNull SmalltalkParser.ExpressionListContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitSubexpression(SmalltalkParser.SubexpressionContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitNumberExp(@NotNull SmalltalkParser.NumberExpContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitLiteral(SmalltalkParser.LiteralContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitString(@NotNull SmalltalkParser.StringContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitRuntimeLiteral(SmalltalkParser.RuntimeLiteralContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitPrimitive(@NotNull SmalltalkParser.PrimitiveContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitBlock(SmalltalkParser.BlockContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitUnarySend(@NotNull SmalltalkParser.UnarySendContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitBlockParamList(SmalltalkParser.BlockParamListContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitKeywordMessage(@NotNull SmalltalkParser.KeywordMessageContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitDynamicDictionary(SmalltalkParser.DynamicDictionaryContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitSubexpression(@NotNull SmalltalkParser.SubexpressionContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitDynamicArray(SmalltalkParser.DynamicArrayContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitLiteral(@NotNull SmalltalkParser.LiteralContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitParsetimeLiteral(SmalltalkParser.ParsetimeLiteralContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitBareSymbol(@NotNull SmalltalkParser.BareSymbolContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitNumber(SmalltalkParser.NumberContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitDynamicArray(@NotNull SmalltalkParser.DynamicArrayContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitNumberExp(SmalltalkParser.NumberExpContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitWs(@NotNull SmalltalkParser.WsContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitCharConstant(SmalltalkParser.CharConstantContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitPseudoVariable(@NotNull SmalltalkParser.PseudoVariableContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitHex(SmalltalkParser.HexContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitExpression(@NotNull SmalltalkParser.ExpressionContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitStInteger(SmalltalkParser.StIntegerContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitStatementAnswer(@NotNull SmalltalkParser.StatementAnswerContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitStFloat(SmalltalkParser.StFloatContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitBareLiteralArray(@NotNull SmalltalkParser.BareLiteralArrayContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitPseudoVariable(SmalltalkParser.PseudoVariableContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitUnarySelector(@NotNull SmalltalkParser.UnarySelectorContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitString(SmalltalkParser.StringContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitAssignment(@NotNull SmalltalkParser.AssignmentContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitSymbol(SmalltalkParser.SymbolContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitMessage(@NotNull SmalltalkParser.MessageContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitPrimitive(SmalltalkParser.PrimitiveContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitBinaryMessage(@NotNull SmalltalkParser.BinaryMessageContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitBareSymbol(SmalltalkParser.BareSymbolContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitCharConstant(@NotNull SmalltalkParser.CharConstantContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitLiteralArray(SmalltalkParser.LiteralArrayContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitParsetimeLiteral(@NotNull SmalltalkParser.ParsetimeLiteralContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitLiteralArrayRest(SmalltalkParser.LiteralArrayRestContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitAnswer(@NotNull SmalltalkParser.AnswerContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitBareLiteralArray(SmalltalkParser.BareLiteralArrayContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitKeywordPair(@NotNull SmalltalkParser.KeywordPairContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitUnaryTail(SmalltalkParser.UnaryTailContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitBinaryTail(@NotNull SmalltalkParser.BinaryTailContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitUnaryMessage(SmalltalkParser.UnaryMessageContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitLiteralArray(@NotNull SmalltalkParser.LiteralArrayContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitUnarySelector(SmalltalkParser.UnarySelectorContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitVariable(@NotNull SmalltalkParser.VariableContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitKeywords(SmalltalkParser.KeywordsContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitRuntimeLiteral(@NotNull SmalltalkParser.RuntimeLiteralContext ctx) { return visitChildren(ctx); }
-
+	@Override public T visitReference(SmalltalkParser.ReferenceContext ctx) { return visitChildren(ctx); }
 	/**
 	 * {@inheritDoc}
-	 * <p/>
-	 * The default implementation returns the result of calling
-	 * {@link #visitChildren} on {@code ctx}.
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
 	 */
-	@Override public T visitOperand(@NotNull SmalltalkParser.OperandContext ctx) { return visitChildren(ctx); }
+	@Override public T visitBinaryTail(SmalltalkParser.BinaryTailContext ctx) { return visitChildren(ctx); }
+	/**
+	 * {@inheritDoc}
+	 *
+	 * <p>The default implementation returns the result of calling
+	 * {@link #visitChildren} on {@code ctx}.</p>
+	 */
+	@Override public T visitBinaryMessage(SmalltalkParser.BinaryMessageContext ctx) { return visitChildren(ctx); }
 }

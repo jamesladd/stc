@@ -1,12 +1,16 @@
+/* Redline Smalltalk, Copyright (c) James C. Ladd. All rights reserved. See LICENSE in the root of this distribution. */
 package st.redline.classloader;
 
 import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/* Note: Move the preprocessing resposibility into an inner class. */
+/* Note: Move the preprocessing responsibility into an inner class. */
 
 public class SmalltalkSourceFile implements Source, LineTransformer {
+
+    public static final String SEPARATOR = "/";
+    public static final String SOURCE_EXTENSION = ".st";
 
     private static final Pattern METHOD_START_PATTERN = Pattern.compile("^[-+] .*\\s");
     private static final Pattern METHOD_UNARY_PATTERN = Pattern.compile("^\\w+[^:|\\s]");
@@ -19,24 +23,30 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
     private static final String METHOD_PUT_SELECTOR = "withMethod:";
     private static final String CLASS_METHOD_INDICATOR = "+ ";
     private static final String NEWLINE = System.getProperty("line.separator");
-    private static final String SOURCE_FILE_EXTENSION = ".st";
 
     private final String name;
     private final String filename;
     private final File file;
+    private final String classpath;
     private final SourceReader reader;
     private boolean methods;
-    private String className;
-    private String selector;
-    private String arguments;
-    private String fullClassName;
+    protected String className;
+    protected String selector;
+    protected String arguments;
+    protected String fullClassName;
+    protected String packageName;
 
-    public SmalltalkSourceFile(String name, String filename, File file, SourceReader reader) {
+    public SmalltalkSourceFile(String name, String filename, File file, String classpath, SourceReader reader) {
         this.name = name;
         this.filename = filename;
         this.file = file;
+        this.classpath = classpath;
         this.reader = reader;
         this.methods = false;
+    }
+
+    public boolean exists() {
+        return true;
     }
 
     public boolean hasContent() {
@@ -54,7 +64,7 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
     }
 
     public String fileExtension() {
-        return SOURCE_FILE_EXTENSION;
+        return SOURCE_EXTENSION;
     }
 
     private String methodDefinitionTransformation(String line) {
@@ -129,19 +139,42 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
         return line.startsWith(CLASS_METHOD_INDICATOR);
     }
 
+    public String classpath() {
+        return classpath;
+    }
+
+    public String name() {
+        return name;
+    }
+
     public String className() {
-        if (className == null)
-            className = withoutExtension(filename());
-        return className;
+        return name();
     }
 
     public String fullClassName() {
         if (fullClassName == null)
-            fullClassName = withoutExtension(fullFilename());
+            fullClassName = withoutClassPath(withoutExtension(filename()));
         return fullClassName;
     }
 
-    private String withoutExtension(String filename) {
+    public String packageName() {
+        if (packageName == null) {
+            packageName = fullClassName();
+            int index = packageName.lastIndexOf(File.separatorChar);
+            if (index != -1)
+                packageName = packageName.substring(0, index);
+            packageName = packageName.replaceAll(String.valueOf(File.separatorChar), ".");
+        }
+        return packageName;
+    }
+
+    private String withoutClassPath(String filename) {
+        if (classpath.length() > 0 && filename.startsWith(classpath))
+            return filename.substring(classpath.length() + 1);
+        return filename;
+    }
+
+    protected String withoutExtension(String filename) {
         return filename.substring(0, filename.lastIndexOf("."));
     }
 
@@ -150,7 +183,7 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
     }
 
     public String filename() {
-        return file.getName();
+        return filename;
     }
 
     public String fullFilename() {

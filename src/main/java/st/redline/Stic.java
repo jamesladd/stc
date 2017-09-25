@@ -2,6 +2,7 @@
 package st.redline;
 
 import st.redline.classloader.*;
+import st.redline.kernel.Smalltalk;
 
 import java.io.*;
 
@@ -22,7 +23,15 @@ public class Stic {
     }
 
     private void run(Class cls) throws IllegalAccessException, InstantiationException {
-        cls.newInstance();
+        // Instantiate Class that contains the message sends embodied in the Smalltalk class.
+        Script script = (Script) cls.newInstance();
+        // Call 'sendMessages' with a Smalltalk instance to invoke all the message sends
+        // embodied in the Smalltalk class.
+        System.out.println(script.sendMessages(smalltalk()));
+    }
+
+    private Smalltalk smalltalk() {
+        return new RedlineSmalltalk();
     }
 
     private Class loadScript(String name) throws ClassNotFoundException {

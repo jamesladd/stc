@@ -11,4 +11,5 @@ public interface Source {
     String fileExtension();
     String packageName();
     String classpath();
+    int firstLineNumber();
 }

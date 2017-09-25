@@ -146,5 +146,10 @@ public class SmalltalkSourceFinder implements SourceFinder {
         public String classpath() {
             return "";
         }
+
+        @Override
+        public int firstLineNumber() {
+            return 0;
+        }
     }
 }

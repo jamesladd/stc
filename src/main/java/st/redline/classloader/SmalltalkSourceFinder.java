@@ -28,51 +28,72 @@ public class SmalltalkSourceFinder implements SourceFinder {
         File file = new File(filename);
         if (file.exists())
             return sourceFile(filename, file, "");
+        String packageName = toPackageName(name);
+        List<Source> sources = findIn(packageName, filename);
+        if (!sources.isEmpty())
+            return sources.get(0);
         return new SourceNotFound(name);
     }
 
-    public List<Source> findIn(String packageName) {
-        return findInPath(packageName);
+    public List<Source> findIn(String packageName, String filename) {
+        return findInPath(packageName, filename);
     }
 
-    private List<Source> findInPath(String path) {
+    private List<Source> findInPath(String path, String filename) {
         String packagePath = path.replace(".", SEPARATOR);
         List<Source> sources = new ArrayList<>();
-        for (String classPath : classPaths)
-            sources.addAll(findInPath(packagePath, classPath));
+        for (String classPath : classPaths) {
+            sources.addAll(findInPath(packagePath, classPath, filename));
+            // Short circuit search if we are finding with filename != null.
+            if (filename != null && !sources.isEmpty())
+                return sources;
+        }
         return sources;
     }
 
-    private List<Source> findInPath(String packagePath, String classPath) {
+    private List<Source> findInPath(String packagePath, String classPath, String filename) {
         if (isJar(classPath)) {
-            return findSourceInInJar(packagePath, classPath);
+            return findSourceInInJar(packagePath, classPath, filename);
         } else
-            return findSourceInFile(packagePath, classPath);
+            return findSourceInFile(packagePath, classPath, filename);
     }
 
     @SuppressWarnings("unchecked")
-    private List<Source> findSourceInFile(String packagePath, String classPath) {
+    private List<Source> findSourceInFile(String packagePath, String classPath, String filename) {
         File folder = new File(classPath + SEPARATOR + packagePath);
         if (!folder.isDirectory())
             return Collections.EMPTY_LIST;
         List<Source> sources = new ArrayList<>();
         File[] files = folder.listFiles();
         if (files != null)
-            for (File file : files)
+            for (File file : files) {
                 if (file.isFile() && file.getName().endsWith(SOURCE_EXTENSION))
-                    sources.add(sourceFile(packagePath + SEPARATOR + file.getName(), file, classPath));
+                    // Short circuit search if we are finding with filename != null.
+                    if (filename == null)
+                        sources.add(sourceFile(packagePath + SEPARATOR + file.getName(), file, classPath));
+                    else if (file.getName().endsWith(filename)) {
+                        sources.add(sourceFile(packagePath + SEPARATOR + file.getName(), file, classPath));
+                        return sources;
+                    }
+            }
         return sources;
     }
 
-    private List<Source> findSourceInInJar(String packagePath, String classPath) {
+    private List<Source> findSourceInInJar(String packagePath, String classPath, String filename) {
         List<Source> sources = new ArrayList<>();
         JarFile jarFile = tryCreateJarFile(classPath);
         for (Enumeration em1 = jarFile.entries(); em1.hasMoreElements();) {
             String entry = em1.nextElement().toString();
             int lastSlash = entry.lastIndexOf('/');
             int pathLength = packagePath.length();
-            if (entry.startsWith(packagePath) && pathLength == lastSlash && entry.endsWith(".st"))
-                sources.add(sourceFactory.createFromJar(entry, classPath));
+            if (entry.startsWith(packagePath) && pathLength == lastSlash && entry.endsWith(".st")) {
+                // Short circuit search if we are finding with filename != null.
+                if (entry.equals(filename)) {
+                    sources.add(sourceFactory.createFromJar(entry, classPath));
+                    return sources;
+                } else if (filename == null)
+                    sources.add(sourceFactory.createFromJar(entry, classPath));
+            }
         }
         return sources;
     }
@@ -99,6 +120,13 @@ public class SmalltalkSourceFinder implements SourceFinder {
 
     private String toFilename(String name) {
         return name.replaceAll("\\.", File.separator) + SOURCE_EXTENSION;
+    }
+
+    public String toPackageName(String name) {
+        int index = name.lastIndexOf(".");
+        if (index == -1)
+            return "";
+        return name.substring(0, index);
     }
 
     public class SourceNotFound implements Source {

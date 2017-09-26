@@ -6,5 +6,5 @@ import java.util.*;
 public interface SourceFinder {
 
     Source find(String name);
-    List<Source> findIn(String packageName);
+    List<Source> findIn(String packageName, String filename);
 }

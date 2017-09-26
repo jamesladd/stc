@@ -72,6 +72,14 @@
   </dependencies>
 
     <build>
+        <resources>
+            <resource>
+                <directory>src/main/smalltalk</directory>
+                <includes>
+                    <include>**/*.st</include>
+                </includes>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -144,6 +152,12 @@
                                     <exclude>classworlds:*</exclude>
                                 </excludes>
                             </artifactSet>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <!-- Main class -->
+                                    <mainClass>st.redline.Stic</mainClass>
+                                </transformer>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>

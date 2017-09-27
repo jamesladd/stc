@@ -32,7 +32,7 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 
 	@Override
 	public T visitWs(SmalltalkParser.WsContext ctx) {
-		LOG.info("visit");
+//		LOG.info("visit");
 		return visitChildren(ctx);
 	}
 

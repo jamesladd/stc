@@ -186,7 +186,7 @@ public class SmalltalkSourceFinder implements SourceFinder {
 
         @Override
         public int firstSourceLineNumber() {
-            return 1;
+            return 0;
         }
     }
 }

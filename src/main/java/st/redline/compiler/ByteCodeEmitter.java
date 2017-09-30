@@ -110,7 +110,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
 
     private void visitLine(MethodVisitor mv, int line) {
         // We adjust the line number as the pre-processor may have prepended source lines.
-        int adjustedSourceLine = line - source.firstSourceLineNumber();
+        int adjustedSourceLine = line - source.countOfLinesAddedByPreprocessor();
         Label l0 = new Label();
         mv.visitLabel(l0);
         mv.visitLineNumber(adjustedSourceLine, l0);

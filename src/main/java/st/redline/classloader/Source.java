@@ -11,5 +11,5 @@ public interface Source {
     String fileExtension();
     String packageName();
     String classpath();
-    int firstSourceLineNumber();
+    int countOfLinesAddedByPreprocessor();
 }

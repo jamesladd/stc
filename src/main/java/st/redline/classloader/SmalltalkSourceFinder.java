@@ -185,7 +185,7 @@ public class SmalltalkSourceFinder implements SourceFinder {
         }
 
         @Override
-        public int firstSourceLineNumber() {
+        public int countOfLinesAddedByPreprocessor() {
             return 0;
         }
     }

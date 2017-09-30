@@ -75,7 +75,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     private void makeJavaClassInitializer() {
         MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
         mv.visitCode();
-        visitLine(mv, 1);
+        visitLine(mv, 0);
         mv.visitVarInsn(ALOAD, 0);
         mv.visitMethodInsn(INVOKESPECIAL, superclassName(), "<init>", "()V", false);
 

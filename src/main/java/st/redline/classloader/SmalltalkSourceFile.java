@@ -147,7 +147,7 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
     public int firstSourceLineNumber() {
         // First source line number is the Authors first source line taking
         // into account there may be other Smalltalk lines prepended by the preprocessor.
-        // Ie: lines added by preprocessor - 1.
+        // ie: return count of lines added by preprocessor.
         return 0;
     }
 

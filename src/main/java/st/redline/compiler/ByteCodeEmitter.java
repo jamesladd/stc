@@ -29,6 +29,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     private final ClassWriter cw;
     private MethodVisitor mv;
     private byte[] classBytes;
+    private Source source;
 
     ByteCodeEmitter() {
         cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
@@ -45,11 +46,12 @@ class ByteCodeEmitter implements Emitter, Opcodes {
 
     @Override
     public void openClass(Source source) {
+        this.source = source;
         if (isTraceEnabled(LOG))
             LOG.trace(source.fullClassName());
         cw.visit(BYTECODE_VERSION, ACC_PUBLIC + ACC_SUPER, source.fullClassName(), null, superclassName(), new String[] {"st/redline/classloader/Script"});
         cw.visitSource(source.className() + source.fileExtension(), null);
-        makeJavaClassInitializer(source);
+        makeJavaClassInitializer();
         openSendMessagesMethod();
     }
 
@@ -70,12 +72,10 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         return "java/lang/Object";
     }
 
-    private void makeJavaClassInitializer(Source source) {
+    private void makeJavaClassInitializer() {
         MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "()V", null, null);
         mv.visitCode();
-        Label l0 = new Label();
-        mv.visitLabel(l0);
-        mv.visitLineNumber(source.firstLineNumber(), l0);
+        visitLine(mv, 1);
         mv.visitVarInsn(ALOAD, 0);
         mv.visitMethodInsn(INVOKESPECIAL, superclassName(), "<init>", "()V", false);
 
@@ -85,7 +85,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     @Override
-    public void closeClass(Source source) {
+    public void closeClass() {
         if (isTraceEnabled(LOG))
             LOG.trace(source.fullClassName());
         closeSendMessagesMethod();
@@ -102,5 +102,13 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         mv.visitInsn(ARETURN);
         mv.visitMaxs(0, 0);
         mv.visitEnd();
+    }
+
+    private void visitLine(MethodVisitor mv, int line) {
+        // We adjust the line number as the pre-processor may have prepended source lines.
+        int adjustedSourceLine = line - source.firstSourceLineNumber();
+        Label l0 = new Label();
+        mv.visitLabel(l0);
+        mv.visitLineNumber(adjustedSourceLine, l0);
     }
 }

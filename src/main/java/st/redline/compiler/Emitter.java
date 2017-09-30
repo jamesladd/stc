@@ -7,5 +7,5 @@ interface Emitter {
 
     byte[] generatedBytes();
     void openClass(Source source);
-    void closeClass(Source source);
+    void closeClass();
 }

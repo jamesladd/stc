@@ -34,7 +34,7 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
             LOG.trace("visit");
         emitter.openClass(source);
         visitor().visitChildren(ctx);
-        emitter.closeClass(source);
+        emitter.closeClass();
         return null;
     }
 }

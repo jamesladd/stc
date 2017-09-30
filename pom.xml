@@ -50,6 +50,7 @@
         <junit-version>4.12</junit-version>
         <antlr4-version>4.7</antlr4-version>
         <common-logging-version>1.2</common-logging-version>
+        <log4j-version>1.2.17</log4j-version>
         <asm-all-version>5.1</asm-all-version>
     </properties>
 
@@ -69,6 +70,11 @@
         <artifactId>commons-logging</artifactId>
         <version>${common-logging-version}</version>
     </dependency>
+    <dependency>
+        <groupId>log4j</groupId>
+        <artifactId>log4j</artifactId>
+        <version>${log4j-version}</version>
+    </dependency>
   </dependencies>
 
     <build>
@@ -77,6 +83,12 @@
                 <directory>src/main/smalltalk</directory>
                 <includes>
                     <include>**/*.st</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/config</directory>
+                <includes>
+                    <include>**/*</include>
                 </includes>
             </resource>
         </resources>

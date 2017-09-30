@@ -41,7 +41,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
 
     @Override
     public void openClass(Source source) {
-        LOG.info("openClass: " + source.fullClassName());
+        LOG.info(source.fullClassName());
         cw.visit(BYTECODE_VERSION, ACC_PUBLIC + ACC_SUPER, source.fullClassName(), null, superclassName(), new String[] {"st/redline/classloader/Script"});
         cw.visitSource(source.className() + source.fileExtension(), null);
         makeJavaClassInitializer(source);
@@ -79,7 +79,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
 
     @Override
     public void closeClass(Source source) {
-        LOG.info("closeClass: " + source.fullClassName());
+        LOG.info(source.fullClassName());
         closeSendMessagesMethod();
         mv.visitMaxs(1, 1);
         mv.visitEnd();

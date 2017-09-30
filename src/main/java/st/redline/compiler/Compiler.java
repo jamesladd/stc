@@ -53,8 +53,13 @@ public class Compiler {
 
     private String sourceContents() {
         String src = source.contents();
-        LOG.info("preprocessed source:\n\n" + src);
+        if (isTraceEnabled(LOG))
+            LOG.trace("preprocessed source:\n" + src);
         return src;
+    }
+
+    protected boolean isTraceEnabled(Log log) {
+        return log.isTraceEnabled();
     }
 
     private boolean haveSource() {

@@ -30,7 +30,8 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
 
     @Override
     public Void visitScript(SmalltalkParser.ScriptContext ctx) {
-        LOG.info("visit");
+        if (isTraceEnabled(LOG))
+            LOG.trace("visit");
         emitter.openClass(source);
         visitor().visitChildren(ctx);
         emitter.closeClass(source);

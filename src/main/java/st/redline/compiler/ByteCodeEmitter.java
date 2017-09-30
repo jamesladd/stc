@@ -34,6 +34,10 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
     }
 
+    protected boolean isTraceEnabled(Log log) {
+        return log.isTraceEnabled();
+    }
+
     @Override
     public byte[] generatedBytes() {
         return classBytes;
@@ -41,7 +45,8 @@ class ByteCodeEmitter implements Emitter, Opcodes {
 
     @Override
     public void openClass(Source source) {
-        LOG.info(source.fullClassName());
+        if (isTraceEnabled(LOG))
+            LOG.trace(source.fullClassName());
         cw.visit(BYTECODE_VERSION, ACC_PUBLIC + ACC_SUPER, source.fullClassName(), null, superclassName(), new String[] {"st/redline/classloader/Script"});
         cw.visitSource(source.className() + source.fileExtension(), null);
         makeJavaClassInitializer(source);
@@ -49,6 +54,8 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     private void openSendMessagesMethod() {
+        if (isTraceEnabled(LOG))
+            LOG.trace("");
         mv = cw.visitMethod(ACC_PUBLIC, "sendMessages", SEND_MESSAGES_SIG, null, null);
         mv.visitCode();
 
@@ -79,7 +86,8 @@ class ByteCodeEmitter implements Emitter, Opcodes {
 
     @Override
     public void closeClass(Source source) {
-        LOG.info(source.fullClassName());
+        if (isTraceEnabled(LOG))
+            LOG.trace(source.fullClassName());
         closeSendMessagesMethod();
         mv.visitMaxs(1, 1);
         mv.visitEnd();
@@ -88,6 +96,8 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     private void closeSendMessagesMethod() {
+        if (isTraceEnabled(LOG))
+            LOG.trace("");
         mv.visitInsn(ACONST_NULL);  // <- Currently sendMessages will return NULL.
         mv.visitInsn(ARETURN);
         mv.visitMaxs(0, 0);

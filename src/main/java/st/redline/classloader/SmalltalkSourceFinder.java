@@ -25,8 +25,13 @@ public class SmalltalkSourceFinder implements SourceFinder {
         this.sourceCache = new HashMap<>();
     }
 
+    protected boolean isTraceEnabled(Log log) {
+        return log.isTraceEnabled();
+    }
+
     public Source find(String name) {
-        LOG.info(name);
+        if (isTraceEnabled(LOG))
+            LOG.trace(name);
         String packageName = toPackageName(name);
         if (notInSourceCache(packageName))
             cacheSources(packageName);
@@ -36,7 +41,8 @@ public class SmalltalkSourceFinder implements SourceFinder {
 
     private void cacheSources(String packageName) {
         // Cache Smalltalk sources found in <packageName> along classPath.
-        LOG.info(packageName);
+        if (isTraceEnabled(LOG))
+            LOG.trace(packageName);
         List<Source> sources = findIn(packageName);
         for (Source source : sources) {
             if (notInSourceCache(packageName))

@@ -16,8 +16,13 @@ public class SmalltalkClassLoader extends ClassLoader {
         this.sourceFinder = sourceFinder;
     }
 
+    protected boolean isTraceEnabled(Log log) {
+        return log.isTraceEnabled();
+    }
+
     public Class findClass(String name) throws ClassNotFoundException {
-        LOG.info(name);
+        if (isTraceEnabled(LOG))
+            LOG.trace(name);
         Class cls = cachedClass(name);
         if (cls != null)
             return cls;

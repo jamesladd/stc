@@ -1,8 +1,11 @@
 // Generated from Smalltalk.g4 by ANTLR 4.7
 package st.redline.compiler;
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.util.List;
 
 /**
  * This class provides an empty implementation of {@link SmalltalkVisitor},
@@ -73,7 +76,7 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	@Override
 	public T visitAnswer(SmalltalkParser.AnswerContext ctx) {
 		if (isTraceEnabled(LOG))
-			LOG.trace("visit");
+			LOG.trace(trace(ctx.CARROT()));
 		return visitChildren(ctx);
 	}
 
@@ -122,7 +125,7 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	@Override
 	public T visitVariable(SmalltalkParser.VariableContext ctx) {
 		if (isTraceEnabled(LOG))
-			LOG.trace("visit");
+			LOG.trace(trace(ctx.IDENTIFIER()));
 		return visitChildren(ctx);
 	}
 
@@ -157,7 +160,7 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	@Override
 	public T visitKeywordPair(SmalltalkParser.KeywordPairContext ctx) {
 		if (isTraceEnabled(LOG))
-			LOG.trace("visit");
+			LOG.trace(trace(ctx.KEYWORD()));
 		return visitChildren(ctx);
 	}
 
@@ -192,7 +195,7 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	@Override
 	public T visitBlock(SmalltalkParser.BlockContext ctx) {
 		if (isTraceEnabled(LOG))
-			LOG.trace("visit");
+			LOG.trace(trace(ctx.BLOCK_START()));
 		return visitChildren(ctx);
 	}
 
@@ -269,7 +272,7 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	@Override
 	public T visitPseudoVariable(SmalltalkParser.PseudoVariableContext ctx) {
 		if (isTraceEnabled(LOG))
-			LOG.trace("visit");
+			LOG.trace(trace(ctx.RESERVED_WORD()));
 		return visitChildren(ctx);
 	}
 
@@ -283,7 +286,7 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	@Override
 	public T visitSymbol(SmalltalkParser.SymbolContext ctx) {
 		if (isTraceEnabled(LOG))
-			LOG.trace("visit");
+			LOG.trace(ctx.HASH());
 		return visitChildren(ctx);
 	}
 
@@ -297,7 +300,7 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	@Override
 	public T visitBareSymbol(SmalltalkParser.BareSymbolContext ctx) {
 		if (isTraceEnabled(LOG))
-			LOG.trace("visit");
+			LOG.trace(trace(ctx.IDENTIFIER(), ctx.BINARY_SELECTOR(), ctx.KEYWORD(), ctx.PIPE()));
 		return visitChildren(ctx);
 	}
 
@@ -339,7 +342,7 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	@Override
 	public T visitUnarySelector(SmalltalkParser.UnarySelectorContext ctx) {
 		if (isTraceEnabled(LOG))
-			LOG.trace("visit");
+			LOG.trace(trace(ctx.IDENTIFIER()));
 		return visitChildren(ctx);
 	}
 
@@ -369,5 +372,26 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 		if (isTraceEnabled(LOG))
 			LOG.trace("visit");
 		return visitChildren(ctx);
+	}
+
+	@SuppressWarnings("unchecked")
+	private String trace(Object ... nodes) {
+		for (Object node : nodes)
+			if (node instanceof TerminalNode)
+				return traceNode((TerminalNode) node);
+			else if (node instanceof List)
+				return traceNodes((List<TerminalNode>) node);
+		return "!Unknown TerminalNode: " + nodes.getClass();
+	}
+
+	private String traceNodes(List<TerminalNode> nodes) {
+		String trace = "L" + nodes.get(0).getSymbol().getLine() + " ";
+		for (TerminalNode node : nodes)
+			trace = trace + node.getSymbol().getText();
+		return trace;
+	}
+
+	private String traceNode(TerminalNode node) {
+		return "" + node.getSymbol().getLine() + ":" + (1 + node.getSymbol().getCharPositionInLine()) + " " + node.getSymbol().getText();
 	}
 }

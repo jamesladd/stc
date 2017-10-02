@@ -35,7 +35,7 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	@Override
 	public T visitSequence(SmalltalkParser.SequenceContext ctx) {
 		if (isTraceEnabled(LOG))
-			LOG.trace(trace(ctx.temps()));
+			LOG.trace("visit");
 		return visitChildren(ctx);
 	}
 

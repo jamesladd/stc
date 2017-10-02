@@ -35,7 +35,7 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	@Override
 	public T visitSequence(SmalltalkParser.SequenceContext ctx) {
 		if (isTraceEnabled(LOG))
-			LOG.trace("visit");
+			LOG.trace(trace(ctx.temps()));
 		return visitChildren(ctx);
 	}
 
@@ -381,7 +381,7 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 				return traceNode((TerminalNode) node);
 			else if (node instanceof List)
 				return traceNodes((List<TerminalNode>) node);
-		return "!Unknown TerminalNode: " + nodes.getClass();
+		return "!Unknown TerminalNode.";
 	}
 
 	private String traceNodes(List<TerminalNode> nodes) {

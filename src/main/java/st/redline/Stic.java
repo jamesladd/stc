@@ -22,7 +22,7 @@ public class Stic {
         run(loadScript(scriptName()));
     }
 
-    private void run(Class cls) throws IllegalAccessException, InstantiationException {
+    private void run(Class cls) throws IllegalAccessException, InstantiationException, ClassNotFoundException {
         // Instantiate Class that contains the message sends embodied in the Smalltalk class.
         Script script = (Script) cls.newInstance();
         // Call 'sendMessages' with a Smalltalk instance to invoke all the message sends
@@ -30,8 +30,11 @@ public class Stic {
         System.out.println(script.sendMessages(smalltalk()));
     }
 
-    private Smalltalk smalltalk() {
-        return new RedlineSmalltalk();
+    private Smalltalk smalltalk() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
+        // Load the RedlineSmalltalk instance via the Smalltalk class loader so it can see the same paths / classes etc.
+        // By the time this is called we expect the current classloader to be set to Redline's.
+        return (Smalltalk) currentClassLoader().loadClass("st.redline.RedlineSmalltalk")
+                                               .newInstance();
     }
 
     private Class loadScript(String name) throws ClassNotFoundException {
@@ -39,7 +42,9 @@ public class Stic {
     }
 
     private SmalltalkClassLoader classLoader() {
-        return new SmalltalkClassLoader(currentClassLoader(), sourceFinder());
+        SmalltalkClassLoader classLoader = new SmalltalkClassLoader(currentClassLoader(), sourceFinder());
+        Thread.currentThread().setContextClassLoader(classLoader);
+        return classLoader;
     }
 
     private SourceFinder sourceFinder() {
@@ -50,7 +55,7 @@ public class Stic {
         return new SourceFactory();
     }
 
-    public String[] classPaths() {
+    private String[] classPaths() {
         return classPath().split(File.pathSeparator);
     }
 

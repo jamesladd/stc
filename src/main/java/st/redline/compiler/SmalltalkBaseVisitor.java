@@ -375,7 +375,7 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	}
 
 	@SuppressWarnings("unchecked")
-	private String trace(Object ... nodes) {
+	protected String trace(Object ... nodes) {
 		for (Object node : nodes)
 			if (node instanceof TerminalNode)
 				return traceNode((TerminalNode) node);

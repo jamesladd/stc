@@ -99,6 +99,12 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         classBytes = cw.toByteArray();
     }
 
+    @Override
+    public void emit(Statement statement) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(statement);
+    }
+
     private void closeSendMessagesMethod() {
         if (isTraceEnabled(LOG))
             LOG.trace("");

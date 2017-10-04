@@ -244,7 +244,7 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	@Override
 	public T visitCharConstant(SmalltalkParser.CharConstantContext ctx) {
 		if (isTraceEnabled(LOG))
-			LOG.trace("visit");
+			LOG.trace(trace(ctx.CHARACTER_CONSTANT()));
 		return visitChildren(ctx);
 	}
 
@@ -279,7 +279,7 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	@Override
 	public T visitString(SmalltalkParser.StringContext ctx) {
 		if (isTraceEnabled(LOG))
-			LOG.trace("visit");
+			LOG.trace(trace(ctx.STRING()));
 		return visitChildren(ctx);
 	}
 
@@ -370,7 +370,7 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 	@Override
 	public T visitBinaryMessage(SmalltalkParser.BinaryMessageContext ctx) {
 		if (isTraceEnabled(LOG))
-			LOG.trace("visit");
+			LOG.trace(trace(ctx.BINARY_SELECTOR()));
 		return visitChildren(ctx);
 	}
 

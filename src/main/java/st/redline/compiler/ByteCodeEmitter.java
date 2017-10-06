@@ -1,6 +1,7 @@
 /* Redline Smalltalk, Copyright (c) James C. Ladd. All rights reserved. See LICENSE in the root of this distribution. */
 package st.redline.compiler;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.ClassWriter;
@@ -10,6 +11,7 @@ import org.objectweb.asm.Opcodes;
 import st.redline.classloader.Source;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 class ByteCodeEmitter implements Emitter, Opcodes {
 
@@ -24,7 +26,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             throw new RuntimeException("Java 1.8 or above required.");
         }
     }
-    private final String SEND_MESSAGES_SIG = "(Lst/redline/kernel/Smalltalk;)Lst/redline/kernel/PrimObject;";
+    private final String SEND_MESSAGES_SIG = "(Lst/redline/Smalltalk;)Lst/redline/kernel/PrimObject;";
 
     private final ClassWriter cw;
     private MethodVisitor mv;
@@ -103,12 +105,37 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     public void emit(Statement statement) {
         if (isTraceEnabled(LOG))
             LOG.trace(statement);
+        emit(statement.message());
+        if (statement.isAnswer())
+            mv.visitInsn(ARETURN);
+    }
+
+    private void emit(Message message) {
+        emitReceiver(message.receiver());
+        emitArguments(message.arguments());
+        emitSelector(message.selector());
+    }
+
+    private void emitReceiver(TerminalNode receiver) {
+        visitLine(mv, receiver.getSymbol().getLine());
+        pushSmalltalk();
+        mv.visitLdcInsn("hello");
+        mv.visitMethodInsn(INVOKEINTERFACE, "st/redline/Smalltalk", "createString", "(Ljava/lang/String;)Lst/redline/kernel/PrimObject;", true);
+    }
+
+    private void pushSmalltalk() {
+        mv.visitVarInsn(ALOAD, 1);
+    }
+
+    private void emitSelector(String selector) {
+    }
+
+    private void emitArguments(List<TerminalNode> arguments) {
     }
 
     private void closeSendMessagesMethod() {
         if (isTraceEnabled(LOG))
             LOG.trace("");
-        mv.visitInsn(ACONST_NULL);  // <- Currently sendMessages will return NULL.
         mv.visitInsn(ARETURN);
         mv.visitMaxs(0, 0);
         mv.visitEnd();

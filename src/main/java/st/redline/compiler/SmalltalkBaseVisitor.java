@@ -1,11 +1,12 @@
 // Generated from Smalltalk.g4 by ANTLR 4.7
 package st.redline.compiler;
+
 import org.antlr.v4.runtime.tree.AbstractParseTreeVisitor;
-import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.util.List;
+import static st.redline.compiler.Trace.isTraceEnabled;
+import static st.redline.compiler.Trace.trace;
 
 /**
  * This class provides an empty implementation of {@link SmalltalkVisitor},
@@ -18,10 +19,6 @@ import java.util.List;
 public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> implements SmalltalkVisitor<T> {
 
 	private static Log LOG = LogFactory.getLog(SmalltalkBaseVisitor.class);
-
-	protected boolean isTraceEnabled(Log log) {
-		return log.isTraceEnabled();
-	}
 
 	public byte[] generatedBytes() { return null; };
 
@@ -372,26 +369,5 @@ public class SmalltalkBaseVisitor<T> extends AbstractParseTreeVisitor<T> impleme
 		if (isTraceEnabled(LOG))
 			LOG.trace(trace(ctx.BINARY_SELECTOR()));
 		return visitChildren(ctx);
-	}
-
-	@SuppressWarnings("unchecked")
-	String trace(Object ... nodes) {
-		for (Object node : nodes)
-			if (node instanceof TerminalNode)
-				return traceNode((TerminalNode) node);
-			else if (node instanceof List)
-				return traceNodes((List<TerminalNode>) node);
-		return "!Unknown TerminalNode.";
-	}
-
-	private String traceNodes(List<TerminalNode> nodes) {
-		String trace = "L" + nodes.get(0).getSymbol().getLine() + " ";
-		for (TerminalNode node : nodes)
-			trace = trace + node.getSymbol().getText();
-		return trace;
-	}
-
-	private String traceNode(TerminalNode node) {
-		return "" + node.getSymbol().getLine() + ":" + (1 + node.getSymbol().getCharPositionInLine()) + " " + node.getSymbol().getText();
 	}
 }

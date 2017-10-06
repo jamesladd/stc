@@ -1,11 +1,15 @@
 /* Redline Smalltalk, Copyright (c) James C. Ladd. All rights reserved. See LICENSE in the root of this distribution. */
 package st.redline.compiler;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import st.redline.classloader.Source;
 
 import java.util.Stack;
+
+import static st.redline.compiler.Trace.isTraceEnabled;
+import static st.redline.compiler.Trace.trace;
 
 class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements SmalltalkVisitor<Void> {
 
@@ -85,6 +89,18 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
             LOG.trace(trace(ctx.CARROT()));
         markStatementAsAnswer();
         return visitChildren(ctx);
+    }
+
+    @Override
+    public Void visitString(SmalltalkParser.StringContext ctx) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(trace(ctx.STRING()));
+        addToStatement(ctx.STRING());
+        return visitChildren(ctx);
+    }
+
+    private void addToStatement(TerminalNode node) {
+        currentStatement().addToMessage(node);
     }
 
     private void markStatementAsAnswer() {

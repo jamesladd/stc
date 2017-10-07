@@ -118,6 +118,8 @@ class ByteCodeEmitter implements Emitter, Opcodes {
 
     private void emitReceiver(TerminalNode receiver) {
         visitLine(mv, receiver.getSymbol().getLine());
+
+        // WARNING: This is currently hard coded to call createString.
         pushSmalltalk();
         mv.visitLdcInsn("hello");
         mv.visitMethodInsn(INVOKEINTERFACE, "st/redline/Smalltalk", "createString", "(Ljava/lang/String;)Lst/redline/kernel/PrimObject;", true);

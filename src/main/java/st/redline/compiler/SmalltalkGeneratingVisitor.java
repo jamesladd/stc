@@ -19,6 +19,7 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     private final Stack<Statement> statements = new Stack<>();
     private final Source source;
     private final Emitter emitter;
+    private Statement lastStatementEmitted;
 
     SmalltalkGeneratingVisitor(Source source, Emitter emitter) {
         this.source = source;
@@ -39,7 +40,7 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
             LOG.trace(source.fullClassName());
         emitter.openClass(source);
         visitor().visitChildren(ctx);
-        emitter.closeClass();
+        emitter.closeClass(requiresReturn());
         if (!statements.empty())
             throw new RuntimeException("Not all statements emitted");
         return null;
@@ -120,6 +121,12 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     }
 
     private void emitStatement() {
-        emitter.emit(statements.pop());
+        Statement statement = statements.pop();
+        lastStatementEmitted = statement;
+        emitter.emit(statement);
+    }
+
+    private boolean requiresReturn() {
+        return lastStatementEmitted != null && !lastStatementEmitted.isAnswer();
     }
 }

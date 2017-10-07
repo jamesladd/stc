@@ -91,10 +91,10 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     @Override
-    public void closeClass() {
+    public void closeClass(boolean returnRequired) {
         if (isTraceEnabled(LOG))
             LOG.trace(source.fullClassName());
-        closeSendMessagesMethod();
+        closeSendMessagesMethod(returnRequired);
         mv.visitMaxs(1, 1);
         mv.visitEnd();
         cw.visitEnd();
@@ -133,10 +133,11 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     private void emitArguments(List<TerminalNode> arguments) {
     }
 
-    private void closeSendMessagesMethod() {
+    private void closeSendMessagesMethod(boolean returnRequired) {
         if (isTraceEnabled(LOG))
             LOG.trace("");
-        mv.visitInsn(ARETURN);
+        if (returnRequired)
+            mv.visitInsn(ARETURN);
         mv.visitMaxs(0, 0);
         mv.visitEnd();
     }

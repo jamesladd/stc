@@ -33,7 +33,7 @@ class Message {
     }
 
     void addObject(TerminalNode node) {
-        if (receiverRequired())
+        if (isReceiverRequired())
             addReceiver(node);
         else
             addArgument(node);
@@ -52,7 +52,7 @@ class Message {
         receiverRequired = false;
     }
 
-    private boolean receiverRequired() {
+    private boolean isReceiverRequired() {
         return receiverRequired;
     }
 }

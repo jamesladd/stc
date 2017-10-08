@@ -1,7 +1,7 @@
 package st.redline.classloader;
 
 import st.redline.kernel.PrimObject;
-import st.redline.kernel.Smalltalk;
+import st.redline.Smalltalk;
 
 public interface Script {
 

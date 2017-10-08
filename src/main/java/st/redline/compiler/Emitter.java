@@ -6,6 +6,9 @@ import st.redline.classloader.Source;
 interface Emitter {
 
     byte[] generatedBytes();
+
     void openClass(Source source);
-    void closeClass();
+    void closeClass(boolean returnRequired);
+
+    void emit(Statement statement);
 }

@@ -2,7 +2,6 @@
 package st.redline;
 
 import st.redline.classloader.*;
-import st.redline.kernel.Smalltalk;
 
 import java.io.*;
 

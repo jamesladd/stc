@@ -1,6 +1,7 @@
 /* Redline Smalltalk, Copyright (c) James C. Ladd. All rights reserved. See LICENSE in the root of this distribution. */
 package st.redline.compiler;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.ClassWriter;
@@ -10,6 +11,9 @@ import org.objectweb.asm.Opcodes;
 import st.redline.classloader.Source;
 
 import java.math.BigDecimal;
+import java.util.List;
+
+import static st.redline.compiler.SmalltalkParser.STRING;
 
 class ByteCodeEmitter implements Emitter, Opcodes {
 
@@ -24,7 +28,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             throw new RuntimeException("Java 1.8 or above required.");
         }
     }
-    private final String SEND_MESSAGES_SIG = "(Lst/redline/kernel/Smalltalk;)Lst/redline/kernel/PrimObject;";
+    private final String SEND_MESSAGES_SIG = "(Lst/redline/Smalltalk;)Lst/redline/kernel/PrimObject;";
 
     private final ClassWriter cw;
     private MethodVisitor mv;
@@ -89,21 +93,65 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     @Override
-    public void closeClass() {
+    public void closeClass(boolean returnRequired) {
         if (isTraceEnabled(LOG))
             LOG.trace(source.fullClassName());
-        closeSendMessagesMethod();
+        closeSendMessagesMethod(returnRequired);
         mv.visitMaxs(1, 1);
         mv.visitEnd();
         cw.visitEnd();
         classBytes = cw.toByteArray();
     }
 
-    private void closeSendMessagesMethod() {
+    @Override
+    public void emit(Statement statement) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(statement);
+        emit(statement.message());
+        if (statement.containsAnswer())
+            mv.visitInsn(ARETURN);
+    }
+
+    private void emit(Message message) {
+        emitReceiver(message.receiver());
+        emitArguments(message.arguments());
+        emitSelector(message.selector());
+    }
+
+    private void emitReceiver(EmitterNode receiver) {
+        int type = receiver.type();
+        TerminalNode node = receiver.value();
+        visitLine(mv, node.getSymbol().getLine());
+        switch (type) {
+            case STRING:
+                pushSmalltalk();
+                mv.visitLdcInsn(removeSingleQuotes(node.getText()));
+                mv.visitMethodInsn(INVOKEINTERFACE, "st/redline/Smalltalk", "createString", "(Ljava/lang/String;)Lst/redline/kernel/PrimObject;", true);
+                break;
+            default:
+                throw new RuntimeException("Unknown Emitter Type: " + receiver.type());
+        }
+    }
+
+    private Object removeSingleQuotes(String text) {
+        return text.substring(1, text.length() - 1);
+    }
+
+    private void pushSmalltalk() {
+        mv.visitVarInsn(ALOAD, 1);
+    }
+
+    private void emitSelector(String selector) {
+    }
+
+    private void emitArguments(List<EmitterNode> arguments) {
+    }
+
+    private void closeSendMessagesMethod(boolean returnRequired) {
         if (isTraceEnabled(LOG))
             LOG.trace("");
-        mv.visitInsn(ACONST_NULL);  // <- Currently sendMessages will return NULL.
-        mv.visitInsn(ARETURN);
+        if (returnRequired)
+            mv.visitInsn(ARETURN);
         mv.visitMaxs(0, 0);
         mv.visitEnd();
     }

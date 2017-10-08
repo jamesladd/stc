@@ -32,7 +32,9 @@ class Trace {
     }
 
     private static String traceNode(EmitterNode node) {
-        return traceNode(node.value());
+        if (!node.isList())
+            return traceNode(node.value());
+        return trace(node.values());
     }
 
     private static String traceNode(TerminalNode node) {

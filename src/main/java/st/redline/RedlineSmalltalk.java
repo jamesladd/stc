@@ -11,4 +11,12 @@ public class RedlineSmalltalk implements Smalltalk {
         object.javaValue(javaString);
         return object;
     }
+
+    @Override
+    public PrimObject createSymbol(String javaString) {
+        // TODO.JCL - When Smalltalk Symbol is available create one, ie: after bootstrap
+        PrimObject object = new PrimObject();
+        object.javaValue(javaString);
+        return object;
+    }
 }

@@ -13,6 +13,7 @@ import st.redline.classloader.Source;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static st.redline.compiler.SmalltalkParser.HASH;
 import static st.redline.compiler.SmalltalkParser.STRING;
 
 class ByteCodeEmitter implements Emitter, Opcodes {
@@ -120,31 +121,70 @@ class ByteCodeEmitter implements Emitter, Opcodes {
 
     private void emitReceiver(EmitterNode receiver) {
         int type = receiver.type();
-        TerminalNode node = receiver.value();
+        if (!receiver.isList())
+            emitReceiver(type, receiver.value());
+        else
+            emitReceiver(type, receiver.values());
+    }
+
+    private void emitReceiver(int type, TerminalNode node) {
         visitLine(mv, node.getSymbol().getLine());
         switch (type) {
             case STRING:
-                pushSmalltalk();
-                mv.visitLdcInsn(removeSingleQuotes(node.getText()));
-                mv.visitMethodInsn(INVOKEINTERFACE, "st/redline/Smalltalk", "createString", "(Ljava/lang/String;)Lst/redline/kernel/PrimObject;", true);
+                emitCreateString(removeSingleQuotes(node.getText()));
+                break;
+            case HASH:
+                emitCreateSymbol(node.getText());
                 break;
             default:
-                throw new RuntimeException("Unknown Emitter Type: " + receiver.type());
+                throw new RuntimeException("Unknown Emitter Type: " + type);
         }
     }
 
-    private Object removeSingleQuotes(String text) {
-        return text.substring(1, text.length() - 1);
-    }
-
-    private void pushSmalltalk() {
-        mv.visitVarInsn(ALOAD, 1);
+    private void emitReceiver(int type, List<TerminalNode> nodes) {
+        visitLine(mv, nodes.get(0).getSymbol().getLine());
+        switch (type) {
+            case HASH:
+                emitCreateSymbol(concatText(nodes));
+                break;
+            default:
+                throw new RuntimeException("Unknown Emitter Type: " + type);
+        }
     }
 
     private void emitSelector(String selector) {
     }
 
     private void emitArguments(List<EmitterNode> arguments) {
+    }
+
+    private String concatText(List<TerminalNode> nodes) {
+        String text = "";
+        for (TerminalNode node : nodes)
+            text = text + node.getText();
+        return text;
+    }
+
+    private void emitCreateSymbol(String value) {
+        emitSmalltalkCall("createSymbol", value);
+    }
+
+    private void emitCreateString(String value) {
+        emitSmalltalkCall("createString", value);
+    }
+
+    private void emitSmalltalkCall(String method, String value) {
+        pushSmalltalk();
+        mv.visitLdcInsn(value);
+        mv.visitMethodInsn(INVOKEINTERFACE, "st/redline/Smalltalk", method, "(Ljava/lang/String;)Lst/redline/kernel/PrimObject;", true);
+    }
+
+    private String removeSingleQuotes(String text) {
+        return text.substring(1, text.length() - 1);
+    }
+
+    private void pushSmalltalk() {
+        mv.visitVarInsn(ALOAD, 1);
     }
 
     private void closeSendMessagesMethod(boolean returnRequired) {

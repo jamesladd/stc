@@ -6,8 +6,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import st.redline.classloader.Source;
 
+import java.util.List;
 import java.util.Stack;
 
+import static st.redline.compiler.SmalltalkParser.HASH;
 import static st.redline.compiler.SmalltalkParser.STRING;
 import static st.redline.compiler.Trace.isTraceEnabled;
 import static st.redline.compiler.Trace.trace;
@@ -97,8 +99,24 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     public Void visitString(SmalltalkParser.StringContext ctx) {
         if (isTraceEnabled(LOG))
             LOG.trace(trace(ctx.STRING()));
-        addToStatement(new EmitterNode(STRING, ctx.STRING()));
+        addToStatement(EmitterNode.create(STRING, ctx.STRING()));
         return visitChildren(ctx);
+    }
+
+    @Override
+    public Void visitBareSymbol(SmalltalkParser.BareSymbolContext ctx) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(trace(ctx.IDENTIFIER(), ctx.BINARY_SELECTOR(), ctx.KEYWORD(), ctx.PIPE()));
+        Object node = firstNotNull(ctx.IDENTIFIER(), ctx.BINARY_SELECTOR(), ctx.KEYWORD(), ctx.PIPE());
+        addToStatement(EmitterNode.create(HASH, node));
+        return visitChildren(ctx);
+    }
+
+    private Object firstNotNull(Object ... objects) {
+        for (Object object : objects)
+            if (object != null)
+                return object;
+        throw new RuntimeException("Non-Null object expected.");
     }
 
     private void addToStatement(EmitterNode node) {

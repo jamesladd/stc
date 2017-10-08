@@ -2,4 +2,8 @@
 package st.redline.compiler;
 
 class ExpressionAnswerStatement extends Statement {
+
+    boolean containsAnswer() {
+        return true;
+    }
 }

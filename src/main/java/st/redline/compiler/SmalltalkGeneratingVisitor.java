@@ -127,6 +127,6 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     }
 
     private boolean requiresReturn() {
-        return lastStatementEmitted != null && !lastStatementEmitted.isAnswer();
+        return lastStatementEmitted != null && !lastStatementEmitted.containsAnswer();
     }
 }

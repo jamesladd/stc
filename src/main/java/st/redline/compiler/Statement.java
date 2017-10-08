@@ -5,7 +5,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 
 import java.util.Stack;
 
-class Statement {
+abstract class Statement {
 
     private final Stack<Message> messages = new Stack<>();
 
@@ -13,7 +13,7 @@ class Statement {
         messages.push(new Message());
     }
 
-    boolean isAnswer() {
+    boolean containsAnswer() {
         return false;
     }
 

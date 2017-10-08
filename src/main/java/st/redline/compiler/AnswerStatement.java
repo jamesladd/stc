@@ -3,7 +3,7 @@ package st.redline.compiler;
 
 class AnswerStatement extends Statement {
 
-    boolean isAnswer() {
+    boolean containsAnswer() {
         return true;
     }
 

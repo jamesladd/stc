@@ -106,7 +106,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         if (isTraceEnabled(LOG))
             LOG.trace(statement);
         emit(statement.message());
-        if (statement.isAnswer())
+        if (statement.containsAnswer())
             mv.visitInsn(ARETURN);
     }
 

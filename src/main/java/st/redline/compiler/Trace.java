@@ -15,7 +15,9 @@ class Trace {
     @SuppressWarnings("unchecked")
     static String trace(Object ... nodes) {
         for (Object node : nodes)
-            if (node instanceof TerminalNode)
+            if (node instanceof EmitterNode)
+                return traceNode((EmitterNode) node);
+            else if (node instanceof TerminalNode)
                 return traceNode((TerminalNode) node);
             else if (node instanceof List)
                 return traceNodes((List<TerminalNode>) node);
@@ -27,6 +29,10 @@ class Trace {
         for (TerminalNode node : nodes)
             trace = trace + node.getSymbol().getText();
         return trace;
+    }
+
+    private static String traceNode(EmitterNode node) {
+        return traceNode(node.value());
     }
 
     private static String traceNode(TerminalNode node) {

@@ -16,11 +16,11 @@ class Message {
     private static Log LOG = LogFactory.getLog(Message.class);
 
     private boolean receiverRequired = true;
-    private TerminalNode receiver;
+    private EmitterNode receiver;
     private StringBuilder selector = new StringBuilder();
-    private List<TerminalNode> arguments = new ArrayList<>();
+    private List<EmitterNode> arguments = new ArrayList<>();
 
-    TerminalNode receiver() {
+    EmitterNode receiver() {
         return receiver;
     }
 
@@ -28,24 +28,24 @@ class Message {
         return selector.toString();
     }
 
-    List<TerminalNode> arguments() {
+    List<EmitterNode> arguments() {
         return arguments;
     }
 
-    void addObject(TerminalNode node) {
+    void addObject(EmitterNode node) {
         if (isReceiverRequired())
             addReceiver(node);
         else
             addArgument(node);
     }
 
-    private void addArgument(TerminalNode node) {
+    private void addArgument(EmitterNode node) {
         if (isTraceEnabled(LOG))
             LOG.trace(trace(node));
         arguments.add(node);
     }
 
-    private void addReceiver(TerminalNode node) {
+    private void addReceiver(EmitterNode node) {
         if (isTraceEnabled(LOG))
             LOG.trace(trace(node));
         receiver = node;

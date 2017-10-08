@@ -2,4 +2,15 @@
 package st.redline.kernel;
 
 public class PrimObject {
+
+    private Object javaValue;
+
+    public PrimObject javaValue(Object object) {
+        this.javaValue = object;
+        return this;
+    }
+
+    public String toString() {
+        return String.valueOf(javaValue);
+    }
 }

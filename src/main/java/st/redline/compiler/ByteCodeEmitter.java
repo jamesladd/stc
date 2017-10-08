@@ -13,6 +13,8 @@ import st.redline.classloader.Source;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static st.redline.compiler.SmalltalkParser.STRING;
+
 class ByteCodeEmitter implements Emitter, Opcodes {
 
     private static Log LOG = LogFactory.getLog(ByteCodeEmitter.class);
@@ -116,13 +118,23 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         emitSelector(message.selector());
     }
 
-    private void emitReceiver(TerminalNode receiver) {
-        visitLine(mv, receiver.getSymbol().getLine());
+    private void emitReceiver(EmitterNode receiver) {
+        int type = receiver.type();
+        TerminalNode node = receiver.value();
+        visitLine(mv, node.getSymbol().getLine());
+        switch (type) {
+            case STRING:
+                pushSmalltalk();
+                mv.visitLdcInsn(removeSingleQuotes(node.getText()));
+                mv.visitMethodInsn(INVOKEINTERFACE, "st/redline/Smalltalk", "createString", "(Ljava/lang/String;)Lst/redline/kernel/PrimObject;", true);
+                break;
+            default:
+                throw new RuntimeException("Unknown Emitter Type: " + receiver.type());
+        }
+    }
 
-        // WARNING: This is currently hard coded to call createString.
-        pushSmalltalk();
-        mv.visitLdcInsn("hello");
-        mv.visitMethodInsn(INVOKEINTERFACE, "st/redline/Smalltalk", "createString", "(Ljava/lang/String;)Lst/redline/kernel/PrimObject;", true);
+    private Object removeSingleQuotes(String text) {
+        return text.substring(1, text.length() - 1);
     }
 
     private void pushSmalltalk() {
@@ -132,7 +144,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     private void emitSelector(String selector) {
     }
 
-    private void emitArguments(List<TerminalNode> arguments) {
+    private void emitArguments(List<EmitterNode> arguments) {
     }
 
     private void closeSendMessagesMethod(boolean returnRequired) {

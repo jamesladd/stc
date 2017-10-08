@@ -8,6 +8,7 @@ import st.redline.classloader.Source;
 
 import java.util.Stack;
 
+import static st.redline.compiler.SmalltalkParser.STRING;
 import static st.redline.compiler.Trace.isTraceEnabled;
 import static st.redline.compiler.Trace.trace;
 
@@ -96,11 +97,11 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     public Void visitString(SmalltalkParser.StringContext ctx) {
         if (isTraceEnabled(LOG))
             LOG.trace(trace(ctx.STRING()));
-        addToStatement(ctx.STRING());
+        addToStatement(new EmitterNode(STRING, ctx.STRING()));
         return visitChildren(ctx);
     }
 
-    private void addToStatement(TerminalNode node) {
+    private void addToStatement(EmitterNode node) {
         currentStatement().addToMessage(node);
     }
 

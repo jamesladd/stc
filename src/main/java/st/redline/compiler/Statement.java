@@ -21,7 +21,7 @@ abstract class Statement {
         throw new RuntimeException("Marking non-answer statement as answer!");
     }
 
-    void addToMessage(TerminalNode node) {
+    void addToMessage(EmitterNode node) {
         currentMessage().addObject(node);
     }
 

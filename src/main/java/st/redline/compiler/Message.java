@@ -17,7 +17,7 @@ class Message {
 
     private boolean receiverRequired = true;
     private EmitterNode receiver;
-    private StringBuilder selector = new StringBuilder();
+    private List<EmitterNode> selector = new ArrayList<>();
     private List<EmitterNode> arguments = new ArrayList<>();
 
     EmitterNode receiver() {

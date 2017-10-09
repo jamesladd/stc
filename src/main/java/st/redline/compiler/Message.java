@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static st.redline.compiler.SmalltalkParser.KEYWORD;
 import static st.redline.compiler.Trace.isTraceEnabled;
 import static st.redline.compiler.Trace.trace;
 
@@ -57,7 +58,7 @@ class Message {
             LOG.trace(trace(node));
         selectors.add(node);
         selectorRequired = false;
-        argumentRequired = true;
+        argumentRequired = node.type() == KEYWORD;
     }
 
     private void addArgument(EmitterNode node) {
@@ -65,6 +66,7 @@ class Message {
             LOG.trace(trace(node));
         arguments.add(node);
         argumentRequired = false;
+        selectorRequired = true;
     }
 
     private boolean isReceiverRequired() {

@@ -116,7 +116,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     private void emit(Message message) {
         emitReceiver(message.receiver());
         emitArguments(message.arguments());
-        emitSelector(message.selector());
+        emitSelector(message.selectors());
     }
 
     private void emitReceiver(EmitterNode receiver) {
@@ -152,10 +152,20 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         }
     }
 
-    private void emitSelector(String selector) {
+    private void emitSelector(List<EmitterNode> selectors) {
+        if (selectors.isEmpty())
+            return;
+        TerminalNode firstSelector = selectors.get(0).value();
+        visitLine(mv, firstSelector.getSymbol().getLine());
+        String selector = "";
+        for (EmitterNode node : selectors)
+            selector = selector + node.text();
+        mv.visitLdcInsn(selector);
     }
 
     private void emitArguments(List<EmitterNode> arguments) {
+        if (arguments.isEmpty())
+            return;
     }
 
     private String concatText(List<TerminalNode> nodes) {

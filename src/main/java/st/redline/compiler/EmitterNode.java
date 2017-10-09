@@ -25,6 +25,15 @@ class EmitterNode {
         this.isList = true;
     }
 
+    String text() {
+        if (node != null)
+            return node.getText();
+        String text = "";
+        for (TerminalNode node : nodes)
+            text = text + node.getText();
+        return text;
+    }
+
     boolean isList() {
         return isList;
     }

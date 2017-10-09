@@ -13,13 +13,21 @@ import st.redline.classloader.Source;
 import java.math.BigDecimal;
 import java.util.List;
 
+import static st.redline.compiler.SmalltalkParser.DIGIT;
 import static st.redline.compiler.SmalltalkParser.HASH;
 import static st.redline.compiler.SmalltalkParser.STRING;
 
 class ByteCodeEmitter implements Emitter, Opcodes {
 
     private static Log LOG = LogFactory.getLog(ByteCodeEmitter.class);
-
+    private static final String[] SIGNATURES = {
+            "(Ljava/lang/String;)Lst/redline/kernel/PrimObject;",
+            "(Lst/redline/kernel/PrimObject;Ljava/lang/String;)Lst/redline/kernel/PrimObject;",
+            "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Ljava/lang/String;)Lst/redline/kernel/PrimObject;",
+            "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Ljava/lang/String;)Lst/redline/kernel/PrimObject;",
+            "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Ljava/lang/String;)Lst/redline/kernel/PrimObject;",
+            "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Ljava/lang/String;)Lst/redline/kernel/PrimObject;"
+    };
     private static final int BYTECODE_VERSION;
     static {
         int compareTo18 = new BigDecimal(System.getProperty("java.specification.version")).compareTo(new BigDecimal("1.8"));
@@ -98,8 +106,6 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         if (isTraceEnabled(LOG))
             LOG.trace(source.fullClassName());
         closeSendMessagesMethod(returnRequired);
-        mv.visitMaxs(1, 1);
-        mv.visitEnd();
         cw.visitEnd();
         classBytes = cw.toByteArray();
     }
@@ -114,20 +120,24 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     private void emit(Message message) {
+        // Items are emitted in the order required by the PrimObject.perform method.
+        // That is receiver, arguments and then selector.
         emitReceiver(message.receiver());
         emitArguments(message.arguments());
-        emitSelector(message.selector());
+        emitSelector(message.selectors());
+        if (message.selectors().size() != 0)
+            emitPerform(message.arguments().size());
     }
 
     private void emitReceiver(EmitterNode receiver) {
         int type = receiver.type();
         if (!receiver.isList())
-            emitReceiver(type, receiver.value());
+            emitObject(type, receiver.value());
         else
-            emitReceiver(type, receiver.values());
+            emitObject(type, receiver.values());
     }
 
-    private void emitReceiver(int type, TerminalNode node) {
+    private void emitObject(int type, TerminalNode node) {
         visitLine(mv, node.getSymbol().getLine());
         switch (type) {
             case STRING:
@@ -141,21 +151,43 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         }
     }
 
-    private void emitReceiver(int type, List<TerminalNode> nodes) {
+    private void emitObject(int type, List<TerminalNode> nodes) {
         visitLine(mv, nodes.get(0).getSymbol().getLine());
         switch (type) {
             case HASH:
                 emitCreateSymbol(concatText(nodes));
+                break;
+            case DIGIT:
+                emitCreateInteger(concatText(nodes));
                 break;
             default:
                 throw new RuntimeException("Unknown Emitter Type: " + type);
         }
     }
 
-    private void emitSelector(String selector) {
+    private void emitSelector(List<EmitterNode> selectors) {
+        if (selectors.isEmpty())
+            return;
+        TerminalNode firstSelector = selectors.get(0).value();
+        visitLine(mv, firstSelector.getSymbol().getLine());
+        String selector = "";
+        for (EmitterNode node : selectors)
+            selector = selector + node.text();
+        mv.visitLdcInsn(selector);
+    }
+
+    private void emitPerform(int argumentCount) {
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimObject", "perform", SIGNATURES[argumentCount], false);
     }
 
     private void emitArguments(List<EmitterNode> arguments) {
+        if (arguments.isEmpty())
+            return;
+        for (EmitterNode node : arguments)
+            if (node.value() != null)
+                emitObject(node.type(), node.value());
+            else
+                emitObject(node.type(), node.values());
     }
 
     private String concatText(List<TerminalNode> nodes) {
@@ -163,6 +195,10 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         for (TerminalNode node : nodes)
             text = text + node.getText();
         return text;
+    }
+
+    private void emitCreateInteger(String value) {
+        emitSmalltalkCall("createInteger", value);
     }
 
     private void emitCreateSymbol(String value) {

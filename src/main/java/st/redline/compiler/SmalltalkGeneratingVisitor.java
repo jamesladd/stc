@@ -121,6 +121,14 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     }
 
     @Override
+    public Void visitCharConstant(SmalltalkParser.CharConstantContext ctx) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(trace(ctx.CHARACTER_CONSTANT()));
+        addToStatement(EmitterNode.create(CHARACTER_CONSTANT, ctx.CHARACTER_CONSTANT()));
+        return visitChildren(ctx);
+    }
+
+    @Override
     public Void visitKeywordPair(SmalltalkParser.KeywordPairContext ctx) {
         if (isTraceEnabled(LOG))
             LOG.trace(trace(ctx.KEYWORD()));

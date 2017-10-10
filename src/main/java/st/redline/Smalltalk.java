@@ -7,4 +7,5 @@ public interface Smalltalk {
     PrimObject createString(String javaString);
     PrimObject createSymbol(String javaString);
     PrimObject createInteger(String javaString);
+    PrimObject createCharacter(String javaString);
 }

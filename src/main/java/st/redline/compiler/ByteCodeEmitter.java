@@ -13,9 +13,7 @@ import st.redline.classloader.Source;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static st.redline.compiler.SmalltalkParser.DIGIT;
-import static st.redline.compiler.SmalltalkParser.HASH;
-import static st.redline.compiler.SmalltalkParser.STRING;
+import static st.redline.compiler.SmalltalkParser.*;
 
 class ByteCodeEmitter implements Emitter, Opcodes {
 
@@ -140,6 +138,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             case HASH:
                 emitCreateSymbol(node.getText());
                 break;
+            case CHARACTER_CONSTANT:
+                emitCreateCharacter(removeLeadingChar(node.getText()));
+                break;
             default:
                 throw new RuntimeException("Unknown Emitter Type: " + type);
         }
@@ -191,6 +192,10 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         return text;
     }
 
+    private void emitCreateCharacter(String value) {
+        emitSmalltalkCall("createCharacter", value);
+    }
+
     private void emitCreateInteger(String value) {
         emitSmalltalkCall("createInteger", value);
     }
@@ -207,6 +212,10 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         pushSmalltalk();
         mv.visitLdcInsn(value);
         mv.visitMethodInsn(INVOKEINTERFACE, "st/redline/Smalltalk", method, "(Ljava/lang/String;)Lst/redline/kernel/PrimObject;", true);
+    }
+
+    private String removeLeadingChar(String text) {
+        return text.substring(1, text.length());
     }
 
     private String removeSingleQuotes(String text) {

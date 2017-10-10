@@ -73,12 +73,6 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             LOG.trace("");
         mv = cw.visitMethod(ACC_PUBLIC, "sendMessages", SEND_MESSAGES_SIG, null, null);
         mv.visitCode();
-
-        // Currently: sendMessages outputs 'sendMessages' to console.
-        mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-        mv.visitLdcInsn("sendMessages");
-        mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
-//        mv.visitVarInsn(ALOAD, 1);
     }
 
     private String superclassName() {

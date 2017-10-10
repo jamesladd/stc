@@ -1,2 +1,2 @@
 
-'HelloWorld' at: 1.
+'Smalltalk' at: 1 put: 'Redline '.

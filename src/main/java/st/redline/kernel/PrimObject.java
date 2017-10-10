@@ -24,4 +24,10 @@ public class PrimObject {
             LOG.trace(this + " " + selector + " " + arg1);
         return this;
     }
+
+    public PrimObject perform(PrimObject arg1, PrimObject arg2, String selector) {
+        if (LOG.isTraceEnabled())
+            LOG.trace(this + " " + selector + " " + arg1 + " " + arg2);
+        return this;
+    }
 }

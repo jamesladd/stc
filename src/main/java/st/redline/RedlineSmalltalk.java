@@ -35,4 +35,20 @@ public class RedlineSmalltalk implements Smalltalk {
         object.javaValue(value.charAt(0));
         return object;
     }
+
+    @Override
+    public PrimObject booleanSingleton(String value) {
+        // TODO.JCL - When Smalltalk Symbol is available create one, ie: after bootstrap
+        PrimObject object = new PrimObject();
+        object.javaValue(Boolean.valueOf(value));
+        return object;
+    }
+
+    @Override
+    public PrimObject nilSingleton(String value) {
+        // TODO.JCL - When Smalltalk Symbol is available create one, ie: after bootstrap
+        PrimObject object = new PrimObject();
+        object.javaValue("nil");
+        return object;
+    }
 }

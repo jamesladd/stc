@@ -8,4 +8,6 @@ public interface Smalltalk {
     PrimObject createSymbol(String javaString);
     PrimObject createInteger(String javaString);
     PrimObject createCharacter(String javaString);
+    PrimObject booleanSingleton(String javaString);
+    PrimObject nilSingleton(String javaString);
 }

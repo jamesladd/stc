@@ -41,6 +41,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     private MethodVisitor mv;
     private byte[] classBytes;
     private Source source;
+    private boolean sendToSuper = false;
 
     ByteCodeEmitter() {
         cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
@@ -141,6 +142,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             case CHARACTER_CONSTANT:
                 emitCreateCharacter(removeLeadingChar(node.getText()));
                 break;
+            case RESERVED_WORD:
+                emitPseudoVariable(node.getText());
+                break;
             default:
                 throw new RuntimeException("Unknown Emitter Type: " + type);
         }
@@ -172,7 +176,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     private void emitPerform(int argumentCount) {
-        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimObject", "perform", SIGNATURES[argumentCount], false);
+        String method = sendToSuper ? "superPerform" : "perform";
+        sendToSuper = false;
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimObject", method, SIGNATURES[argumentCount], false);
     }
 
     private void emitArguments(List<EmitterNode> arguments) {
@@ -190,6 +196,30 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         for (TerminalNode node : nodes)
             text = text + node.getText();
         return text;
+    }
+
+    private void emitPseudoVariable(String value) {
+        switch (value) {
+            case "self":
+                emitPushReceiver();
+                break;
+            case "true":
+            case "false":
+                emitSmalltalkCall("booleanSingleton", value);
+                break;
+            case "nil":
+                emitSmalltalkCall("nilSingleton", value);
+                break;
+            case "super":
+                sendToSuper = true;
+                break;
+            default:
+                throw new RuntimeException("Unhandled Pseudo Variable: " + value);
+        }
+    }
+
+    private void emitPushReceiver() {
+        mv.visitVarInsn(ALOAD, 0);
     }
 
     private void emitCreateCharacter(String value) {

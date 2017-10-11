@@ -15,12 +15,19 @@ class Message {
 
     private static Log LOG = LogFactory.getLog(Message.class);
 
+    private final boolean isTail;
     private boolean receiverRequired = true;
     private boolean selectorRequired = false;
     private boolean argumentRequired = false;
     private EmitterNode receiver;
     private List<EmitterNode> selectors = new ArrayList<>();
     private List<EmitterNode> arguments = new ArrayList<>();
+
+    Message(boolean isTail) {
+        this.receiverRequired = !isTail;
+        this.isTail = isTail;
+        this.selectorRequired = isTail;
+    }
 
     EmitterNode receiver() {
         return receiver;
@@ -32,6 +39,10 @@ class Message {
 
     List<EmitterNode> arguments() {
         return arguments;
+    }
+
+    boolean isTail() {
+        return isTail;
     }
 
     void addObject(EmitterNode node) {

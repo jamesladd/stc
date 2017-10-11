@@ -1,16 +1,19 @@
 /* Redline Smalltalk, Copyright (c) James C. Ladd. All rights reserved. See LICENSE in the root of this distribution. */
 package st.redline.compiler;
 
-import org.antlr.v4.runtime.tree.TerminalNode;
-
 import java.util.Stack;
+import java.util.Vector;
 
 abstract class Statement {
 
     private final Stack<Message> messages = new Stack<>();
 
     void newMessage() {
-        messages.push(new Message());
+        messages.push(new Message(false));
+    }
+
+    void newMessageTail() {
+        messages.push(new Message(true));
     }
 
     boolean containsAnswer() {
@@ -25,8 +28,8 @@ abstract class Statement {
         currentMessage().addObject(node);
     }
 
-    Message message() {
-        return currentMessage();
+    Vector<Message> messages() {
+        return messages;
     }
 
     private Message currentMessage() {

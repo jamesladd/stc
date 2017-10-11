@@ -144,6 +144,22 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         return visitChildren(ctx);
     }
 
+    @Override
+    public Void visitUnaryMessage(SmalltalkParser.UnaryMessageContext ctx) {
+        if (isTraceEnabled(LOG))
+            LOG.trace("visit");
+        newStatementMessageTail();
+        return visitChildren(ctx);
+    }
+
+    @Override
+    public Void visitUnarySelector(SmalltalkParser.UnarySelectorContext ctx) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(trace(ctx.IDENTIFIER()));
+        addToStatement(EmitterNode.create(IDENTIFIER, ctx.IDENTIFIER()));
+        return visitChildren(ctx);
+    }
+
     private Object firstNotNull(Object ... objects) {
         for (Object object : objects)
             if (object != null)
@@ -161,6 +177,10 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
 
     private void newStatementMessage() {
         currentStatement().newMessage();
+    }
+
+    private void newStatementMessageTail() {
+        currentStatement().newMessageTail();
     }
 
     private void newStatement(Statement statement) {

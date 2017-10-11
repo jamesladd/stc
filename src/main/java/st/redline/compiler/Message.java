@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory;
 import java.util.ArrayList;
 import java.util.List;
 
+import static st.redline.compiler.SmalltalkParser.BINARY_SELECTOR;
 import static st.redline.compiler.SmalltalkParser.KEYWORD;
 import static st.redline.compiler.Trace.isTraceEnabled;
 import static st.redline.compiler.Trace.trace;
@@ -15,12 +16,19 @@ class Message {
 
     private static Log LOG = LogFactory.getLog(Message.class);
 
+    private final boolean isTail;
     private boolean receiverRequired = true;
     private boolean selectorRequired = false;
     private boolean argumentRequired = false;
     private EmitterNode receiver;
     private List<EmitterNode> selectors = new ArrayList<>();
     private List<EmitterNode> arguments = new ArrayList<>();
+
+    Message(boolean isTail) {
+        this.receiverRequired = !isTail;
+        this.isTail = isTail;
+        this.selectorRequired = isTail;
+    }
 
     EmitterNode receiver() {
         return receiver;
@@ -32,6 +40,10 @@ class Message {
 
     List<EmitterNode> arguments() {
         return arguments;
+    }
+
+    boolean isTail() {
+        return isTail;
     }
 
     void addObject(EmitterNode node) {
@@ -58,7 +70,7 @@ class Message {
             LOG.trace(trace(node));
         selectors.add(node);
         selectorRequired = false;
-        argumentRequired = node.type() == KEYWORD;
+        argumentRequired = (node.type() == KEYWORD || node.type() == BINARY_SELECTOR);
     }
 
     private void addArgument(EmitterNode node) {

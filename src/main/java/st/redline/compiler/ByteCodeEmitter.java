@@ -12,6 +12,7 @@ import st.redline.classloader.Source;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Vector;
 
 import static st.redline.compiler.SmalltalkParser.*;
 
@@ -72,6 +73,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             LOG.trace("");
         mv = cw.visitMethod(ACC_PUBLIC, "sendMessages", SEND_MESSAGES_SIG, null, null);
         mv.visitCode();
+
+        // Add value to top of stack - see emit(Message)
+        mv.visitVarInsn(ALOAD, 1);
     }
 
     private String superclassName() {
@@ -107,15 +111,24 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     public void emit(Statement statement) {
         if (isTraceEnabled(LOG))
             LOG.trace(statement);
-        emit(statement.message());
+        emit(statement.messages());
         if (statement.containsAnswer())
             mv.visitInsn(ARETURN);
     }
 
+    private void emit(Vector<Message> messages) {
+        for (Message message : messages)
+            emit(message);
+    }
+
     private void emit(Message message) {
-        // Items are emitted in the order required by the PrimObject.perform method.
-        // That is receiver, arguments and then selector.
-        emitReceiver(message.receiver());
+        // Before each Message we pop the top value off the stack, as it may
+        // be the value left from a previous message send.
+        // UNLESS the message is a messageTail in which case we leave it.
+        if (!message.isTail()) {
+            emitPop();
+            emitReceiver(message.receiver());
+        }
         emitArguments(message.arguments());
         emitSelector(message.selectors());
         if (message.selectors().size() != 0)
@@ -216,6 +229,10 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             default:
                 throw new RuntimeException("Unhandled Pseudo Variable: " + value);
         }
+    }
+
+    private void emitPop() {
+        mv.visitInsn(POP);
     }
 
     private void emitPushReceiver() {

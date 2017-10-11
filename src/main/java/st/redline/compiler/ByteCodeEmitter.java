@@ -72,6 +72,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             LOG.trace("");
         mv = cw.visitMethod(ACC_PUBLIC, "sendMessages", SEND_MESSAGES_SIG, null, null);
         mv.visitCode();
+        
+        // Add value to top of stack - see emit(Message)
+        mv.visitVarInsn(ALOAD, 1);
     }
 
     private String superclassName() {
@@ -113,6 +116,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     private void emit(Message message) {
+        // Before each Message we pop the top value off the stack, as it may
+        // be the value left from a previous message send.
+        emitPop();
         // Items are emitted in the order required by the PrimObject.perform method.
         // That is receiver, arguments and then selector.
         emitReceiver(message.receiver());
@@ -216,6 +222,10 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             default:
                 throw new RuntimeException("Unhandled Pseudo Variable: " + value);
         }
+    }
+
+    private void emitPop() {
+        mv.visitInsn(POP);
     }
 
     private void emitPushReceiver() {

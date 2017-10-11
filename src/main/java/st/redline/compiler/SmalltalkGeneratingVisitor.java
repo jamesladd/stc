@@ -153,6 +153,15 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     }
 
     @Override
+    public Void visitBinaryMessage(SmalltalkParser.BinaryMessageContext ctx) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(trace(ctx.BINARY_SELECTOR()));
+        newStatementMessageTail();
+        addToStatement(EmitterNode.create(BINARY_SELECTOR, ctx.BINARY_SELECTOR()));
+        return visitChildren(ctx);
+    }
+
+    @Override
     public Void visitUnarySelector(SmalltalkParser.UnarySelectorContext ctx) {
         if (isTraceEnabled(LOG))
             LOG.trace(trace(ctx.IDENTIFIER()));

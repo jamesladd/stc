@@ -20,6 +20,7 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     private final Source source;
     private final Emitter emitter;
     private Statement lastStatementEmitted;
+    private boolean isCascade;
 
     SmalltalkGeneratingVisitor(Source source, Emitter emitter) {
         this.source = source;
@@ -80,7 +81,16 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     public Void visitExpression(SmalltalkParser.ExpressionContext ctx) {
         if (isTraceEnabled(LOG))
             LOG.trace("visit");
+        isCascade = false;
         newStatementMessage();
+        return visitChildren(ctx);
+    }
+
+    @Override
+    public Void visitCascade(SmalltalkParser.CascadeContext ctx) {
+        if (isTraceEnabled(LOG))
+            LOG.trace("visit");
+        isCascade = true;
         return visitChildren(ctx);
     }
 
@@ -140,6 +150,8 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     public Void visitKeywordPair(SmalltalkParser.KeywordPairContext ctx) {
         if (isTraceEnabled(LOG))
             LOG.trace(trace(ctx.KEYWORD()));
+        if (isCascade)
+            newStatementMessageTail();
         addToStatement(EmitterNode.create(KEYWORD, ctx.KEYWORD()));
         return visitChildren(ctx);
     }
@@ -189,7 +201,7 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     }
 
     private void newStatementMessageTail() {
-        currentStatement().newMessageTail();
+        currentStatement().newMessageTail(isCascade);
     }
 
     private void newStatement(Statement statement) {

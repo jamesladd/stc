@@ -128,11 +128,16 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         if (!message.isTail()) {
             emitPop();
             emitReceiver(message.receiver());
-        }
+        } else if (message.isCascade())
+            emitDup();
+
         emitArguments(message.arguments());
         emitSelector(message.selectors());
         if (message.selectors().size() != 0)
             emitPerform(message.arguments().size());
+
+        if (message.isTail() && message.isCascade())
+            emitPop();
     }
 
     private void emitReceiver(EmitterNode receiver) {
@@ -229,6 +234,10 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             default:
                 throw new RuntimeException("Unhandled Pseudo Variable: " + value);
         }
+    }
+
+    private void emitDup() {
+        mv.visitInsn(DUP);
     }
 
     private void emitPop() {

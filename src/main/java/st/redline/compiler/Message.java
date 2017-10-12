@@ -17,6 +17,7 @@ class Message {
     private static Log LOG = LogFactory.getLog(Message.class);
 
     private final boolean isTail;
+    private final boolean isCascade;
     private boolean receiverRequired = true;
     private boolean selectorRequired = false;
     private boolean argumentRequired = false;
@@ -24,10 +25,13 @@ class Message {
     private List<EmitterNode> selectors = new ArrayList<>();
     private List<EmitterNode> arguments = new ArrayList<>();
 
-    Message(boolean isTail) {
+    Message(boolean isTail, boolean isCascade) {
         this.receiverRequired = !isTail;
         this.isTail = isTail;
-        this.selectorRequired = isTail;
+        this.isCascade = isCascade;
+        this.selectorRequired = isTail || isCascade;
+        if (isCascade && !isTail)
+            throw new RuntimeException("Invalid Message state, setting cascade for a non-tail message");
     }
 
     EmitterNode receiver() {
@@ -44,6 +48,10 @@ class Message {
 
     boolean isTail() {
         return isTail;
+    }
+
+    boolean isCascade() {
+        return isCascade;
     }
 
     void addObject(EmitterNode node) {

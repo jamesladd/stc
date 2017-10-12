@@ -9,11 +9,11 @@ abstract class Statement {
     private final Stack<Message> messages = new Stack<>();
 
     void newMessage() {
-        messages.push(new Message(false));
+        messages.push(new Message(false, false));
     }
 
-    void newMessageTail() {
-        messages.push(new Message(true));
+    void newMessageTail(boolean isCascade) {
+        messages.push(new Message(true, isCascade));
     }
 
     boolean containsAnswer() {

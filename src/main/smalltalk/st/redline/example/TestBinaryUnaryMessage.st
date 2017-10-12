@@ -1,0 +1,2 @@
+
+'Redline' + 'Smalltalk' reverse.

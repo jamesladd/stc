@@ -1,5 +1,6 @@
-package st.redline;
+package st.redline.kernel;
 
+import st.redline.Smalltalk;
 import st.redline.kernel.PrimObject;
 
 public class RedlineSmalltalk implements Smalltalk {

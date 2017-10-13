@@ -32,7 +32,7 @@ public class Stic {
     private Smalltalk smalltalk() throws ClassNotFoundException, IllegalAccessException, InstantiationException {
         // Load the RedlineSmalltalk instance via the Smalltalk class loader so it can see the same paths / classes etc.
         // By the time this is called we expect the current classloader to be set to Redline's.
-        return (Smalltalk) currentClassLoader().loadClass("st.redline.RedlineSmalltalk")
+        return (Smalltalk) currentClassLoader().loadClass("st.redline.kernel.RedlineSmalltalk")
                                                .newInstance();
     }
 

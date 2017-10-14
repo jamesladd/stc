@@ -16,6 +16,7 @@ import java.util.Vector;
 
 import static st.redline.compiler.EmitterNode.SYNTHETIC_TEMPORARY;
 import static st.redline.compiler.SmalltalkParser.*;
+import static st.redline.compiler.Trace.trace;
 
 class ByteCodeEmitter implements Emitter, Opcodes {
 
@@ -143,8 +144,38 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     private void emit(Vector<Message> messages) {
-        for (Message message : messages)
-            emit(message);
+        int index = 0;
+        int size = messages.size();
+        while (index < size)
+            if (messages.get(index).isAssignment())
+                index = emitAssignment(index, messages);
+            else
+                emit(messages.get(index++));
+    }
+
+    private int emitAssignment(int index, Vector<Message> messages) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(trace(messages.get(index).receiver()));
+        EmitterNode receiver = messages.get(index).receiver();
+        if (receiver.type() != SYNTHETIC_TEMPORARY)
+            throw new RuntimeException("Attempt to assign to non-temporary.");
+        if ((messages.size() - index) < 2)
+            throw new RuntimeException("Missing assignment expression to temporary.");
+        TerminalNode node = receiver.value();
+        visitLine(mv, node.getSymbol().getLine());
+        pushContext();
+        pushIntConst(receiver.index());
+        pushIntConst(receiver.index());
+        index++;
+        // Emit first part of right hand side of assignment.
+        emit(messages.get(index));
+        index++;
+        // Emit rest of the right hand side of assignment.
+        while (messages.get(index).isTail())
+            emit(messages.get(index++));
+        // Do assignment here.
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimContext", "temporaryAtPut", "(ILst/redline/kernel/PrimObject;)Lst/redline/kernel/PrimObject;", false);
+        return index;
     }
 
     private void emit(Message message) {
@@ -189,7 +220,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
                 emitPseudoVariable(node.getText());
                 break;
             case SYNTHETIC_TEMPORARY:
-                emitTemporary(node, emitterNode.index());
+                emitTemporaryGet(node, emitterNode.index());
                 break;
             default:
                 throw new RuntimeException("Unknown Emitter Type: " + emitterNode.type());
@@ -264,7 +295,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         }
     }
 
-    private void emitTemporary(TerminalNode node, int index) {
+    private void emitTemporaryGet(TerminalNode node, int index) {
         visitLine(mv, node.getSymbol().getLine());
         pushContext();
         pushIntConst(index);

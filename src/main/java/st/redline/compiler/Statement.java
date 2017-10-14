@@ -35,4 +35,8 @@ abstract class Statement {
     private Message currentMessage() {
         return messages.peek();
     }
+
+    void markAsAssignment() {
+        currentMessage().markAsAssignment();
+    }
 }

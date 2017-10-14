@@ -196,6 +196,14 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     }
 
     @Override
+    public Void visitAssignment(SmalltalkParser.AssignmentContext ctx) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(trace(ctx.ASSIGNMENT()));
+        markStatementAsAssignment();
+        return visitChildren(ctx);
+    }
+
+    @Override
     public Void visitTemps(SmalltalkParser.TempsContext ctx) {
         if (isTraceEnabled(LOG))
             LOG.trace(trace(ctx.IDENTIFIER()));
@@ -228,6 +236,10 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
 
     private void markStatementAsAnswer() {
         currentStatement().markAsAnswer();
+    }
+
+    private void markStatementAsAssignment() {
+        currentStatement().markAsAssignment();
     }
 
     private void newStatementMessage() {

@@ -14,4 +14,13 @@ public class PrimContext {
     public Smalltalk smalltalk() {
         return smalltalk;
     }
+
+    public void initTemporaries(int count) {
+    }
+
+    public PrimObject temporaryAt(int index) {
+        PrimObject object = new PrimObject();
+        object.javaValue("temporary");
+        return object;
+    }
 }

@@ -131,9 +131,17 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     public void emit(Statement statement) {
         if (isTraceEnabled(LOG))
             LOG.trace(statement);
-        emit(statement.messages());
+        if (statement.isAssignment())
+            emitAssignment(statement.messages());
+        else
+            emit(statement.messages());
         if (statement.containsAnswer())
             mv.visitInsn(ARETURN);
+    }
+
+    private void emitAssignment(Vector<Message> messages) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(messages);
     }
 
     public void emitInitTemporaries(int index) {

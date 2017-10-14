@@ -18,6 +18,7 @@ class Message {
 
     private final boolean isTail;
     private final boolean isCascade;
+    private boolean isAssignment;
     private boolean receiverRequired = true;
     private boolean selectorRequired = false;
     private boolean argumentRequired = false;
@@ -52,6 +53,10 @@ class Message {
 
     boolean isCascade() {
         return isCascade;
+    }
+
+    boolean isAssignment() {
+        return isAssignment;
     }
 
     void addObject(EmitterNode node) {
@@ -99,5 +104,9 @@ class Message {
 
     private boolean isArgumentRequired() {
         return argumentRequired;
+    }
+
+    void markAsAssignment() {
+        isAssignment = true;
     }
 }

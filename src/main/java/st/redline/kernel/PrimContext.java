@@ -21,7 +21,7 @@ public class PrimContext {
         // TODO.JCL - initialize with Nil.
         for (int index = 0; index < count; index++) {
             temporaries[index] = new PrimObject();
-            temporaries[index].javaValue("TODO:JCL - nil.");
+            temporaries[index].javaValue("TODO:JCL - nil - " + index);
         }
     }
 

@@ -132,40 +132,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     public void emit(Statement statement) {
         if (isTraceEnabled(LOG))
             LOG.trace(statement);
-        if (statement.isAssignment())
-            emitAssignment(statement.messages());
-        else
-            emit(statement.messages());
+        emit(statement.messages());
         if (statement.containsAnswer())
             mv.visitInsn(ARETURN);
-    }
-
-    private void emitAssignment(Vector<Message> messages) {
-        if (isTraceEnabled(LOG))
-            LOG.trace(trace(messages.get(0).receiver()));
-        EmitterNode receiver = messages.get(0).receiver();
-        if (receiver.type() != SYNTHETIC_TEMPORARY)
-            throw new RuntimeException("Attempt to assign to non-temporary.");
-        if (messages.size() < 2)
-            throw new RuntimeException("Missing assignment expression to temporary.");
-        TerminalNode node = receiver.value();
-        visitLine(mv, node.getSymbol().getLine());
-        pushContext();
-        pushIntConst(receiver.index());
-        pushIntConst(receiver.index());
-        // Emit first part of right hand side of assignment.
-        emit(messages.get(1));
-        if (messages.size() > 2) {
-            int index = 2;
-            // Emit rest of the right hand side of assignment.
-            while (messages.get(index).isTail())
-                emit(messages.get(index++));
-            // Do assignment here.
-            mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimContext", "temporaryAtPut", "(ILst/redline/kernel/PrimObject;)Lst/redline/kernel/PrimObject;", false);
-            // Now the rest of the messages.
-            while (index < messages.size())
-                emit(messages.get(index++));
-        }
     }
 
     public void emitInitTemporaries(int index) {
@@ -175,8 +144,38 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     private void emit(Vector<Message> messages) {
-        for (Message message : messages)
-            emit(message);
+        int index = 0;
+        int size = messages.size();
+        while (index < size)
+            if (messages.get(index).isAssignment())
+                index = emitAssignment(index, messages);
+            else
+                emit(messages.get(index++));
+    }
+
+    private int emitAssignment(int index, Vector<Message> messages) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(trace(messages.get(index).receiver()));
+        EmitterNode receiver = messages.get(index).receiver();
+        if (receiver.type() != SYNTHETIC_TEMPORARY)
+            throw new RuntimeException("Attempt to assign to non-temporary.");
+        if ((messages.size() - index) < 2)
+            throw new RuntimeException("Missing assignment expression to temporary.");
+        TerminalNode node = receiver.value();
+        visitLine(mv, node.getSymbol().getLine());
+        pushContext();
+        pushIntConst(receiver.index());
+        pushIntConst(receiver.index());
+        index++;
+        // Emit first part of right hand side of assignment.
+        emit(messages.get(index));
+        index++;
+        // Emit rest of the right hand side of assignment.
+        while (messages.get(index).isTail())
+            emit(messages.get(index++));
+        // Do assignment here.
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimContext", "temporaryAtPut", "(ILst/redline/kernel/PrimObject;)Lst/redline/kernel/PrimObject;", false);
+        return index;
     }
 
     private void emit(Message message) {

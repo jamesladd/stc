@@ -7,7 +7,6 @@ import java.util.Vector;
 abstract class Statement {
 
     private final Stack<Message> messages = new Stack<>();
-    private boolean isAssignment = false;
 
     void newMessage() {
         messages.push(new Message(false, false));
@@ -37,11 +36,7 @@ abstract class Statement {
         return messages.peek();
     }
 
-    boolean isAssignment() {
-        return isAssignment;
-    }
-
     void markAsAssignment() {
-        this.isAssignment = true;
+        currentMessage().markAsAssignment();
     }
 }

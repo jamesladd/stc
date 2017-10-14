@@ -16,6 +16,7 @@ import java.util.Vector;
 
 import static st.redline.compiler.EmitterNode.SYNTHETIC_TEMPORARY;
 import static st.redline.compiler.SmalltalkParser.*;
+import static st.redline.compiler.Trace.trace;
 
 class ByteCodeEmitter implements Emitter, Opcodes {
 
@@ -141,9 +142,30 @@ class ByteCodeEmitter implements Emitter, Opcodes {
 
     private void emitAssignment(Vector<Message> messages) {
         if (isTraceEnabled(LOG))
-            LOG.trace(messages);
-        if (messages.get(0).receiver().type() != SYNTHETIC_TEMPORARY)
+            LOG.trace(trace(messages.get(0).receiver()));
+        EmitterNode receiver = messages.get(0).receiver();
+        if (receiver.type() != SYNTHETIC_TEMPORARY)
             throw new RuntimeException("Attempt to assign to non-temporary.");
+        if (messages.size() < 2)
+            throw new RuntimeException("Missing assignment expression to temporary.");
+        TerminalNode node = receiver.value();
+        visitLine(mv, node.getSymbol().getLine());
+        pushContext();
+        pushIntConst(receiver.index());
+        pushIntConst(receiver.index());
+        // Emit first part of right hand side of assignment.
+        emit(messages.get(1));
+        if (messages.size() > 2) {
+            int index = 2;
+            // Emit rest of the right hand side of assignment.
+            while (messages.get(index).isTail())
+                emit(messages.get(index++));
+            // Do assignment here.
+            mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimContext", "temporaryAtPut", "(ILst/redline/kernel/PrimObject;)Lst/redline/kernel/PrimObject;", false);
+            // Now the rest of the messages.
+            while (index < messages.size())
+                emit(messages.get(index++));
+        }
     }
 
     public void emitInitTemporaries(int index) {

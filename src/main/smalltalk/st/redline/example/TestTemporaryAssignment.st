@@ -1,6 +1,6 @@
 
 | tmp1 |
 
-tmp1 := 'Hello' + 'World' reverse.
+tmp1 := 'Hello'.
 
 ^ tmp1.

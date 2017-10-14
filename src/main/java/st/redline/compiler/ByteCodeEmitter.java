@@ -167,16 +167,15 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     private void emitReceiver(EmitterNode receiver) {
-        int type = receiver.type();
         if (!receiver.isList())
-            emitObject(type, receiver.value(), receiver.index());
+            emitObject(receiver, receiver.value());
         else
-            emitObject(type, receiver.values());
+            emitObject(receiver, receiver.values());
     }
 
-    private void emitObject(int type, TerminalNode node, int index) {
+    private void emitObject(EmitterNode emitterNode, TerminalNode node) {
         visitLine(mv, node.getSymbol().getLine());
-        switch (type) {
+        switch (emitterNode.type()) {
             case STRING:
                 emitCreateString(removeSingleQuotes(node.getText()));
                 break;
@@ -190,16 +189,16 @@ class ByteCodeEmitter implements Emitter, Opcodes {
                 emitPseudoVariable(node.getText());
                 break;
             case SYNTHETIC_TEMPORARY:
-                emitTemporary(node, index);
+                emitTemporary(node, emitterNode.index());
                 break;
             default:
-                throw new RuntimeException("Unknown Emitter Type: " + type);
+                throw new RuntimeException("Unknown Emitter Type: " + emitterNode.type());
         }
     }
 
-    private void emitObject(int type, List<TerminalNode> nodes) {
+    private void emitObject(EmitterNode emitterNode, List<TerminalNode> nodes) {
         visitLine(mv, nodes.get(0).getSymbol().getLine());
-        switch (type) {
+        switch (emitterNode.type()) {
             case HASH:
                 emitCreateSymbol(concatText(nodes));
                 break;
@@ -207,7 +206,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
                 emitCreateInteger(concatText(nodes));
                 break;
             default:
-                throw new RuntimeException("Unknown Emitter Type: " + type);
+                throw new RuntimeException("Unknown Emitter Type: " + emitterNode.type());
         }
     }
 
@@ -233,9 +232,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             return;
         for (EmitterNode node : arguments)
             if (node.value() != null)
-                emitObject(node.type(), node.value(), node.index());
+                emitObject(node, node.value());
             else
-                emitObject(node.type(), node.values());
+                emitObject(node, node.values());
     }
 
     private String concatText(List<TerminalNode> nodes) {

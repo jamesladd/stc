@@ -4,6 +4,10 @@ import st.redline.Smalltalk;
 
 public class RedlineSmalltalk extends PrimObject implements Smalltalk {
 
+    public RedlineSmalltalk() {
+        this.javaValue("RedlineSmalltalk");
+    }
+
     @Override
     public PrimObject createString(String value) {
         // TODO.JCL - When Smalltalk String is available create one, ie: after bootstrap

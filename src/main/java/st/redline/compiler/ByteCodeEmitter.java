@@ -75,14 +75,13 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         // - Smalltalk instance is put into the context.
         mv = cw.visitMethod(ACC_PUBLIC, "sendMessages", "(Lst/redline/Smalltalk;)Lst/redline/kernel/PrimObject;", null, null);
         mv.visitVarInsn(ALOAD, 0);
-        mv.visitTypeInsn(NEW, "st/redline/kernel/PrimObject");
-        mv.visitInsn(DUP);
-        mv.visitMethodInsn(INVOKESPECIAL, "st/redline/kernel/PrimObject", "<init>", "()V", false);
+        mv.visitVarInsn(ALOAD, 1);
+        mv.visitTypeInsn(CHECKCAST, "st/redline/kernel/PrimObject");
         mv.visitTypeInsn(NEW, "st/redline/kernel/PrimContext");
         mv.visitInsn(DUP);
         mv.visitVarInsn(ALOAD, 1);
         mv.visitMethodInsn(INVOKESPECIAL, "st/redline/kernel/PrimContext", "<init>", "(Lst/redline/Smalltalk;)V", false);
-        mv.visitMethodInsn(INVOKESPECIAL, source.fullClassName(), "sendMessages", SEND_MESSAGES_SIG, false);
+        mv.visitMethodInsn(INVOKEVIRTUAL, source.fullClassName(), "sendMessages", SEND_MESSAGES_SIG, false);
         mv.visitInsn(ARETURN);
         mv.visitMaxs(5, 2);
         mv.visitEnd();

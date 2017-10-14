@@ -142,6 +142,8 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     private void emitAssignment(Vector<Message> messages) {
         if (isTraceEnabled(LOG))
             LOG.trace(messages);
+        if (messages.get(0).receiver().type() != SYNTHETIC_TEMPORARY)
+            throw new RuntimeException("Attempt to assign to non-temporary.");
     }
 
     public void emitInitTemporaries(int index) {
@@ -197,7 +199,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
                 emitPseudoVariable(node.getText());
                 break;
             case SYNTHETIC_TEMPORARY:
-                emitTemporary(node, emitterNode.index());
+                emitTemporaryGet(node, emitterNode.index());
                 break;
             default:
                 throw new RuntimeException("Unknown Emitter Type: " + emitterNode.type());
@@ -272,7 +274,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         }
     }
 
-    private void emitTemporary(TerminalNode node, int index) {
+    private void emitTemporaryGet(TerminalNode node, int index) {
         visitLine(mv, node.getSymbol().getLine());
         pushContext();
         pushIntConst(index);

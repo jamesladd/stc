@@ -6,4 +6,8 @@ class ExpressionAnswerStatement extends Statement {
     boolean containsAnswer() {
         return true;
     }
+    
+    void markAsAnswer() {
+        // No-op.
+    }
 }

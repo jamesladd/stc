@@ -1,8 +1,8 @@
-package st.redline;
+package st.redline.kernel;
 
-import st.redline.kernel.PrimObject;
+import st.redline.Smalltalk;
 
-public class RedlineSmalltalk implements Smalltalk {
+public class RedlineSmalltalk extends PrimObject implements Smalltalk {
 
     @Override
     public PrimObject createString(String value) {

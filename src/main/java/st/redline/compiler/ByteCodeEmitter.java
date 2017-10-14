@@ -36,7 +36,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             throw new RuntimeException("Java 1.8 or above required.");
         }
     }
-    private final String SEND_MESSAGES_SIG = "(Lst/redline/Smalltalk;)Lst/redline/kernel/PrimObject;";
+    private final String SEND_MESSAGES_SIG = "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;";
 
     private final ClassWriter cw;
     private MethodVisitor mv;
@@ -65,10 +65,30 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         cw.visit(BYTECODE_VERSION, ACC_PUBLIC + ACC_SUPER, source.fullClassName(), null, superclassName(), new String[] {"st/redline/classloader/Script"});
         cw.visitSource(source.className() + source.fileExtension(), null);
         makeJavaClassInitializer();
-        openSendMessagesMethod();
+        makePublicSendMessagesMethod();
+        openPrivateSendMessagesMethod();
     }
 
-    private void openSendMessagesMethod() {
+    private void makePublicSendMessagesMethod() {
+        // This method takes the public call to sendMessage with arg of Smalltalk instance
+        // and calls the private sendMessages instance with instances of PrimObject and PrimContext
+        // - Smalltalk instance is put into the context.
+        mv = cw.visitMethod(ACC_PUBLIC, "sendMessages", "(Lst/redline/Smalltalk;)Lst/redline/kernel/PrimObject;", null, null);
+        mv.visitVarInsn(ALOAD, 0);
+        mv.visitTypeInsn(NEW, "st/redline/kernel/PrimObject");
+        mv.visitInsn(DUP);
+        mv.visitMethodInsn(INVOKESPECIAL, "st/redline/kernel/PrimObject", "<init>", "()V", false);
+        mv.visitTypeInsn(NEW, "st/redline/kernel/PrimContext");
+        mv.visitInsn(DUP);
+        mv.visitVarInsn(ALOAD, 1);
+        mv.visitMethodInsn(INVOKESPECIAL, "st/redline/kernel/PrimContext", "<init>", "(Lst/redline/Smalltalk;)V", false);
+        mv.visitMethodInsn(INVOKESPECIAL, source.fullClassName(), "sendMessages", SEND_MESSAGES_SIG, false);
+        mv.visitInsn(ARETURN);
+        mv.visitMaxs(5, 2);
+        mv.visitEnd();
+    }
+
+    private void openPrivateSendMessagesMethod() {
         if (isTraceEnabled(LOG))
             LOG.trace("");
         mv = cw.visitMethod(ACC_PUBLIC, "sendMessages", SEND_MESSAGES_SIG, null, null);
@@ -102,7 +122,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     public void closeClass(boolean returnRequired) {
         if (isTraceEnabled(LOG))
             LOG.trace(source.fullClassName());
-        closeSendMessagesMethod(returnRequired);
+        closePrivateSendMessagesMethod(returnRequired);
         cw.visitEnd();
         classBytes = cw.toByteArray();
     }
@@ -245,7 +265,11 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     private void emitPushReceiver() {
-        mv.visitVarInsn(ALOAD, 0);
+        mv.visitVarInsn(ALOAD, 1);
+    }
+
+    private void pushContext() {
+        mv.visitVarInsn(ALOAD, 2);
     }
 
     private void emitCreateCharacter(String value) {
@@ -279,10 +303,11 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     private void pushSmalltalk() {
-        mv.visitVarInsn(ALOAD, 1);
+        pushContext();
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimContext", "smalltalk", "()Lst/redline/Smalltalk;", false);
     }
 
-    private void closeSendMessagesMethod(boolean returnRequired) {
+    private void closePrivateSendMessagesMethod(boolean returnRequired) {
         if (isTraceEnabled(LOG))
             LOG.trace("");
         if (returnRequired)

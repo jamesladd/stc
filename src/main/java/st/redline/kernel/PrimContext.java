@@ -6,6 +6,7 @@ import st.redline.Smalltalk;
 public class PrimContext {
 
     private final Smalltalk smalltalk;
+    private PrimObject[] temporaries;
 
     public PrimContext(Smalltalk smalltalk) {
         this.smalltalk = smalltalk;
@@ -16,11 +17,25 @@ public class PrimContext {
     }
 
     public void initTemporaries(int count) {
+        temporaries = new PrimObject[count];
+        // TODO.JCL - initialize with Nil.
+        for (int index = 0; index < count; index++) {
+            temporaries[index] = new PrimObject();
+            temporaries[index].javaValue("TODO:JCL - nil.");
+        }
     }
 
     public PrimObject temporaryAt(int index) {
-        PrimObject object = new PrimObject();
-        object.javaValue("temporary");
-        return object;
+        if (index < temporaries.length)
+            return temporaries[index];
+        throw new RuntimeException("Temporaries index " + index + " out of bounds " + temporaries.length);
+    }
+
+    public PrimObject temporaryAtPut(int index, PrimObject object) {
+        if (index < temporaries.length) {
+            temporaries[index] = object;
+            return object;
+        }
+        throw new RuntimeException("Temporaries index " + index + " out of bounds " + temporaries.length);
     }
 }

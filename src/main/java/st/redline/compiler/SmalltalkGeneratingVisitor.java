@@ -1,10 +1,13 @@
 /* Redline Smalltalk, Copyright (c) James C. Ladd. All rights reserved. See LICENSE in the root of this distribution. */
 package st.redline.compiler;
 
+import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import st.redline.classloader.Source;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Stack;
 
 import static st.redline.compiler.SmalltalkParser.*;
@@ -19,6 +22,7 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     private final Stack<Statement> statements = new Stack<>();
     private final Source source;
     private final Emitter emitter;
+    private Map<String, EmitterNode> temporaries;
     private Statement lastStatementEmitted;
     private boolean isCascade;
 
@@ -181,6 +185,36 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         return visitChildren(ctx);
     }
 
+    @Override
+    public Void visitVariable(SmalltalkParser.VariableContext ctx) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(trace(ctx.IDENTIFIER()));
+        String value = ctx.IDENTIFIER().getText();
+        if (isTemporary(value))
+            addToStatement(EmitterNode.createTemporary(ctx.IDENTIFIER(), temporaryAt(value)));
+        return visitChildren(ctx);
+    }
+
+    @Override
+    public Void visitTemps(SmalltalkParser.TempsContext ctx) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(trace(ctx.IDENTIFIER()));
+        temporaries = new HashMap<>();
+        int index = 0;
+        for (TerminalNode node : ctx.IDENTIFIER())
+            temporaries.put(node.getText(), EmitterNode.create(IDENTIFIER, node, index++));
+        emitInitTemporaries(index);
+        return visitChildren(ctx);
+    }
+
+    private boolean isTemporary(String identifier) {
+        return temporaries.containsKey(identifier);
+    }
+
+    private EmitterNode temporaryAt(String identifier) {
+        return temporaries.get(identifier);
+    }
+
     private Object firstNotNull(Object ... objects) {
         for (Object object : objects)
             if (object != null)
@@ -216,6 +250,10 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         Statement statement = statements.pop();
         lastStatementEmitted = statement;
         emitter.emit(statement);
+    }
+
+    private void emitInitTemporaries(int index) {
+        emitter.emitInitTemporaries(index);
     }
 
     private boolean requiresReturn() {

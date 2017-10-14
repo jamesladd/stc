@@ -11,4 +11,5 @@ interface Emitter {
     void closeClass(boolean returnRequired);
 
     void emit(Statement statement);
+    void emitInitTemporaries(int index);
 }

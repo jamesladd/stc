@@ -8,21 +8,26 @@ import static st.redline.compiler.SmalltalkParser.HASH;
 
 class EmitterNode {
 
+    static final int SYNTHETIC_TEMPORARY = 100;
+
     private final int type;
     private final boolean isList;
+    private final int index;
     private TerminalNode node;
     private List<TerminalNode> nodes;
 
-    EmitterNode(int type, TerminalNode node) {
+    EmitterNode(int type, TerminalNode node, int index) {
         this.type = type;
         this.node = node;
         this.isList = false;
+        this.index = index;
     }
 
-    EmitterNode(int type, List<TerminalNode> nodes) {
+    EmitterNode(int type, List<TerminalNode> nodes, int index) {
         this.type = type;
         this.nodes = nodes;
         this.isList = true;
+        this.index = index;
     }
 
     String text() {
@@ -50,8 +55,20 @@ class EmitterNode {
         return nodes;
     }
 
-    @SuppressWarnings("unchecked")
+    int index() {
+        return index;
+    }
+
     static EmitterNode create(int type, Object node) {
-        return node instanceof List ? new EmitterNode(type, (List<TerminalNode>) node) : new EmitterNode(type, (TerminalNode) node);
+        return create(type, node, 0);
+    }
+
+    @SuppressWarnings("unchecked")
+    static EmitterNode create(int type, Object node, int index) {
+        return node instanceof List ? new EmitterNode(type, (List<TerminalNode>) node, index) : new EmitterNode(type, (TerminalNode) node, index);
+    }
+
+    static EmitterNode createTemporary(TerminalNode identifier, EmitterNode declaration) {
+        return new EmitterNode(SYNTHETIC_TEMPORARY, identifier, declaration.index);
     }
 }

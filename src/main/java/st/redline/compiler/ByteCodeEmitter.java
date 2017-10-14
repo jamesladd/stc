@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Vector;
 
+import static st.redline.compiler.EmitterNode.SYNTHETIC_TEMPORARY;
 import static st.redline.compiler.SmalltalkParser.*;
 
 class ByteCodeEmitter implements Emitter, Opcodes {
@@ -135,6 +136,12 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             mv.visitInsn(ARETURN);
     }
 
+    public void emitInitTemporaries(int index) {
+        pushContext();
+        pushIntConst(index);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimContext", "initTemporaries", "(I)V", false);
+    }
+
     private void emit(Vector<Message> messages) {
         for (Message message : messages)
             emit(message);
@@ -162,12 +169,12 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     private void emitReceiver(EmitterNode receiver) {
         int type = receiver.type();
         if (!receiver.isList())
-            emitObject(type, receiver.value());
+            emitObject(type, receiver.value(), receiver.index());
         else
             emitObject(type, receiver.values());
     }
 
-    private void emitObject(int type, TerminalNode node) {
+    private void emitObject(int type, TerminalNode node, int index) {
         visitLine(mv, node.getSymbol().getLine());
         switch (type) {
             case STRING:
@@ -181,6 +188,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
                 break;
             case RESERVED_WORD:
                 emitPseudoVariable(node.getText());
+                break;
+            case SYNTHETIC_TEMPORARY:
+                emitTemporary(node, index);
                 break;
             default:
                 throw new RuntimeException("Unknown Emitter Type: " + type);
@@ -223,7 +233,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             return;
         for (EmitterNode node : arguments)
             if (node.value() != null)
-                emitObject(node.type(), node.value());
+                emitObject(node.type(), node.value(), node.index());
             else
                 emitObject(node.type(), node.values());
     }
@@ -253,6 +263,13 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             default:
                 throw new RuntimeException("Unhandled Pseudo Variable: " + value);
         }
+    }
+
+    private void emitTemporary(TerminalNode node, int index) {
+        visitLine(mv, node.getSymbol().getLine());
+        pushContext();
+        pushIntConst(index);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimContext", "temporaryAt", "(I)Lst/redline/kernel/PrimObject;", false);
     }
 
     private void emitDup() {
@@ -321,5 +338,21 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         Label l0 = new Label();
         mv.visitLabel(l0);
         mv.visitLineNumber(adjustedSourceLine, l0);
+    }
+
+    private void pushIntConst(int value) {
+        switch (value) {
+            case 0: mv.visitInsn(ICONST_0); break;
+            case 1: mv.visitInsn(ICONST_1); break;
+            case 2: mv.visitInsn(ICONST_2); break;
+            case 3: mv.visitInsn(ICONST_3); break;
+            case 4: mv.visitInsn(ICONST_4); break;
+            case 5: mv.visitInsn(ICONST_5); break;
+            default:
+                if (value > 5 && value < 128)
+                    mv.visitIntInsn(BIPUSH, value);
+                else // SIPUSH not supported yet.
+                    throw new IllegalStateException("Push of integer value " + value + " not yet supported.");
+        }
     }
 }

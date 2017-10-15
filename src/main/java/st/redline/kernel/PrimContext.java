@@ -5,15 +5,40 @@ import st.redline.Smalltalk;
 
 public class PrimContext {
 
-    private final Smalltalk smalltalk;
+    private static Smalltalk SMALLTALK;
+
+    private final PrimObject receiver;
+    private final PrimObject method;
+    private final String selector;
+    private final PrimObject[] arguments;
+
     private PrimObject[] temporaries;
 
     public PrimContext(Smalltalk smalltalk) {
-        this.smalltalk = smalltalk;
+        SMALLTALK = smalltalk;
+        this.receiver = null;
+        this.method = null;
+        this.selector = null;
+        this.arguments = null;
+    }
+
+    public PrimContext(PrimObject receiver, PrimObject method, String selector, PrimObject[] arguments) {
+        this.receiver = receiver;
+        this.method = method;
+        this.selector = selector;
+        this.arguments = arguments;
     }
 
     public Smalltalk smalltalk() {
-        return smalltalk;
+        return SMALLTALK;
+    }
+
+    public String selector() {
+        return selector;
+    }
+
+    public PrimObject method() {
+        return method;
     }
 
     public void initTemporaries(int count) {
@@ -37,5 +62,11 @@ public class PrimContext {
             return object;
         }
         throw new RuntimeException("Temporaries index " + index + " out of bounds " + temporaries.length);
+    }
+
+    public PrimObject argumentAt(int index) {
+        if (index < arguments.length)
+            return arguments[index];
+        throw new RuntimeException("Arguments index " + index + " out of bounds " + arguments.length);
     }
 }

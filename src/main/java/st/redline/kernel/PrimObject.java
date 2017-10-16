@@ -16,6 +16,10 @@ public class PrimObject {
         this.javaValue = object;
     }
 
+    public Object javaValue() {
+        return javaValue;
+    }
+
     public String toString() {
         return String.valueOf(javaValue);
     }

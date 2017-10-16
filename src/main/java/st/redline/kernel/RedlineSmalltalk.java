@@ -55,4 +55,12 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
         object.javaValue("nil");
         return object;
     }
+
+    @Override
+    public PrimObject resolve(String value) {
+        // TODO.JCL - When Smalltalk Symbol is available create one, ie: after bootstrap
+        PrimObject object = new PrimObject();
+        object.javaValue(value);
+        return object;
+    }
 }

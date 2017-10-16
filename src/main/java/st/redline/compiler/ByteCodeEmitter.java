@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Vector;
 
+import static st.redline.compiler.EmitterNode.SYNTHETIC_REFERENCE;
 import static st.redline.compiler.EmitterNode.SYNTHETIC_TEMPORARY;
 import static st.redline.compiler.SmalltalkParser.*;
 import static st.redline.compiler.Trace.trace;
@@ -222,6 +223,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             case SYNTHETIC_TEMPORARY:
                 emitTemporaryGet(node, emitterNode.index());
                 break;
+            case SYNTHETIC_REFERENCE:
+                emitResolveReference(node.getText());
+                break;
             default:
                 throw new RuntimeException("Unknown Emitter Type: " + emitterNode.type());
         }
@@ -239,6 +243,10 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             default:
                 throw new RuntimeException("Unknown Emitter Type: " + emitterNode.type());
         }
+    }
+
+    private void emitResolveReference(String value) {
+        emitSmalltalkCall("resolve", value);
     }
 
     private void emitSelector(List<EmitterNode> selectors) {

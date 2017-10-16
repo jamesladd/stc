@@ -22,7 +22,9 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     private final Stack<Statement> statements = new Stack<>();
     private final Source source;
     private final Emitter emitter;
-    private Map<String, EmitterNode> temporaries;
+    private Map<String, EmitterNode> temporaries = new HashMap<>();
+    private Map<String, EmitterNode> arguments = new HashMap<>();
+    private Map<String, EmitterNode> instanceVariables = new HashMap<>();
     private Statement lastStatementEmitted;
     private boolean isCascade;
 
@@ -192,6 +194,12 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         String value = ctx.IDENTIFIER().getText();
         if (isTemporary(value))
             addToStatement(EmitterNode.createTemporary(ctx.IDENTIFIER(), temporaryAt(value)));
+        else if (isArgument(value))
+            addToStatement(EmitterNode.createArgument(ctx.IDENTIFIER(), argumentAt(value)));
+        else if (isInstanceVariable(value))
+            addToStatement(EmitterNode.createInstanceVariable(ctx.IDENTIFIER(), instanceVariableAt(value)));
+        else
+            addToStatement(EmitterNode.createReference(ctx.IDENTIFIER()));
         return visitChildren(ctx);
     }
 
@@ -219,8 +227,24 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         return temporaries.containsKey(identifier);
     }
 
+    private boolean isArgument(String identifier) {
+        return arguments.containsKey(identifier);
+    }
+
+    private boolean isInstanceVariable(String identifier) {
+        return instanceVariables.containsKey(identifier);
+    }
+
     private EmitterNode temporaryAt(String identifier) {
         return temporaries.get(identifier);
+    }
+
+    private EmitterNode argumentAt(String identifier) {
+        return arguments.get(identifier);
+    }
+
+    private EmitterNode instanceVariableAt(String identifier) {
+        return instanceVariables.get(identifier);
     }
 
     private Object firstNotNull(Object ... objects) {

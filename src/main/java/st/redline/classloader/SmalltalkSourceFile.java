@@ -54,7 +54,8 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
     }
 
     public String contents() {
-        return reader.contents(this);
+        String readerGeneratedLine = "Smalltalk package: '" + packageName() + "'.\n";
+        return readerGeneratedLine + reader.contents(this);
     }
 
     public String transform(String line) {
@@ -148,7 +149,7 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
         // First source line number is the Authors first source line taking
         // into account there may be other Smalltalk lines prepended by the preprocessor.
         // ie: return count of lines added by preprocessor.
-        return 0;
+        return 1;
     }
 
     private String name() {

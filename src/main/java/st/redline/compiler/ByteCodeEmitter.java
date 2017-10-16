@@ -14,6 +14,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Vector;
 
+import static st.redline.compiler.EmitterNode.SYNTHETIC_REFERENCE;
 import static st.redline.compiler.EmitterNode.SYNTHETIC_TEMPORARY;
 import static st.redline.compiler.SmalltalkParser.*;
 import static st.redline.compiler.Trace.trace;
@@ -222,6 +223,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             case SYNTHETIC_TEMPORARY:
                 emitTemporaryGet(node, emitterNode.index());
                 break;
+            case SYNTHETIC_REFERENCE:
+                emitResolveReference(node.getText());
+                break;
             default:
                 throw new RuntimeException("Unknown Emitter Type: " + emitterNode.type());
         }
@@ -239,6 +243,12 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             default:
                 throw new RuntimeException("Unknown Emitter Type: " + emitterNode.type());
         }
+    }
+
+    private void emitResolveReference(String value) {
+        if (isTraceEnabled(LOG))
+            LOG.trace("resolve: " + value + " for: " + source.className() + " in: " + source.packageName());
+        emitSmalltalkCall("resolveFor", value, source.className(), source.packageName());
     }
 
     private void emitSelector(List<EmitterNode> selectors) {
@@ -338,6 +348,14 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         pushSmalltalk();
         mv.visitLdcInsn(value);
         mv.visitMethodInsn(INVOKEINTERFACE, "st/redline/Smalltalk", method, "(Ljava/lang/String;)Lst/redline/kernel/PrimObject;", true);
+    }
+
+    private void emitSmalltalkCall(String method, String value1, String value2, String value3) {
+        pushSmalltalk();
+        mv.visitLdcInsn(value1);
+        mv.visitLdcInsn(value2);
+        mv.visitLdcInsn(value3);
+        mv.visitMethodInsn(INVOKEINTERFACE, "st/redline/Smalltalk", method, "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lst/redline/kernel/PrimObject;", true);
     }
 
     private String removeLeadingChar(String text) {

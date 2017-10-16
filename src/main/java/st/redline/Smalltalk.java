@@ -10,4 +10,9 @@ public interface Smalltalk {
     PrimObject createCharacter(String javaString);
     PrimObject booleanSingleton(String javaString);
     PrimObject nilSingleton(String javaString);
+    PrimObject resolveFor(String reference, String className, String packageName);
+
+    PrimObject currentPackage(String javaString);
+    String currentPackage();
+    Smalltalk register(PrimObject newClass, String className);
 }

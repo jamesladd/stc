@@ -9,6 +9,9 @@ import static st.redline.compiler.SmalltalkParser.HASH;
 class EmitterNode {
 
     static final int SYNTHETIC_TEMPORARY = 100;
+    static final int SYNTHETIC_ARGUMENT = 101;
+    static final int SYNTHETIC_INSTANCE_VARIABLE = 102;
+    static final int SYNTHETIC_REFERENCE = 103;
 
     private final int type;
     private final boolean isList;
@@ -70,5 +73,17 @@ class EmitterNode {
 
     static EmitterNode createTemporary(TerminalNode identifier, EmitterNode declaration) {
         return new EmitterNode(SYNTHETIC_TEMPORARY, identifier, declaration.index);
+    }
+
+    static EmitterNode createArgument(TerminalNode identifier, EmitterNode declaration) {
+        return new EmitterNode(SYNTHETIC_ARGUMENT, identifier, declaration.index);
+    }
+
+    static EmitterNode createInstanceVariable(TerminalNode identifier, EmitterNode declaration) {
+        return new EmitterNode(SYNTHETIC_INSTANCE_VARIABLE, identifier, declaration.index);
+    }
+
+    static EmitterNode createReference(TerminalNode identifier) {
+        return new EmitterNode(SYNTHETIC_REFERENCE, identifier, 0);
     }
 }

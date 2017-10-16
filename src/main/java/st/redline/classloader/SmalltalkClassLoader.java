@@ -23,24 +23,14 @@ public class SmalltalkClassLoader extends ClassLoader {
     public Class findClass(String name) throws ClassNotFoundException {
         if (isTraceEnabled(LOG))
             LOG.trace(name);
-        Class cls = cachedClass(name);
-        if (cls != null)
-            return cls;
         byte[] classData = loadClassData(name);
         if (classData == null)
             return super.findClass(name);
-        cls = defineClass(null, classData, 0, classData.length);
-//        saveClass(classData, name);
-//        cacheClass(cls, name);
-        return cls;
+        return defineClass(null, classData, 0, classData.length);
     }
 
     public Class loadScript(String name) throws ClassNotFoundException {
         return loadClass(name);
-    }
-
-    private Class cachedClass(String name) {
-        return null;
     }
 
     private byte[] loadClassData(String name) {

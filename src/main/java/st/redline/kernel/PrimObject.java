@@ -24,6 +24,14 @@ public class PrimObject {
         return String.valueOf(javaValue);
     }
 
+    public PrimObject clazz() {
+        return clazz;
+    }
+
+    public void clazz(PrimObject clazz) {
+        this.clazz = clazz;
+    }
+
     //
     // dispatch - lookup and dispatch method - start search for method in class of the receiver.
     //
@@ -44,10 +52,6 @@ public class PrimObject {
     // dispatches will result in a doesNotUnderstand:.
     // Except for 'subclass:' and 'package:' which are used during bootstrapping.
     //
-
-    public PrimObject clazz() {
-        return clazz;
-    }
 
     public PrimObject superclass() {
         return this;

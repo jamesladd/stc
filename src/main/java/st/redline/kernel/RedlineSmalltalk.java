@@ -107,6 +107,14 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
         return currentPackage;
     }
 
+    @Override
+    public Smalltalk register(PrimObject newClass, String className) {
+        String fullClassName = currentPackage() + "." + className;
+        classes.put(fullClassName, newClass);
+        return this;
+    }
+
+
     private void tryCompileClass(String path) {
         try {
             Class cls = tryLoadScript(path);

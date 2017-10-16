@@ -57,10 +57,10 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
     }
 
     @Override
-    public PrimObject resolve(String value) {
+    public PrimObject resolveFor(String reference, String className, String packageName) {
         // TODO.JCL - When Smalltalk Symbol is available create one, ie: after bootstrap
         PrimObject object = new PrimObject();
-        object.javaValue(value);
+        object.javaValue(reference);
         return object;
     }
 }

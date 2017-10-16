@@ -10,5 +10,5 @@ public interface Smalltalk {
     PrimObject createCharacter(String javaString);
     PrimObject booleanSingleton(String javaString);
     PrimObject nilSingleton(String javaString);
-    PrimObject resolve(String javaString);
+    PrimObject resolveFor(String reference, String className, String packageName);
 }

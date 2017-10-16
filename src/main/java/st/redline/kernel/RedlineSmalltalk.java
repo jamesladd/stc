@@ -1,5 +1,6 @@
 package st.redline.kernel;
 
+import edu.emory.mathcs.backport.java.util.Collections;
 import st.redline.Smalltalk;
 import st.redline.classloader.Script;
 import st.redline.classloader.SmalltalkClassLoader;
@@ -120,11 +121,12 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
 
     @SuppressWarnings("unchecked")
     private String importFor(String packageName, String className, String reference) {
+        Map emptyMap = Collections.emptyMap();
         // TODO.JCL remove this conditional when importing is implemented.
         if (reference.equals("Object"))
             return "st.redline.kernel.Object";
-        Map<String, Map<String, String>> thePackage = imports.getOrDefault(packageName, emptyMap());
-        Map<String, String> theClass = thePackage.getOrDefault(className, emptyMap());
+        Map<String, Map<String, String>> thePackage = imports.getOrDefault(packageName, emptyMap);
+        Map<String, String> theClass = thePackage.getOrDefault(className, emptyMap);
         return theClass.getOrDefault(reference, null);
     }
 }

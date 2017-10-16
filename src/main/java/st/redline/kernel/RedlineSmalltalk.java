@@ -8,12 +8,11 @@ import st.redline.classloader.SmalltalkClassLoader;
 import java.util.HashMap;
 import java.util.Map;
 
-import static edu.emory.mathcs.backport.java.util.Collections.emptyMap;
-
 public class RedlineSmalltalk extends PrimObject implements Smalltalk {
 
     private Map<String, PrimObject> classes = new HashMap<>();
     private Map<String, Map<String, Map<String, String>>> imports = new HashMap<>();
+    private String currentPackage;
 
     public RedlineSmalltalk() {
         this.javaValue("RedlineSmalltalk");
@@ -95,6 +94,17 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
             throw new RuntimeException("Compilation of class '" + fullPath + "' did not result in a Smalltalk class.");
 
         return classes.get(fullPath);
+    }
+
+    @Override
+    public PrimObject currentPackage(String javaString) {
+        currentPackage = javaString;
+        return this;
+    }
+
+    @Override
+    public String currentPackage() {
+        return currentPackage;
     }
 
     private void tryCompileClass(String path) {

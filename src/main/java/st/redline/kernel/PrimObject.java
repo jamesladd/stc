@@ -40,8 +40,9 @@ public class PrimObject {
     }
 
     //
-    // Methods that should be overridden in a subclass - otherwise all
+    // Methods that should be overridden in a subclass - otherwise most all
     // dispatches will result in a doesNotUnderstand:.
+    // Except for 'subclass:' and 'package:' which are used during bootstrapping.
     //
 
     public PrimObject clazz() {
@@ -65,6 +66,10 @@ public class PrimObject {
     }
 
     public PrimObject methodAt(String selector) {
+        if (selector.equals("subclass:"))
+            return new PrimSubclassMethod();
+        if (selector.equals("package:"))
+            return new PrimPackageMethod();
         PrimObject dnuMethod = new PrimObject();
         dnuMethod.javaValue(selector);
         return dnuMethod;

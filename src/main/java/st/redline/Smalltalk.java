@@ -11,4 +11,6 @@ public interface Smalltalk {
     PrimObject booleanSingleton(String javaString);
     PrimObject nilSingleton(String javaString);
     PrimObject resolveFor(String reference, String className, String packageName);
+    PrimObject currentPackage(String javaString);
+    String currentPackage();
 }

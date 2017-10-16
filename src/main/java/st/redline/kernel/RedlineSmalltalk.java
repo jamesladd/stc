@@ -16,6 +16,14 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
 
     public RedlineSmalltalk() {
         this.javaValue("RedlineSmalltalk");
+        bootstrap();
+    }
+
+    private void bootstrap() {
+        PrimObject primObject = new PrimObject();
+        primObject.javaValue("PrimObject");
+        classes.put("st.redline.kernel.PrimObject", primObject);
+        classes.put("st.redline.kernel.Smalltalk", this);
     }
 
     @Override
@@ -70,7 +78,12 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
     public PrimObject resolveFor(String reference, String className, String packageName) {
         String fullPath = importFor(packageName, className, reference);
         if (fullPath == null)
-            throw new RuntimeException("Import for '" + reference + "' not found in " + packageName + "." + className);
+            if (reference.equals("PrimObject"))
+                return classes.get("st.redline.kernel.PrimObject");
+            else if (reference.equals("Smalltalk"))
+                return classes.get("st.redline.kernel.Smalltalk");
+            else
+                throw new RuntimeException("Import for '" + reference + "' not found in " + packageName + "." + className);
 
         if (classes.containsKey(fullPath))
             return classes.get(fullPath);
@@ -107,6 +120,9 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
 
     @SuppressWarnings("unchecked")
     private String importFor(String packageName, String className, String reference) {
+        // TODO.JCL remove this conditional when importing is implemented.
+        if (reference.equals("Object"))
+            return "st.redline.kernel.Object";
         Map<String, Map<String, String>> thePackage = imports.getOrDefault(packageName, emptyMap());
         Map<String, String> theClass = thePackage.getOrDefault(className, emptyMap());
         return theClass.getOrDefault(reference, null);

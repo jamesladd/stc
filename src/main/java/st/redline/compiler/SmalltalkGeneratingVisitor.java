@@ -25,8 +25,12 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     private Map<String, EmitterNode> temporaries = new HashMap<>();
     private Map<String, EmitterNode> arguments = new HashMap<>();
     private Map<String, EmitterNode> instanceVariables = new HashMap<>();
+    private Map<String, EmitterNode> classVariables = new HashMap<>();
     private Statement lastStatementEmitted;
     private boolean isCascade;
+    private boolean subclassKeywordSeen;
+    private boolean captureInstanceVariableNames;
+    private boolean captureClassVariableNames;
 
     SmalltalkGeneratingVisitor(Source source, Emitter emitter) {
         this.source = source;
@@ -88,6 +92,9 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         if (isTraceEnabled(LOG))
             LOG.trace("visit");
         isCascade = false;
+        subclassKeywordSeen = false;
+        captureInstanceVariableNames = false;
+        captureClassVariableNames = false;
         newStatementMessage();
         return visitChildren(ctx);
     }
@@ -113,7 +120,23 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         if (isTraceEnabled(LOG))
             LOG.trace(trace(ctx.STRING()));
         addToStatement(EmitterNode.create(STRING, ctx.STRING()));
+        if (captureInstanceVariableNames)
+            captureInstanceVariables(ctx);
+        else if (captureClassVariableNames)
+            captureClassVariables(ctx);
         return visitChildren(ctx);
+    }
+
+    private void captureInstanceVariables(StringContext ctx) {
+        captureInstanceVariableNames = false;
+        instanceVariables = new HashMap<>();
+        splitAndMap(ctx.STRING(), instanceVariables);
+    }
+
+    private void captureClassVariables(StringContext ctx) {
+        captureClassVariableNames = false;
+        classVariables = new HashMap<>();
+        splitAndMap(ctx.STRING(), classVariables);
     }
 
     @Override
@@ -156,6 +179,11 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     public Void visitKeywordPair(SmalltalkParser.KeywordPairContext ctx) {
         if (isTraceEnabled(LOG))
             LOG.trace(trace(ctx.KEYWORD()));
+        String keyword = ctx.KEYWORD().getText();
+        if ("subclass:".equals(keyword))
+            subclassKeywordSeen = true;
+        captureInstanceVariableNames = subclassKeywordSeen && "instanceVariableNames:".equals(keyword);
+        captureClassVariableNames = subclassKeywordSeen && "classVariableNames:".equals(keyword);
         if (isCascade)
             newStatementMessageTail();
         addToStatement(EmitterNode.create(KEYWORD, ctx.KEYWORD()));
@@ -198,6 +226,8 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
             addToStatement(EmitterNode.createArgument(ctx.IDENTIFIER(), argumentAt(value)));
         else if (isInstanceVariable(value))
             addToStatement(EmitterNode.createInstanceVariable(ctx.IDENTIFIER(), instanceVariableAt(value)));
+        else if (isClassVariable(value))
+            addToStatement(EmitterNode.createClassVariable(ctx.IDENTIFIER(), instanceVariableAt(value)));
         else
             addToStatement(EmitterNode.createReference(ctx.IDENTIFIER()));
         return visitChildren(ctx);
@@ -233,6 +263,10 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
 
     private boolean isInstanceVariable(String identifier) {
         return instanceVariables.containsKey(identifier);
+    }
+
+    private boolean isClassVariable(String identifier) {
+        return classVariables.containsKey(identifier);
     }
 
     private EmitterNode temporaryAt(String identifier) {
@@ -294,5 +328,18 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
 
     private boolean requiresReturn() {
         return lastStatementEmitted != null && !lastStatementEmitted.containsAnswer();
+    }
+
+    private void splitAndMap(TerminalNode node, Map<String, EmitterNode> map) {
+        int index = 0;
+        String[] values = splitVariables(node.getText());
+        for (String value : values)
+            map.put(value, EmitterNode.create(IDENTIFIER, node, index++));
+    }
+
+    private String[] splitVariables(String text) {
+        if (text.length() == 2)
+            return new String[0];
+        return text.substring(1, text.length() - 1).split(" ");
     }
 }

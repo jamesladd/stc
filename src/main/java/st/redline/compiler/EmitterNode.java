@@ -11,7 +11,8 @@ class EmitterNode {
     static final int SYNTHETIC_TEMPORARY = 100;
     static final int SYNTHETIC_ARGUMENT = 101;
     static final int SYNTHETIC_INSTANCE_VARIABLE = 102;
-    static final int SYNTHETIC_REFERENCE = 103;
+    static final int SYNTHETIC_CLASS_VARIABLE = 103;
+    static final int SYNTHETIC_REFERENCE = 104;
 
     private final int type;
     private final boolean isList;
@@ -81,6 +82,10 @@ class EmitterNode {
 
     static EmitterNode createInstanceVariable(TerminalNode identifier, EmitterNode declaration) {
         return new EmitterNode(SYNTHETIC_INSTANCE_VARIABLE, identifier, declaration.index);
+    }
+
+    static EmitterNode createClassVariable(TerminalNode identifier, EmitterNode declaration) {
+        return new EmitterNode(SYNTHETIC_CLASS_VARIABLE, identifier, declaration.index);
     }
 
     static EmitterNode createReference(TerminalNode identifier) {

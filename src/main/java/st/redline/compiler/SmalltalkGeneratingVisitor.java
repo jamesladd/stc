@@ -253,6 +253,16 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         return visitChildren(ctx);
     }
 
+    @Override
+    public Void visitBlock(SmalltalkParser.BlockContext ctx) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(trace(ctx.BLOCK_START()));
+        newStatement(new BlockStatement());
+        visitChildren(ctx);
+        emitStatement();
+        return null;
+    }
+
     private boolean isTemporary(String identifier) {
         return temporaries.containsKey(identifier);
     }

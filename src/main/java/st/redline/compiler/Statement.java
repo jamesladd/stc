@@ -16,6 +16,10 @@ abstract class Statement {
         messages.push(new Message(true, isCascade));
     }
 
+    boolean isBlock() {
+        return false;
+    }
+
     boolean containsAnswer() {
         return false;
     }

@@ -1,9 +1,9 @@
 package st.redline.kernel;
 
-public class PrimAddSelectorWithMethod extends PrimMethod {
+public class PrimAtSelectorPutMethod extends PrimMethod {
 
-    PrimAddSelectorWithMethod() {
-        this.javaValue("Method PrimAddSelectorWith");
+    PrimAtSelectorPutMethod() {
+        this.javaValue("Method PrimAtSelectorPut");
         this.function((receiver, context) -> {
             throw new RuntimeException("TODO.JCL - implement");
         });

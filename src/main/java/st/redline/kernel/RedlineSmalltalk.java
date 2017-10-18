@@ -112,6 +112,7 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
     public Smalltalk register(PrimObject newClass, String className) {
         String fullClassName = currentPackage() + "." + className;
         classes.put(fullClassName, newClass);
+        addImport(currentPackage(), className, fullClassName);
         return this;
     }
 
@@ -147,5 +148,14 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
         Map<String, Map<String, String>> thePackage = imports.getOrDefault(packageName, emptyMap);
         Map<String, String> theClass = thePackage.getOrDefault(className, emptyMap);
         return theClass.getOrDefault(reference, null);
+    }
+
+    private void addImport(String packageName, String className, String fullClassName) {
+        Map<String, Map<String, String>> packageMap = imports.computeIfAbsent(packageName, k -> new HashMap<>());
+        Map<String, String> classMap = packageMap.computeIfAbsent(className, k -> new HashMap<>());
+        if (!classMap.containsKey(fullClassName))
+            classMap.put(className, fullClassName);
+        else
+            throw new RuntimeException("Attempt to add import twice for: " + className);
     }
 }

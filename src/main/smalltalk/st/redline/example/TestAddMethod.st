@@ -1,0 +1,3 @@
+
+PrimObject subclass: #Test.
+

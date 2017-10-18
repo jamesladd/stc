@@ -1,4 +1,5 @@
 
 PrimObject subclass: #Test.
 
-^ Test class.
+- helloWorld
+  ^ 'HelloWorld'.

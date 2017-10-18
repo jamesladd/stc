@@ -74,6 +74,8 @@ public class PrimObject {
             return new PrimSubclassMethod();
         if (selector.equals("package:"))
             return new PrimPackageMethod();
+        if (selector.equals("addSelector:with:"))
+            return new PrimAddSelectorWithMethod();
         PrimObject dnuMethod = new PrimObject();
         dnuMethod.javaValue(selector);
         return dnuMethod;

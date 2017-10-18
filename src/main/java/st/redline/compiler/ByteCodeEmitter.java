@@ -248,7 +248,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     private void emitResolveReference(String value) {
         if (isTraceEnabled(LOG))
             LOG.trace("resolve: " + value + " for: " + source.className() + " in: " + source.packageName());
-        emitSmalltalkCall("resolveFor", value, source.className(), source.packageName());
+        emitSmalltalkCall("resolve", value, source.className(), source.packageName());
     }
 
     private void emitSelector(List<EmitterNode> selectors) {

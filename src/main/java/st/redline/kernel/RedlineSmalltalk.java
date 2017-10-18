@@ -1,5 +1,7 @@
 package st.redline.kernel;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import st.redline.Smalltalk;
 import st.redline.classloader.Script;
 import st.redline.classloader.SmalltalkClassLoader;
@@ -8,8 +10,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static java.util.Collections.emptyMap;
+import static st.redline.compiler.Trace.isTraceEnabled;
 
 public class RedlineSmalltalk extends PrimObject implements Smalltalk {
+
+    private static Log LOG = LogFactory.getLog(RedlineSmalltalk.class);
 
     private Map<String, PrimObject> classes = new HashMap<>();
     private Map<String, Map<String, Map<String, String>>> imports = new HashMap<>();
@@ -76,7 +81,9 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
     }
 
     @Override @SuppressWarnings("unchecked")
-    public PrimObject resolveFor(String reference, String className, String packageName) {
+    public PrimObject resolve(String reference, String className, String packageName) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(reference + " for " + className + " in " + packageName);
         String fullPath = importFor(packageName, className, reference);
         if (fullPath == null)
             if (reference.equals("PrimObject"))
@@ -110,6 +117,8 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
 
     @Override
     public Smalltalk register(PrimObject newClass, String className) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(className + " in " + currentPackage());
         String fullClassName = currentPackage() + "." + className;
         classes.put(fullClassName, newClass);
         addImport(currentPackage(), className, fullClassName);
@@ -151,6 +160,8 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
     }
 
     private void addImport(String packageName, String className, String fullClassName) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(className + " in " + packageName + " as " + fullClassName);
         Map<String, Map<String, String>> packageMap = imports.computeIfAbsent(packageName, k -> new HashMap<>());
         Map<String, String> classMap = packageMap.computeIfAbsent(className, k -> new HashMap<>());
         if (!classMap.containsKey(fullClassName))

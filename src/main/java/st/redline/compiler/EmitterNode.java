@@ -13,6 +13,7 @@ class EmitterNode {
     static final int SYNTHETIC_INSTANCE_VARIABLE = 102;
     static final int SYNTHETIC_CLASS_VARIABLE = 103;
     static final int SYNTHETIC_REFERENCE = 104;
+    static final int SYNTHETIC_BLOCK_CREATE = 105;
 
     private final int type;
     private final boolean isList;
@@ -90,5 +91,9 @@ class EmitterNode {
 
     static EmitterNode createReference(TerminalNode identifier) {
         return new EmitterNode(SYNTHETIC_REFERENCE, identifier, 0);
+    }
+
+    static EmitterNode createBlock(TerminalNode identifier, int blockId) {
+        return new EmitterNode(SYNTHETIC_BLOCK_CREATE, identifier, blockId);
     }
 }

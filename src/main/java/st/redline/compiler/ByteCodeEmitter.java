@@ -4,16 +4,14 @@ package st.redline.compiler;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.*;
 import st.redline.classloader.Source;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Vector;
 
+import static st.redline.compiler.EmitterNode.SYNTHETIC_BLOCK_CREATE;
 import static st.redline.compiler.EmitterNode.SYNTHETIC_REFERENCE;
 import static st.redline.compiler.EmitterNode.SYNTHETIC_TEMPORARY;
 import static st.redline.compiler.SmalltalkParser.*;
@@ -67,6 +65,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             LOG.trace(source.fullClassName());
         cw.visit(BYTECODE_VERSION, ACC_PUBLIC + ACC_SUPER, source.fullClassName(), null, superclassName(), new String[] {"st/redline/classloader/Script"});
         cw.visitSource(source.className() + source.fileExtension(), null);
+        // Add support for the Lambda's we typically create to support blocks.
+        cw.visitInnerClass("java/lang/invoke/MethodHandles$Lookup", "java/lang/invoke/MethodHandles", "Lookup", ACC_PUBLIC + ACC_FINAL + ACC_STATIC);
+
         makeJavaClassInitializer();
         makePublicSendMessagesMethod();
         openPrivateSendMessagesMethod();
@@ -131,6 +132,23 @@ class ByteCodeEmitter implements Emitter, Opcodes {
 
     @Override
     public void emit(Statement statement) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(statement);
+        if (statement.isBlock())
+            emitBlock(statement);
+        else
+            emitNonBlock(statement);
+    }
+
+    private void emitBlock(Statement statement) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(statement);
+        emit(statement.messages());
+        if (statement.containsAnswer())
+            mv.visitInsn(ARETURN);
+    }
+
+    private void emitNonBlock(Statement statement) {
         if (isTraceEnabled(LOG))
             LOG.trace(statement);
         emit(statement.messages());
@@ -226,6 +244,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             case SYNTHETIC_REFERENCE:
                 emitResolveReference(node.getText());
                 break;
+            case SYNTHETIC_BLOCK_CREATE:
+                emitResolveBlock(node, emitterNode);
+                break;
             default:
                 throw new RuntimeException("Unknown Emitter Type: " + emitterNode.type());
         }
@@ -243,6 +264,27 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             default:
                 throw new RuntimeException("Unknown Emitter Type: " + emitterNode.type());
         }
+    }
+
+    private void emitResolveBlock(TerminalNode node, EmitterNode emitterNode) {
+        if (isTraceEnabled(LOG))
+            LOG.trace("resolveBlock: " + emitterNode.index());
+        String blockName = makeBlockName(emitterNode.index());
+        visitLine(mv, node.getSymbol().getLine());
+        mv.visitTypeInsn(NEW, "st/redline/kernel/PrimMethod");
+        mv.visitInsn(DUP);
+        mv.visitMethodInsn(INVOKESPECIAL, "st/redline/kernel/PrimMethod", "<init>", "()V", false);
+        mv.visitInvokeDynamicInsn("apply", "()Ljava/util/function/BiFunction;",
+                new Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"),
+                Type.getType("(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"),
+                new Handle(Opcodes.H_INVOKESTATIC, source.fullClassName(), blockName, "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;"),
+                Type.getType("(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;")
+        );
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimMethod", "function", "(Ljava/util/function/BiFunction;)Lst/redline/kernel/PrimObject;", false);
+    }
+
+    private String makeBlockName(int index) {
+        return "block" + index;
     }
 
     private void emitResolveReference(String value) {

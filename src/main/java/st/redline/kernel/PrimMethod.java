@@ -10,7 +10,8 @@ public class PrimMethod extends PrimObject {
         return function.apply(receiver, context);
     }
 
-    public void function(BiFunction<PrimObject, PrimContext, PrimObject> function) {
+    public PrimObject function(BiFunction<PrimObject, PrimContext, PrimObject> function) {
         this.function = function;
+        return this;
     }
 }

@@ -262,7 +262,7 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         newStatement(new BlockStatement(blockId));
         visitChildren(ctx);
         emitStatement();
-        addToStatement(EmitterNode.createBlock(ctx.BLOCK_END(), blockId));
+        addToStatement(EmitterNode.createBlock(ctx.BLOCK_START(), blockId));
         return null;
     }
 

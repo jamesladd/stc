@@ -3,6 +3,17 @@ package st.redline.compiler;
 
 class BlockStatement extends Statement {
 
+    private final int id;
+
+    public BlockStatement(int id) {
+        super();
+        this.id = id;
+    }
+
+    int id() {
+        return id;
+    }
+
     boolean isBlock() {
         return true;
     }

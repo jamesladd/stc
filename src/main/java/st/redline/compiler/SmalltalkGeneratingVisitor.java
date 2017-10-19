@@ -31,6 +31,7 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     private boolean subclassKeywordSeen;
     private boolean captureInstanceVariableNames;
     private boolean captureClassVariableNames;
+    private int blockId = 0;
 
     SmalltalkGeneratingVisitor(Source source, Emitter emitter) {
         this.source = source;
@@ -257,7 +258,7 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     public Void visitBlock(SmalltalkParser.BlockContext ctx) {
         if (isTraceEnabled(LOG))
             LOG.trace(trace(ctx.BLOCK_START()));
-        newStatement(new BlockStatement());
+        newStatement(new BlockStatement(blockId++));
         visitChildren(ctx);
         emitStatement();
         return null;

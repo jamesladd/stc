@@ -126,6 +126,14 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         if (isTraceEnabled(LOG))
             LOG.trace(source.fullClassName());
         closePrivateSendMessagesMethod(returnRequired);
+
+        MethodVisitor mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, "block0", "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;", null, null);
+        mv.visitCode();
+        mv.visitVarInsn(ALOAD, 1);
+        mv.visitInsn(ARETURN);
+        mv.visitMaxs(1, 3);
+        mv.visitEnd();
+
         cw.visitEnd();
         classBytes = cw.toByteArray();
     }
@@ -143,9 +151,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     private void emitBlock(Statement statement) {
         if (isTraceEnabled(LOG))
             LOG.trace(statement);
-        emit(statement.messages());
-        if (statement.containsAnswer())
-            mv.visitInsn(ARETURN);
+//        emit(statement.messages());
+//        if (statement.containsAnswer())
+//            mv.visitInsn(ARETURN);
     }
 
     private void emitNonBlock(Statement statement) {
@@ -274,13 +282,8 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         mv.visitTypeInsn(NEW, "st/redline/kernel/PrimMethod");
         mv.visitInsn(DUP);
         mv.visitMethodInsn(INVOKESPECIAL, "st/redline/kernel/PrimMethod", "<init>", "()V", false);
-        mv.visitInvokeDynamicInsn("apply", "()Ljava/util/function/BiFunction;",
-                new Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"),
-                Type.getType("(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"),
-                new Handle(Opcodes.H_INVOKESTATIC, source.fullClassName(), blockName, "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;"),
-                Type.getType("(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;")
-        );
-        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimMethod", "function", "(Ljava/util/function/BiFunction;)Lst/redline/kernel/PrimObject;", false);
+        mv.visitInvokeDynamicInsn("apply", "()Lst/redline/kernel/TriFunction;", new Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"), new Object[]{Type.getType("(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"), new Handle(Opcodes.H_INVOKESTATIC, source.fullClassName(), blockName, "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;"), Type.getType("(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;")});
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimMethod", "function", "(Lst/redline/kernel/TriFunction;)Lst/redline/kernel/PrimObject;", false);
     }
 
     private String makeBlockName(int index) {

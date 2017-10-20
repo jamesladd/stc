@@ -1,3 +1,4 @@
+/* Redline Smalltalk, Copyright (c) James C. Ladd. All rights reserved. See LICENSE in the root of this distribution. */
 package st.redline.kernel;
 
 import st.redline.Smalltalk;
@@ -6,7 +7,7 @@ public class PrimSubclassMethod extends PrimMethod {
 
     PrimSubclassMethod() {
         this.javaValue("Method PrimSubclass");
-        this.function((receiver, context) -> {
+        this.function((method, receiver, context) -> {
             String className = String.valueOf(context.argumentAt(0).javaValue());
             PrimObject newClass = createClass(receiver, className);
             registerNewClass(context, newClass, className);

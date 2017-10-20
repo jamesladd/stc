@@ -12,4 +12,8 @@ class BlockStatement extends Statement {
     boolean isBlock() {
         return true;
     }
+
+    int blockId() {
+        return blockId;
+    }
 }

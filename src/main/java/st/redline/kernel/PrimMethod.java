@@ -1,16 +1,20 @@
+/* Redline Smalltalk, Copyright (c) James C. Ladd. All rights reserved. See LICENSE in the root of this distribution. */
 package st.redline.kernel;
-
-import java.util.function.BiFunction;
 
 public class PrimMethod extends PrimObject {
 
-    private BiFunction<PrimObject, PrimContext, PrimObject> function;
+    private TriFunction<PrimObject, PrimObject, PrimContext, PrimObject> function;
 
-    public PrimObject apply(PrimObject receiver, PrimContext context) {
-        return function.apply(receiver, context);
+    public PrimMethod() {
+        this.javaValue("PrimMethod");
     }
 
-    public PrimObject function(BiFunction<PrimObject, PrimContext, PrimObject> function) {
+    public PrimObject apply(PrimObject receiver, PrimContext context) {
+        return function.apply(this, receiver, context);
+    }
+
+    public PrimObject function(TriFunction<PrimObject, PrimObject, PrimContext,PrimObject> function) {
+        System.out.println("function set");
         this.function = function;
         return this;
     }

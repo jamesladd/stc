@@ -126,14 +126,6 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         if (isTraceEnabled(LOG))
             LOG.trace(source.fullClassName());
         closePrivateSendMessagesMethod(returnRequired);
-
-        MethodVisitor mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, "block0", "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;", null, null);
-        mv.visitCode();
-        mv.visitVarInsn(ALOAD, 1);
-        mv.visitInsn(ARETURN);
-        mv.visitMaxs(1, 3);
-        mv.visitEnd();
-
         cw.visitEnd();
         classBytes = cw.toByteArray();
     }
@@ -154,6 +146,14 @@ class ByteCodeEmitter implements Emitter, Opcodes {
 //        emit(statement.messages());
 //        if (statement.containsAnswer())
 //            mv.visitInsn(ARETURN);
+
+        String blockName = makeBlockName(((BlockStatement) statement).blockId());
+        MethodVisitor mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, blockName, "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;", null, null);
+        mv.visitCode();
+        mv.visitVarInsn(ALOAD, 1);
+        mv.visitInsn(ARETURN);
+        mv.visitMaxs(1, 3);
+        mv.visitEnd();
     }
 
     private void emitNonBlock(Statement statement) {

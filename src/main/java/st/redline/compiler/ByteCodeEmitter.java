@@ -148,12 +148,16 @@ class ByteCodeEmitter implements Emitter, Opcodes {
 //            mv.visitInsn(ARETURN);
 
         String blockName = makeBlockName(((BlockStatement) statement).blockId());
-        MethodVisitor mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, blockName, "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;", null, null);
+        MethodVisitor currentMethodVisitor = mv;
+
+        mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, blockName, "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;", null, null);
         mv.visitCode();
         mv.visitVarInsn(ALOAD, 1);
         mv.visitInsn(ARETURN);
         mv.visitMaxs(1, 3);
         mv.visitEnd();
+
+        mv = currentMethodVisitor;
     }
 
     private void emitNonBlock(Statement statement) {

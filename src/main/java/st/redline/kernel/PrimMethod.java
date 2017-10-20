@@ -14,7 +14,6 @@ public class PrimMethod extends PrimObject {
     }
 
     public PrimObject function(TriFunction<PrimObject, PrimObject, PrimContext,PrimObject> function) {
-        System.out.println("function set");
         this.function = function;
         return this;
     }

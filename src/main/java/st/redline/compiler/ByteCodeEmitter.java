@@ -38,6 +38,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         }
     }
     private final String SEND_MESSAGES_SIG = "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;";
+    private final String METHOD_SIG = "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;";
 
     private final ClassWriter cw;
     private MethodVisitor mv;
@@ -143,16 +144,18 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     private void emitBlock(Statement statement) {
         if (isTraceEnabled(LOG))
             LOG.trace(statement);
-//        emit(statement.messages());
-//        if (statement.containsAnswer())
-//            mv.visitInsn(ARETURN);
 
         String blockName = makeBlockName(((BlockStatement) statement).blockId());
         MethodVisitor currentMethodVisitor = mv;
 
-        mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, blockName, "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;", null, null);
+        mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, blockName, METHOD_SIG, null, null);
         mv.visitCode();
         mv.visitVarInsn(ALOAD, 1);
+
+//        emit(statement.messages());
+//        if (statement.containsAnswer())
+//            mv.visitInsn(ARETURN);
+
         mv.visitInsn(ARETURN);
         mv.visitMaxs(1, 3);
         mv.visitEnd();

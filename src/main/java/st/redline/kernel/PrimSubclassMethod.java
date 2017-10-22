@@ -6,7 +6,7 @@ import st.redline.Smalltalk;
 public class PrimSubclassMethod extends PrimMethod {
 
     PrimSubclassMethod() {
-        this.javaValue("Method PrimSubclass");
+        this.javaValue("PrimSubclass");
         this.function((method, receiver, context) -> {
             String className = String.valueOf(context.argumentAt(0).javaValue());
             PrimObject newClass = createClass(receiver, className);

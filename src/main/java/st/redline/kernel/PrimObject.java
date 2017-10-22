@@ -54,6 +54,10 @@ public class PrimObject {
     // during bootstrapping.
     //
 
+    public TriFunction<PrimObject, PrimObject, PrimContext, PrimObject> function() {
+        throw new RuntimeException("Subclass should override.");
+    }
+
     public PrimObject superclass() {
         return this;
     }

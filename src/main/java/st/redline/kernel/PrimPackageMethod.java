@@ -6,7 +6,7 @@ import st.redline.Smalltalk;
 public class PrimPackageMethod extends PrimMethod {
 
     PrimPackageMethod() {
-        this.javaValue("Method PrimPackage");
+        this.javaValue("PrimPackage");
         this.function((method, receiver, context) -> {
             if (!(receiver instanceof Smalltalk))
                 throw new RuntimeException("Primitive package not sent to expected receiver.");

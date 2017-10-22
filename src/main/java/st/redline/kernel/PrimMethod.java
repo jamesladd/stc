@@ -3,17 +3,22 @@ package st.redline.kernel;
 
 public class PrimMethod extends PrimObject {
 
-    private TriFunction<PrimObject, PrimObject, PrimContext, PrimObject> function;
+    protected TriFunction<PrimObject, PrimObject, PrimContext, PrimObject> function;
 
     public PrimMethod() {
         this.javaValue("PrimMethod");
     }
 
     public PrimObject apply(PrimObject receiver, PrimContext context) {
-        return function.apply(this, receiver, context);
+        System.out.println("PrimMethod '" + this + "' apply");
+        return function.apply(receiver, receiver, context);
     }
 
-    public PrimObject function(TriFunction<PrimObject, PrimObject, PrimContext,PrimObject> function) {
+    public TriFunction<PrimObject, PrimObject, PrimContext, PrimObject> function() {
+        return function;
+    }
+
+    public PrimObject function(TriFunction<PrimObject, PrimObject, PrimContext, PrimObject> function) {
         this.function = function;
         return this;
     }

@@ -11,9 +11,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Vector;
 
-import static st.redline.compiler.EmitterNode.SYNTHETIC_BLOCK_CREATE;
-import static st.redline.compiler.EmitterNode.SYNTHETIC_REFERENCE;
-import static st.redline.compiler.EmitterNode.SYNTHETIC_TEMPORARY;
+import static st.redline.compiler.EmitterNode.*;
 import static st.redline.compiler.SmalltalkParser.*;
 import static st.redline.compiler.Trace.trace;
 
@@ -136,25 +134,29 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         if (isTraceEnabled(LOG))
             LOG.trace(statement);
         if (statement.isBlock())
-            emitBlock(statement);
+            emitBlock((BlockStatement) statement);
         else
             emitNonBlock(statement);
     }
 
-    private void emitBlock(Statement statement) {
+    private void emitBlock(BlockStatement statement) {
         if (isTraceEnabled(LOG))
             LOG.trace(statement);
 
-        String blockName = makeBlockName(((BlockStatement) statement).blockId());
+        String blockName = makeBlockName(statement.blockId());
         MethodVisitor currentMethodVisitor = mv;
 
         mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, blockName, METHOD_SIG, null, null);
         mv.visitCode();
         mv.visitVarInsn(ALOAD, 1);
 
+        mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+        mv.visitLdcInsn("inside Smalltalk method/block");
+        mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+
 //        emit(statement.messages());
 //        if (statement.containsAnswer())
-//            mv.visitInsn(ARETURN);
+//            throw new RuntimeException("TODO.JCL - Handle block return");
 
         mv.visitInsn(ARETURN);
         mv.visitMaxs(1, 3);
@@ -262,6 +264,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             case SYNTHETIC_BLOCK_CREATE:
                 emitResolveBlock(node, emitterNode);
                 break;
+            case SYNTHETIC_METHOD_CREATE:
+                emitResolveMethod(node, emitterNode);
+                break;
             default:
                 throw new RuntimeException("Unknown Emitter Type: " + emitterNode.type());
         }
@@ -284,13 +289,23 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     private void emitResolveBlock(TerminalNode node, EmitterNode emitterNode) {
         if (isTraceEnabled(LOG))
             LOG.trace("resolveBlock: " + emitterNode.index());
+        emitResolveMethodOrBlock("st/redline/kernel/PrimBlock", node, emitterNode);
+    }
+
+    private void emitResolveMethod(TerminalNode node, EmitterNode emitterNode) {
+        if (isTraceEnabled(LOG))
+            LOG.trace("resolveMethod: " + emitterNode.index());
+        emitResolveMethodOrBlock("st/redline/kernel/PrimMethod", node, emitterNode);
+    }
+
+    private void emitResolveMethodOrBlock(String type, TerminalNode node, EmitterNode emitterNode) {
         String blockName = makeBlockName(emitterNode.index());
         visitLine(mv, node.getSymbol().getLine());
-        mv.visitTypeInsn(NEW, "st/redline/kernel/PrimMethod");
+        mv.visitTypeInsn(NEW, type);
         mv.visitInsn(DUP);
-        mv.visitMethodInsn(INVOKESPECIAL, "st/redline/kernel/PrimMethod", "<init>", "()V", false);
+        mv.visitMethodInsn(INVOKESPECIAL, type, "<init>", "()V", false);
         mv.visitInvokeDynamicInsn("apply", "()Lst/redline/kernel/TriFunction;", new Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"), new Object[]{Type.getType("(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"), new Handle(Opcodes.H_INVOKESTATIC, source.fullClassName(), blockName, "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;"), Type.getType("(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;")});
-        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimMethod", "function", "(Lst/redline/kernel/TriFunction;)Lst/redline/kernel/PrimObject;", false);
+        mv.visitMethodInsn(INVOKEVIRTUAL, type, "function", "(Lst/redline/kernel/TriFunction;)Lst/redline/kernel/PrimObject;", false);
     }
 
     private String makeBlockName(int index) {

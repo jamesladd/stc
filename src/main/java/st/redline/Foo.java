@@ -7,7 +7,7 @@ import st.redline.kernel.PrimObject;
 public class Foo {
 
     public PrimObject test(PrimObject receiver, PrimContext context) {
-        new PrimMethod().function((m, r, c) -> { return r; });
+        System.out.println("inside smalltalk method");
         return null;
     }
 }

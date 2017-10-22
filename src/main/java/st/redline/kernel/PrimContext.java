@@ -22,6 +22,13 @@ public class PrimContext {
         this.arguments = null;
     }
 
+    public PrimContext(PrimObject receiver, PrimObject method, String selector) {
+        this.receiver = receiver;
+        this.method = method;
+        this.selector = selector;
+        this.arguments = new PrimObject[0];
+    }
+
     public PrimContext(PrimObject receiver, PrimObject method, String selector, PrimObject[] arguments) {
         this.receiver = receiver;
         this.method = method;

@@ -10,6 +10,10 @@ interface Emitter {
     void openClass(Source source);
     void closeClass(boolean returnRequired);
 
+    Emitter blockEmitter();
+    void openBlock(int blockId);
+    void closeBlock(int blockId);
+
     void emit(Statement statement);
     void emitInitTemporaries(int index);
 }

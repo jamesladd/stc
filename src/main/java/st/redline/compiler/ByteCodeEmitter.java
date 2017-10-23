@@ -38,10 +38,10 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     private final String SEND_MESSAGES_SIG = "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;";
     private final String METHOD_SIG = "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;";
 
-    private final ClassWriter cw;
-    private MethodVisitor mv;
+    protected ClassWriter cw;
+    protected MethodVisitor mv;
+    protected Source source;
     private byte[] classBytes;
-    private Source source;
     private boolean sendToSuper = false;
 
     ByteCodeEmitter() {
@@ -130,42 +130,22 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     @Override
+    public Emitter blockEmitter() {
+        return new BlockByteCodeEmitter(source, cw);
+    }
+
+    @Override
+    public void openBlock(int blockId) {
+        throw new RuntimeException("Not a Block Emitter");
+    }
+
+    @Override
+    public void closeBlock(int blockId) {
+        throw new RuntimeException("Not a Block Emitter");
+    }
+
+    @Override
     public void emit(Statement statement) {
-        if (isTraceEnabled(LOG))
-            LOG.trace(statement);
-        if (statement.isBlock())
-            emitBlock((BlockStatement) statement);
-        else
-            emitNonBlock(statement);
-    }
-
-    private void emitBlock(BlockStatement statement) {
-        if (isTraceEnabled(LOG))
-            LOG.trace(statement);
-
-        String blockName = makeBlockName(statement.blockId());
-        MethodVisitor currentMethodVisitor = mv;
-
-        mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, blockName, METHOD_SIG, null, null);
-        mv.visitCode();
-        mv.visitVarInsn(ALOAD, 1);
-
-        mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-        mv.visitLdcInsn("inside Smalltalk method/block");
-        mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
-
-//        emit(statement.messages());
-//        if (statement.containsAnswer())
-//            throw new RuntimeException("TODO.JCL - Handle block return");
-
-        mv.visitInsn(ARETURN);
-        mv.visitMaxs(1, 3);
-        mv.visitEnd();
-
-        mv = currentMethodVisitor;
-    }
-
-    private void emitNonBlock(Statement statement) {
         if (isTraceEnabled(LOG))
             LOG.trace(statement);
         emit(statement.messages());
@@ -468,6 +448,37 @@ class ByteCodeEmitter implements Emitter, Opcodes {
                     mv.visitIntInsn(BIPUSH, value);
                 else // SIPUSH not supported yet.
                     throw new IllegalStateException("Push of integer value " + value + " not yet supported.");
+        }
+    }
+
+    private class BlockByteCodeEmitter extends ByteCodeEmitter {
+
+        BlockByteCodeEmitter(Source source, ClassWriter cw) {
+            this.source = source;
+            this.cw = cw;
+        }
+
+        @Override
+        public void openBlock(int blockId) {
+            if (isTraceEnabled(LOG))
+                LOG.trace(blockId);
+            String blockName = makeBlockName(blockId);
+            mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, blockName, METHOD_SIG, null, null);
+            mv.visitCode();
+            mv.visitVarInsn(ALOAD, 1);
+
+            mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+            mv.visitLdcInsn("inside Smalltalk method/block");
+            mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+        }
+
+        @Override
+        public void closeBlock(int blockId) {
+            if (isTraceEnabled(LOG))
+                LOG.trace(blockId);
+            mv.visitInsn(ARETURN);
+            mv.visitMaxs(1, 3);
+            mv.visitEnd();
         }
     }
 }

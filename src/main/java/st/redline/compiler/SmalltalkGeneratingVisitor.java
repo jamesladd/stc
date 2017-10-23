@@ -262,9 +262,11 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         if (isTraceEnabled(LOG))
             LOG.trace(trace(ctx.BLOCK_START()));
         int blockId = this.blockId++;
-        newStatement(new BlockStatement(blockId));
+        pushBlockEmitter();
+        currentEmitter().openBlock(blockId);
         visitChildren(ctx);
-        emitStatement();
+        currentEmitter().closeBlock(blockId);
+        popBlockEmitter();
         if (!addMethodSeen)
             addToStatement(EmitterNode.createBlock(ctx.BLOCK_START(), blockId));
         else
@@ -306,6 +308,14 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
             if (object != null)
                 return object;
         throw new RuntimeException("Non-Null object expected.");
+    }
+
+    private void pushBlockEmitter() {
+        emitters.push(currentEmitter().blockEmitter());
+    }
+
+    private void popBlockEmitter() {
+        emitters.pop();
     }
 
     private Emitter currentEmitter() {

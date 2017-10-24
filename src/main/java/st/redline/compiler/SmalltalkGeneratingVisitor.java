@@ -265,7 +265,9 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         pushBlockEmitter();
         currentEmitter().openBlock(blockId);
         visitChildren(ctx);
-        currentEmitter().closeBlock(blockId);
+        String blockAnswerName = currentEmitter().closeBlock(blockId);
+        if (isTraceEnabled(LOG))
+            LOG.trace(blockAnswerName);
         popBlockEmitter();
         if (!addMethodSeen)
             addToStatement(EmitterNode.createBlock(ctx.BLOCK_START(), blockId));

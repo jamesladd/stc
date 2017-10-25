@@ -7,7 +7,6 @@ import org.apache.commons.logging.LogFactory;
 import org.objectweb.asm.*;
 import st.redline.classloader.SmalltalkClassLoader;
 import st.redline.classloader.Source;
-import sun.misc.Unsafe;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -137,7 +136,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     @Override
-    public void openBlock(int blockId) {
+    public void openBlock(int blockId, boolean isMethodBlock) {
         throw new RuntimeException("Not a Block Emitter");
     }
 
@@ -461,6 +460,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
 
         private String blockName;
         private String blockAnswerClassName = null;
+        private boolean isMethodBlock;
 
         BlockByteCodeEmitter(Source source, ClassWriter cw) {
             this.source = source;
@@ -468,16 +468,17 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         }
 
         @Override
-        public void openBlock(int blockId) {
+        public void openBlock(int blockId, boolean isMethodBlock) {
             if (isTraceEnabled(LOG))
                 LOG.trace(blockId);
-            blockName = makeBlockName(blockId);
+            this.blockName = makeBlockName(blockId);
+            this.isMethodBlock = isMethodBlock;
             mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, blockName, METHOD_SIG, null, null);
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 1);
 
             mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-            mv.visitLdcInsn("inside Smalltalk method/block");
+            mv.visitLdcInsn(isMethodBlock ? "inside Smalltalk method" : "inside Smalltalk Block");
             mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
         }
 
@@ -493,9 +494,13 @@ class ByteCodeEmitter implements Emitter, Opcodes {
 
         public void handleAnswer() {
             blockAnswerClassName = source.packageName().replaceAll("\\.", "/") + '/' + source.className() + blockName;
-            mv.visitInsn(DUP);
-            createBlockAnswerThrow();
-            createBlockAnswerClass();
+            if (!isMethodBlock) {
+                mv.visitInsn(DUP);
+                createBlockAnswerThrow();
+                createBlockAnswerClass();
+            } else {
+                mv.visitInsn(ARETURN);
+            }
         }
 
         private void createBlockAnswerClass() {

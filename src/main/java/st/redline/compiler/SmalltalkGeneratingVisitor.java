@@ -263,7 +263,7 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
             LOG.trace(trace(ctx.BLOCK_START()));
         int blockId = this.blockId++;
         pushBlockEmitter();
-        currentEmitter().openBlock(blockId);
+        currentEmitter().openBlock(blockId, addMethodSeen);
         visitChildren(ctx);
         String blockAnswerName = currentEmitter().closeBlock(blockId);
         if (isTraceEnabled(LOG))

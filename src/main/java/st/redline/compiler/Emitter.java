@@ -13,7 +13,7 @@ interface Emitter {
 
     Emitter blockEmitter();
 
-    void openBlock(int blockId);
+    void openBlock(int blockId, boolean isMethodBlock);
 
     String closeBlock(int blockId);
 

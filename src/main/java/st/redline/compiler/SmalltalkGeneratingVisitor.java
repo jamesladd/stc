@@ -269,9 +269,11 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         if (isTraceEnabled(LOG))
             LOG.trace(blockAnswerName);
         popBlockEmitter();
-        if (!addMethodSeen)
+        if (!addMethodSeen) {
+            if (blockAnswerName != null)
+                markStatementAsHavingBlockWithAnswer(blockAnswerName);
             addToStatement(EmitterNode.createBlock(ctx.BLOCK_START(), blockId));
-        else
+        } else
             addToStatement(EmitterNode.createMethod(ctx.BLOCK_START(), blockId));
         addMethodSeen = false;
         return null;
@@ -326,6 +328,10 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
 
     private void addToStatement(EmitterNode node) {
         currentStatement().addToMessage(node);
+    }
+
+    private void markStatementAsHavingBlockWithAnswer(String blockAnswerName) {
+        currentStatement().markAsBlockWithAnswer(blockAnswerName);
     }
 
     private void markStatementAsAnswer() {

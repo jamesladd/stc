@@ -44,9 +44,17 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     protected Source source;
     private byte[] classBytes;
     private boolean sendToSuper = false;
+    private Label[] blockTryCatchLabels = new Label[3];
 
     ByteCodeEmitter() {
         cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
+        clearBlockTryCatchLabels();
+    }
+
+    private void clearBlockTryCatchLabels() {
+        blockTryCatchLabels[0] = null;
+        blockTryCatchLabels[1] = null;
+        blockTryCatchLabels[2] = null;
     }
 
     protected boolean isTraceEnabled(Log log) {
@@ -149,12 +157,21 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     public void emit(Statement statement) {
         if (isTraceEnabled(LOG))
             LOG.trace(statement);
+
+        if (statement.hasBlockAnswer())
+            emitBlockAnswerTry(statement.blockAnswerName());
+
         emit(statement.messages());
         if (statement.containsAnswer())
             handleAnswer();
+
+        if (statement.hasBlockAnswer())
+            emitBlockAnswerCatch(statement.blockAnswerName());
     }
 
     public void handleAnswer() {
+        if (blockTryCatchLabels[1] != null)
+            mv.visitLabel(blockTryCatchLabels[1]);
         mv.visitInsn(ARETURN);
     }
 
@@ -410,6 +427,27 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         mv.visitMethodInsn(INVOKEINTERFACE, "st/redline/Smalltalk", method, "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lst/redline/kernel/PrimObject;", true);
     }
 
+    private void emitBlockAnswerTry(String blockAnswerName) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(blockAnswerName);
+        blockTryCatchLabels[0] = new Label();
+        blockTryCatchLabels[1] = new Label();
+        blockTryCatchLabels[2] = new Label();
+//        mv.visitTryCatchBlock(blockTryCatchLabels[0], blockTryCatchLabels[1], blockTryCatchLabels[2], blockAnswerName);
+        mv.visitLabel(blockTryCatchLabels[0]);
+    }
+
+    private void emitBlockAnswerCatch(String blockAnswerName) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(blockAnswerName);
+        mv.visitLabel(blockTryCatchLabels[2]);
+//        mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{blockAnswerName});
+//        mv.visitVarInsn(ASTORE, 3);
+//        mv.visitVarInsn(ALOAD, 3);
+//        mv.visitMethodInsn(INVOKEVIRTUAL, blockAnswerName, "answer", "()Lst/redline/kernel/PrimObject;", false);
+        clearBlockTryCatchLabels();
+    }
+
     private String removeLeadingChar(String text) {
         return text.substring(1, text.length());
     }
@@ -426,9 +464,12 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     private void closePrivateSendMessagesMethod(boolean returnRequired) {
         if (isTraceEnabled(LOG))
             LOG.trace("");
-        if (returnRequired)
+        if (returnRequired) {
+            if (blockTryCatchLabels[1] != null)
+                mv.visitLabel(blockTryCatchLabels[1]);
             mv.visitInsn(ARETURN);
-        mv.visitMaxs(0, 0);
+        }
+        mv.visitMaxs(1, 4);
         mv.visitEnd();
     }
 

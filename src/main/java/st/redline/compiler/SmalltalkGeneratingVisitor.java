@@ -271,7 +271,7 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         popBlockEmitter();
         if (!addMethodSeen) {
             if (blockAnswerName != null)
-                markStatementAsHavingBlockWithAnswer(blockAnswerName);
+                markMessageAsHavingBlockWithAnswer(blockAnswerName);
             addToStatement(EmitterNode.createBlock(ctx.BLOCK_START(), blockId));
         } else
             addToStatement(EmitterNode.createMethod(ctx.BLOCK_START(), blockId));
@@ -330,8 +330,8 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         currentStatement().addToMessage(node);
     }
 
-    private void markStatementAsHavingBlockWithAnswer(String blockAnswerName) {
-        currentStatement().markAsBlockWithAnswer(blockAnswerName);
+    private void markMessageAsHavingBlockWithAnswer(String blockAnswerName) {
+        currentStatement().markMessageAsBlockWithAnswer(blockAnswerName);
     }
 
     private void markStatementAsAnswer() {

@@ -7,8 +7,6 @@ import java.util.Vector;
 abstract class Statement {
 
     private final Stack<Message> messages = new Stack<>();
-    private boolean hasBlockAnswer = false;
-    private String blockAnswerName;
 
     void newMessage() {
         messages.push(new Message(false, false));
@@ -16,14 +14,6 @@ abstract class Statement {
 
     void newMessageTail(boolean isCascade) {
         messages.push(new Message(true, isCascade));
-    }
-
-    boolean hasBlockAnswer() {
-        return hasBlockAnswer;
-    }
-
-    String blockAnswerName() {
-        return blockAnswerName;
     }
 
     boolean containsAnswer() {
@@ -50,8 +40,7 @@ abstract class Statement {
         currentMessage().markAsAssignment();
     }
 
-    void markAsBlockWithAnswer(String blockAnswerName) {
-        this.blockAnswerName = blockAnswerName;
-        this.hasBlockAnswer = true;
+    void markMessageAsBlockWithAnswer(String blockAnswerName) {
+        currentMessage().markAsBlockWithAnswer(blockAnswerName);
     }
 }

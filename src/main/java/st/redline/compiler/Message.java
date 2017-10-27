@@ -25,6 +25,8 @@ class Message {
     private EmitterNode receiver;
     private List<EmitterNode> selectors = new ArrayList<>();
     private List<EmitterNode> arguments = new ArrayList<>();
+    private boolean hasBlockAnswer = false;
+    private String blockAnswerName;
 
     Message(boolean isTail, boolean isCascade) {
         this.receiverRequired = !isTail;
@@ -57,6 +59,14 @@ class Message {
 
     boolean isAssignment() {
         return isAssignment;
+    }
+
+    boolean hasBlockAnswer() {
+        return hasBlockAnswer;
+    }
+
+    String blockAnswerName() {
+        return blockAnswerName;
     }
 
     void addObject(EmitterNode node) {
@@ -108,5 +118,10 @@ class Message {
 
     void markAsAssignment() {
         isAssignment = true;
+    }
+
+    void markAsBlockWithAnswer(String blockAnswerName) {
+        this.blockAnswerName = blockAnswerName;
+        this.hasBlockAnswer = true;
     }
 }

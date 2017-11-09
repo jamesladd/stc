@@ -9,7 +9,9 @@ import st.redline.classloader.SmalltalkClassLoader;
 import st.redline.classloader.Source;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.Vector;
 
 import static st.redline.compiler.EmitterNode.*;
@@ -44,18 +46,13 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     protected Source source;
     private byte[] classBytes;
     private boolean sendToSuper = false;
-    private Label[] blockTryCatchLabels = new Label[4];
+    private Stack<String> blockAnswerNames;
+    private Label blockTryStartLabel;
+    private Label blockTryEndLabel;
+    private Label blockCatchLabel;
 
     ByteCodeEmitter() {
         cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
-        clearBlockTryCatchLabels();
-    }
-
-    private void clearBlockTryCatchLabels() {
-        blockTryCatchLabels[0] = null;
-        blockTryCatchLabels[1] = null;
-        blockTryCatchLabels[2] = null;
-        blockTryCatchLabels[3] = null;
     }
 
     protected boolean isTraceEnabled(Log log) {
@@ -158,6 +155,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     public void emit(Statement statement) {
         if (isTraceEnabled(LOG))
             LOG.trace(statement);
+        blockAnswerNames = new Stack<>();
         emit(statement.messages());
         if (statement.containsAnswer())
             handleAnswer();
@@ -225,6 +223,11 @@ class ByteCodeEmitter implements Emitter, Opcodes {
 
         if (message.isTail() && message.isCascade())
             emitPop();
+
+        // record the block answer names for next 'perform:'
+        // - we see the block answer names before we see a selector performed.
+        if (message.hasBlockAnswer())
+            blockAnswerNames.addAll(message.blockAnswerNames());
     }
 
     private void emitReceiver(EmitterNode receiver) {
@@ -324,9 +327,11 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     private void emitPerform(int argumentCount) {
+        emitBlockAnswerTry();
         String method = sendToSuper ? "superPerform" : "perform";
         sendToSuper = false;
         mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimObject", method, SIGNATURES[argumentCount], false);
+        emitBlockAnswerCatch();
     }
 
     private void emitArguments(List<EmitterNode> arguments) {
@@ -419,25 +424,30 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         mv.visitMethodInsn(INVOKEINTERFACE, "st/redline/Smalltalk", method, "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lst/redline/kernel/PrimObject;", true);
     }
 
-    private void emitBlockAnswerTry(String blockAnswerName) {
+    private void emitBlockAnswerTry() {
         if (isTraceEnabled(LOG))
-            LOG.trace(blockAnswerName);
-        blockTryCatchLabels[0] = new Label();
-        blockTryCatchLabels[1] = new Label();
-        blockTryCatchLabels[2] = new Label();
-        blockTryCatchLabels[3] = new Label();
-//        mv.visitTryCatchBlock(blockTryCatchLabels[0], blockTryCatchLabels[1], blockTryCatchLabels[2], blockAnswerName);
-//        mv.visitLabel(blockTryCatchLabels[0]);
+            LOG.trace(blockAnswerNames);
+        if (blockAnswerNames.empty())
+            return;
+        blockTryStartLabel = new Label();
+        blockTryEndLabel = new Label();
+        blockCatchLabel = new Label();
+        for (String blockAnswerName: blockAnswerNames)
+            mv.visitTryCatchBlock(blockTryStartLabel, blockTryEndLabel, blockCatchLabel, blockAnswerName);
+        mv.visitLabel(blockTryStartLabel);
     }
 
-    private void emitBlockAnswerCatch(String blockAnswerName) {
+    private void emitBlockAnswerCatch() {
         if (isTraceEnabled(LOG))
-            LOG.trace(blockAnswerName);
-//        mv.visitFrame(Opcodes.F_SAME1, 0, null, 1, new Object[]{blockAnswerName});
-//        mv.visitVarInsn(ASTORE, 3);
-//        mv.visitVarInsn(ALOAD, 3);
-//        mv.visitMethodInsn(INVOKEVIRTUAL, blockAnswerName, "answer", "()Lst/redline/kernel/PrimObject;", false);
-        clearBlockTryCatchLabels();
+            LOG.trace(blockAnswerNames);
+        if (blockAnswerNames.empty())
+            return;
+        for (String blockAnswerName : blockAnswerNames) {
+            mv.visitJumpInsn(GOTO, blockTryEndLabel);
+            mv.visitLabel(blockCatchLabel);
+            mv.visitMethodInsn(INVOKEVIRTUAL, blockAnswerName, "answer", "()Lst/redline/kernel/PrimObject;", false);
+        }
+        mv.visitLabel(blockTryEndLabel);
     }
 
     private String removeLeadingChar(String text) {

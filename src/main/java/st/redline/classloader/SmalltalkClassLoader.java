@@ -51,4 +51,8 @@ public class SmalltalkClassLoader extends ClassLoader {
     private Compiler compiler(Source source) {
         return new Compiler(source);
     }
+
+    public Class defineBlockClass(String name, byte[] classData, int i, int length) {
+        return defineClass(name, classData, i, length);
+    }
 }

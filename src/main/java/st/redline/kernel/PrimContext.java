@@ -11,6 +11,7 @@ public class PrimContext {
     private final PrimObject method;
     private final String selector;
     private final PrimObject[] arguments;
+    private PrimObject blockAnswer;
 
     private PrimObject[] temporaries;
 
@@ -20,6 +21,13 @@ public class PrimContext {
         this.method = null;
         this.selector = null;
         this.arguments = null;
+    }
+
+    public PrimContext(PrimObject receiver, PrimObject method, String selector) {
+        this.receiver = receiver;
+        this.method = method;
+        this.selector = selector;
+        this.arguments = new PrimObject[0];
     }
 
     public PrimContext(PrimObject receiver, PrimObject method, String selector, PrimObject[] arguments) {
@@ -68,5 +76,13 @@ public class PrimContext {
         if (index < arguments.length)
             return arguments[index];
         throw new RuntimeException("Arguments index " + index + " out of bounds " + arguments.length);
+    }
+
+    public void blockAnswer(PrimObject answer) {
+        this.blockAnswer = answer;
+    }
+
+    public PrimObject blockAnswer() {
+        return blockAnswer;
     }
 }

@@ -4,18 +4,17 @@ package st.redline.compiler;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Label;
-import org.objectweb.asm.MethodVisitor;
-import org.objectweb.asm.Opcodes;
+import org.objectweb.asm.*;
+import st.redline.classloader.SmalltalkClassLoader;
 import st.redline.classloader.Source;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.Vector;
 
-import static st.redline.compiler.EmitterNode.SYNTHETIC_REFERENCE;
-import static st.redline.compiler.EmitterNode.SYNTHETIC_TEMPORARY;
+import static st.redline.compiler.EmitterNode.*;
 import static st.redline.compiler.SmalltalkParser.*;
 import static st.redline.compiler.Trace.trace;
 
@@ -40,12 +39,17 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         }
     }
     private final String SEND_MESSAGES_SIG = "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;";
+    private final String METHOD_SIG = "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;";
 
-    private final ClassWriter cw;
-    private MethodVisitor mv;
+    protected ClassWriter cw;
+    protected MethodVisitor mv;
+    protected Source source;
     private byte[] classBytes;
-    private Source source;
     private boolean sendToSuper = false;
+    private Stack<String> blockAnswerNames;
+    private Label blockTryStartLabel;
+    private Label blockTryEndLabel;
+    private Label blockCatchLabel;
 
     ByteCodeEmitter() {
         cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
@@ -67,6 +71,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             LOG.trace(source.fullClassName());
         cw.visit(BYTECODE_VERSION, ACC_PUBLIC + ACC_SUPER, source.fullClassName(), null, superclassName(), new String[] {"st/redline/classloader/Script"});
         cw.visitSource(source.className() + source.fileExtension(), null);
+        // Add support for the Lambda's we typically create to support blocks.
+        cw.visitInnerClass("java/lang/invoke/MethodHandles$Lookup", "java/lang/invoke/MethodHandles", "Lookup", ACC_PUBLIC + ACC_FINAL + ACC_STATIC);
+
         makeJavaClassInitializer();
         makePublicSendMessagesMethod();
         openPrivateSendMessagesMethod();
@@ -130,12 +137,32 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     @Override
+    public Emitter blockEmitter() {
+        return new BlockByteCodeEmitter(source, cw);
+    }
+
+    @Override
+    public void openBlock(int blockId, boolean isMethodBlock) {
+        throw new RuntimeException("Not a Block Emitter");
+    }
+
+    @Override
+    public String closeBlock(int blockId) {
+        throw new RuntimeException("Not a Block Emitter");
+    }
+
+    @Override
     public void emit(Statement statement) {
         if (isTraceEnabled(LOG))
             LOG.trace(statement);
+        blockAnswerNames = new Stack<>();
         emit(statement.messages());
         if (statement.containsAnswer())
-            mv.visitInsn(ARETURN);
+            handleAnswer();
+    }
+
+    public void handleAnswer() {
+        mv.visitInsn(ARETURN);
     }
 
     public void emitInitTemporaries(int index) {
@@ -196,6 +223,11 @@ class ByteCodeEmitter implements Emitter, Opcodes {
 
         if (message.isTail() && message.isCascade())
             emitPop();
+
+        // record the block answer names for next 'perform:'
+        // - we see the block answer names before we see a selector performed.
+        if (message.hasBlockAnswer())
+            blockAnswerNames.addAll(message.blockAnswerNames());
     }
 
     private void emitReceiver(EmitterNode receiver) {
@@ -226,6 +258,12 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             case SYNTHETIC_REFERENCE:
                 emitResolveReference(node.getText());
                 break;
+            case SYNTHETIC_BLOCK_CREATE:
+                emitResolveBlock(node, emitterNode);
+                break;
+            case SYNTHETIC_METHOD_CREATE:
+                emitResolveMethod(node, emitterNode);
+                break;
             default:
                 throw new RuntimeException("Unknown Emitter Type: " + emitterNode.type());
         }
@@ -245,10 +283,36 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         }
     }
 
+    private void emitResolveBlock(TerminalNode node, EmitterNode emitterNode) {
+        if (isTraceEnabled(LOG))
+            LOG.trace("resolveBlock: " + emitterNode.index());
+        emitResolveMethodOrBlock("st/redline/kernel/PrimBlock", node, emitterNode);
+    }
+
+    private void emitResolveMethod(TerminalNode node, EmitterNode emitterNode) {
+        if (isTraceEnabled(LOG))
+            LOG.trace("resolveMethod: " + emitterNode.index());
+        emitResolveMethodOrBlock("st/redline/kernel/PrimMethod", node, emitterNode);
+    }
+
+    private void emitResolveMethodOrBlock(String type, TerminalNode node, EmitterNode emitterNode) {
+        String blockName = makeBlockName(emitterNode.index());
+        visitLine(mv, node.getSymbol().getLine());
+        mv.visitTypeInsn(NEW, type);
+        mv.visitInsn(DUP);
+        mv.visitMethodInsn(INVOKESPECIAL, type, "<init>", "()V", false);
+        mv.visitInvokeDynamicInsn("apply", "()Lst/redline/kernel/TriFunction;", new Handle(Opcodes.H_INVOKESTATIC, "java/lang/invoke/LambdaMetafactory", "metafactory", "(Ljava/lang/invoke/MethodHandles$Lookup;Ljava/lang/String;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodType;Ljava/lang/invoke/MethodHandle;Ljava/lang/invoke/MethodType;)Ljava/lang/invoke/CallSite;"), new Object[]{Type.getType("(Ljava/lang/Object;Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"), new Handle(Opcodes.H_INVOKESTATIC, source.fullClassName(), blockName, "(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;"), Type.getType("(Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimObject;Lst/redline/kernel/PrimContext;)Lst/redline/kernel/PrimObject;")});
+        mv.visitMethodInsn(INVOKEVIRTUAL, type, "function", "(Lst/redline/kernel/TriFunction;)Lst/redline/kernel/PrimObject;", false);
+    }
+
+    private String makeBlockName(int index) {
+        return "Block" + index;
+    }
+
     private void emitResolveReference(String value) {
         if (isTraceEnabled(LOG))
             LOG.trace("resolve: " + value + " for: " + source.className() + " in: " + source.packageName());
-        emitSmalltalkCall("resolveFor", value, source.className(), source.packageName());
+        emitSmalltalkCall("resolve", value, source.className(), source.packageName());
     }
 
     private void emitSelector(List<EmitterNode> selectors) {
@@ -263,9 +327,11 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     private void emitPerform(int argumentCount) {
+        emitBlockAnswerTry();
         String method = sendToSuper ? "superPerform" : "perform";
         sendToSuper = false;
         mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimObject", method, SIGNATURES[argumentCount], false);
+        emitBlockAnswerCatch();
     }
 
     private void emitArguments(List<EmitterNode> arguments) {
@@ -358,6 +424,32 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         mv.visitMethodInsn(INVOKEINTERFACE, "st/redline/Smalltalk", method, "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lst/redline/kernel/PrimObject;", true);
     }
 
+    private void emitBlockAnswerTry() {
+        if (isTraceEnabled(LOG))
+            LOG.trace(blockAnswerNames);
+        if (blockAnswerNames.empty())
+            return;
+        blockTryStartLabel = new Label();
+        blockTryEndLabel = new Label();
+        blockCatchLabel = new Label();
+        for (String blockAnswerName: blockAnswerNames)
+            mv.visitTryCatchBlock(blockTryStartLabel, blockTryEndLabel, blockCatchLabel, blockAnswerName);
+        mv.visitLabel(blockTryStartLabel);
+    }
+
+    private void emitBlockAnswerCatch() {
+        if (isTraceEnabled(LOG))
+            LOG.trace(blockAnswerNames);
+        if (blockAnswerNames.empty())
+            return;
+        for (String blockAnswerName : blockAnswerNames) {
+            mv.visitJumpInsn(GOTO, blockTryEndLabel);
+            mv.visitLabel(blockCatchLabel);
+            mv.visitMethodInsn(INVOKEVIRTUAL, blockAnswerName, "answer", "()Lst/redline/kernel/PrimObject;", false);
+        }
+        mv.visitLabel(blockTryEndLabel);
+    }
+
     private String removeLeadingChar(String text) {
         return text.substring(1, text.length());
     }
@@ -374,9 +466,10 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     private void closePrivateSendMessagesMethod(boolean returnRequired) {
         if (isTraceEnabled(LOG))
             LOG.trace("");
-        if (returnRequired)
+        if (returnRequired) {
             mv.visitInsn(ARETURN);
-        mv.visitMaxs(0, 0);
+        }
+        mv.visitMaxs(1, 4);
         mv.visitEnd();
     }
 
@@ -401,6 +494,87 @@ class ByteCodeEmitter implements Emitter, Opcodes {
                     mv.visitIntInsn(BIPUSH, value);
                 else // SIPUSH not supported yet.
                     throw new IllegalStateException("Push of integer value " + value + " not yet supported.");
+        }
+    }
+
+    private class BlockByteCodeEmitter extends ByteCodeEmitter {
+
+        private String blockName;
+        private String blockAnswerClassName = null;
+        private boolean isMethodBlock;
+
+        BlockByteCodeEmitter(Source source, ClassWriter cw) {
+            this.source = source;
+            this.cw = cw;
+        }
+
+        @Override
+        public void openBlock(int blockId, boolean isMethodBlock) {
+            if (isTraceEnabled(LOG))
+                LOG.trace(blockId);
+            this.blockName = makeBlockName(blockId);
+            this.isMethodBlock = isMethodBlock;
+            mv = cw.visitMethod(ACC_PRIVATE + ACC_STATIC + ACC_SYNTHETIC, blockName, METHOD_SIG, null, null);
+            mv.visitCode();
+            mv.visitVarInsn(ALOAD, 1);
+
+//            mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+//            mv.visitLdcInsn(isMethodBlock ? "inside Smalltalk method" : "inside Smalltalk Block");
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+        }
+
+        @Override
+        public String closeBlock(int blockId) {
+            if (isTraceEnabled(LOG))
+                LOG.trace(blockId);
+            mv.visitInsn(ARETURN);
+            mv.visitMaxs(1, 3);
+            mv.visitEnd();
+            return blockAnswerClassName;
+        }
+
+        public void handleAnswer() {
+            blockAnswerClassName = source.packageName().replaceAll("\\.", "/") + '/' + source.className() + blockName;
+            if (!isMethodBlock) {
+                mv.visitInsn(DUP);
+                createBlockAnswerThrow();
+                createBlockAnswerClass();
+            } else {
+                mv.visitInsn(ARETURN);
+            }
+        }
+
+        private void createBlockAnswerClass() {
+            ClassWriter cw = new ClassWriter(0);
+            cw.visit(52, ACC_PUBLIC + ACC_SUPER, blockAnswerClassName, null, "st/redline/kernel/PrimBlockAnswer", null);
+            MethodVisitor mv = cw.visitMethod(ACC_PUBLIC, "<init>", "(Lst/redline/kernel/PrimObject;)V", null, null);
+            mv.visitCode();
+            mv.visitVarInsn(ALOAD, 0);
+            mv.visitVarInsn(ALOAD, 1);
+            mv.visitMethodInsn(INVOKESPECIAL, "st/redline/kernel/PrimBlockAnswer", "<init>", "(Lst/redline/kernel/PrimObject;)V", false);
+            mv.visitInsn(RETURN);
+            mv.visitMaxs(2, 2);
+            mv.visitEnd();
+            cw.visitEnd();
+            byte[] classData = cw.toByteArray();
+            classLoader().defineBlockClass(null, classData, 0, classData.length);
+        }
+
+        private SmalltalkClassLoader classLoader() {
+            return (SmalltalkClassLoader) Thread.currentThread().getContextClassLoader();
+        }
+
+        private void createBlockAnswerThrow() {
+            mv.visitVarInsn(ASTORE, 3);
+            mv.visitVarInsn(ALOAD, 2);
+            mv.visitVarInsn(ALOAD, 3);
+            mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimContext", "blockAnswer", "(Lst/redline/kernel/PrimObject;)V", false);
+            mv.visitTypeInsn(NEW, blockAnswerClassName);
+            mv.visitInsn(DUP);
+            mv.visitVarInsn(ALOAD, 2);
+            mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimContext", "blockAnswer", "()Lst/redline/kernel/PrimObject;", false);
+            mv.visitMethodInsn(INVOKESPECIAL, blockAnswerClassName, "<init>", "(Lst/redline/kernel/PrimObject;)V", false);
+            mv.visitInsn(ATHROW);
         }
     }
 }

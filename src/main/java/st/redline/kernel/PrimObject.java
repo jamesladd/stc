@@ -50,8 +50,13 @@ public class PrimObject {
     //
     // Methods that should be overridden in a subclass - otherwise most all
     // dispatches will result in a doesNotUnderstand:.
-    // Except for 'subclass:' and 'package:' which are used during bootstrapping.
+    // Except for 'subclass:', 'package:' and 'addSelector:with:' which are used
+    // during bootstrapping.
     //
+
+    public TriFunction<PrimObject, PrimObject, PrimContext, PrimObject> function() {
+        throw new RuntimeException("Subclass should override.");
+    }
 
     public PrimObject superclass() {
         return this;
@@ -74,6 +79,8 @@ public class PrimObject {
             return new PrimSubclassMethod();
         if (selector.equals("package:"))
             return new PrimPackageMethod();
+        if (selector.equals("atSelector:put:"))
+            return new PrimAtSelectorPutMethod();
         PrimObject dnuMethod = new PrimObject();
         dnuMethod.javaValue(selector);
         return dnuMethod;

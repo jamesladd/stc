@@ -19,8 +19,8 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
     private static final String METHOD_START = "[";
     private static final String METHOD_END = "].";
     private static final String CLASS_SELECTOR = "class";
-    private static final String METHOD_AT_SELECTOR = "basicAddSelector:";
-    private static final String METHOD_PUT_SELECTOR = "withMethod:";
+    private static final String METHOD_AT_SELECTOR = "atSelector:";
+    private static final String METHOD_PUT_SELECTOR = "put:";
     private static final String CLASS_METHOD_INDICATOR = "+ ";
     private static final String NEWLINE = System.getProperty("line.separator");
 

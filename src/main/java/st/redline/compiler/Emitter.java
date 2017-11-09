@@ -8,8 +8,16 @@ interface Emitter {
     byte[] generatedBytes();
 
     void openClass(Source source);
+
     void closeClass(boolean returnRequired);
 
+    Emitter blockEmitter();
+
+    void openBlock(int blockId, boolean isMethodBlock);
+
+    String closeBlock(int blockId);
+
     void emit(Statement statement);
+
     void emitInitTemporaries(int index);
 }

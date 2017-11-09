@@ -39,4 +39,8 @@ abstract class Statement {
     void markAsAssignment() {
         currentMessage().markAsAssignment();
     }
+
+    void markMessageAsBlockWithAnswer(String blockAnswerName) {
+        currentMessage().markAsBlockWithAnswer(blockAnswerName);
+    }
 }

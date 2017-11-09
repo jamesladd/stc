@@ -6,9 +6,9 @@ import org.apache.commons.logging.Log;
 
 import java.util.List;
 
-class Trace {
+public class Trace {
 
-    static boolean isTraceEnabled(Log log) {
+    public static boolean isTraceEnabled(Log log) {
         return log.isTraceEnabled();
     }
 

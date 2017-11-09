@@ -6,6 +6,7 @@ import org.apache.commons.logging.LogFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 
 import static st.redline.compiler.SmalltalkParser.BINARY_SELECTOR;
 import static st.redline.compiler.SmalltalkParser.KEYWORD;
@@ -25,6 +26,7 @@ class Message {
     private EmitterNode receiver;
     private List<EmitterNode> selectors = new ArrayList<>();
     private List<EmitterNode> arguments = new ArrayList<>();
+    private Stack<String> blockAnswerNames = new Stack<>();
 
     Message(boolean isTail, boolean isCascade) {
         this.receiverRequired = !isTail;
@@ -57,6 +59,14 @@ class Message {
 
     boolean isAssignment() {
         return isAssignment;
+    }
+
+    boolean hasBlockAnswer() {
+        return !blockAnswerNames.empty();
+    }
+
+    Stack<String> blockAnswerNames() {
+        return blockAnswerNames;
     }
 
     void addObject(EmitterNode node) {
@@ -108,5 +118,9 @@ class Message {
 
     void markAsAssignment() {
         isAssignment = true;
+    }
+
+    void markAsBlockWithAnswer(String blockAnswerName) {
+        this.blockAnswerNames.push(blockAnswerName);
     }
 }

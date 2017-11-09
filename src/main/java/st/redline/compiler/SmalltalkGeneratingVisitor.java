@@ -21,7 +21,7 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     private final Stack<SmalltalkVisitor<Void>> visitors = new Stack<>();
     private final Stack<Statement> statements = new Stack<>();
     private final Source source;
-    private final Emitter emitter;
+    private final Stack<Emitter> emitters = new Stack<>();
     private Map<String, EmitterNode> temporaries = new HashMap<>();
     private Map<String, EmitterNode> arguments = new HashMap<>();
     private Map<String, EmitterNode> instanceVariables = new HashMap<>();
@@ -29,12 +29,14 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     private Statement lastStatementEmitted;
     private boolean isCascade;
     private boolean subclassKeywordSeen;
+    private boolean addMethodSeen;
     private boolean captureInstanceVariableNames;
     private boolean captureClassVariableNames;
+    private int blockId = 0;
 
     SmalltalkGeneratingVisitor(Source source, Emitter emitter) {
         this.source = source;
-        this.emitter = emitter;
+        this.emitters.push(emitter);
         visitors.push(this);
     }
 
@@ -43,15 +45,15 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     }
 
     @Override
-    public byte[] generatedBytes() { return emitter.generatedBytes(); };
+    public byte[] generatedBytes() { return currentEmitter().generatedBytes(); };
 
     @Override
     public Void visitScript(SmalltalkParser.ScriptContext ctx) {
         if (isTraceEnabled(LOG))
             LOG.trace(source.fullClassName());
-        emitter.openClass(source);
+        currentEmitter().openClass(source);
         visitor().visitChildren(ctx);
-        emitter.closeClass(requiresReturn());
+        currentEmitter().closeClass(requiresReturn());
         if (!statements.empty())
             throw new RuntimeException("Not all statements emitted");
         return null;
@@ -93,6 +95,7 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
             LOG.trace("visit");
         isCascade = false;
         subclassKeywordSeen = false;
+        addMethodSeen = false;
         captureInstanceVariableNames = false;
         captureClassVariableNames = false;
         newStatementMessage();
@@ -184,6 +187,7 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
             subclassKeywordSeen = true;
         captureInstanceVariableNames = subclassKeywordSeen && "instanceVariableNames:".equals(keyword);
         captureClassVariableNames = subclassKeywordSeen && "classVariableNames:".equals(keyword);
+        addMethodSeen = "atSelector:put:".equals(keyword);
         if (isCascade)
             newStatementMessageTail();
         addToStatement(EmitterNode.create(KEYWORD, ctx.KEYWORD()));
@@ -253,6 +257,28 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         return visitChildren(ctx);
     }
 
+    @Override
+    public Void visitBlock(SmalltalkParser.BlockContext ctx) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(trace(ctx.BLOCK_START()));
+        int blockId = this.blockId++;
+        pushBlockEmitter();
+        currentEmitter().openBlock(blockId, addMethodSeen);
+        visitChildren(ctx);
+        String blockAnswerName = currentEmitter().closeBlock(blockId);
+        if (isTraceEnabled(LOG))
+            LOG.trace(blockAnswerName);
+        popBlockEmitter();
+        if (!addMethodSeen) {
+            if (blockAnswerName != null)
+                markMessageAsHavingBlockWithAnswer(blockAnswerName);
+            addToStatement(EmitterNode.createBlock(ctx.BLOCK_START(), blockId));
+        } else
+            addToStatement(EmitterNode.createMethod(ctx.BLOCK_START(), blockId));
+        addMethodSeen = false;
+        return null;
+    }
+
     private boolean isTemporary(String identifier) {
         return temporaries.containsKey(identifier);
     }
@@ -288,8 +314,24 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         throw new RuntimeException("Non-Null object expected.");
     }
 
+    private void pushBlockEmitter() {
+        emitters.push(currentEmitter().blockEmitter());
+    }
+
+    private void popBlockEmitter() {
+        emitters.pop();
+    }
+
+    private Emitter currentEmitter() {
+        return emitters.peek();
+    }
+
     private void addToStatement(EmitterNode node) {
         currentStatement().addToMessage(node);
+    }
+
+    private void markMessageAsHavingBlockWithAnswer(String blockAnswerName) {
+        currentStatement().markMessageAsBlockWithAnswer(blockAnswerName);
     }
 
     private void markStatementAsAnswer() {
@@ -319,11 +361,11 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     private void emitStatement() {
         Statement statement = statements.pop();
         lastStatementEmitted = statement;
-        emitter.emit(statement);
+        currentEmitter().emit(statement);
     }
 
     private void emitInitTemporaries(int index) {
-        emitter.emitInitTemporaries(index);
+        currentEmitter().emitInitTemporaries(index);
     }
 
     private boolean requiresReturn() {

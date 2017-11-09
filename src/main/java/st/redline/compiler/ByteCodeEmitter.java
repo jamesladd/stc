@@ -518,9 +518,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             mv.visitCode();
             mv.visitVarInsn(ALOAD, 1);
 
-            mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
-            mv.visitLdcInsn(isMethodBlock ? "inside Smalltalk method" : "inside Smalltalk Block");
-            mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
+//            mv.visitFieldInsn(GETSTATIC, "java/lang/System", "out", "Ljava/io/PrintStream;");
+//            mv.visitLdcInsn(isMethodBlock ? "inside Smalltalk method" : "inside Smalltalk Block");
+//            mv.visitMethodInsn(INVOKEVIRTUAL, "java/io/PrintStream", "println", "(Ljava/lang/String;)V", false);
         }
 
         @Override

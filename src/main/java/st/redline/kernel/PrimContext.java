@@ -79,8 +79,6 @@ public class PrimContext {
     }
 
     public void blockAnswer(PrimObject answer) {
-        System.out.println("block Answer set");
-        System.out.println(answer);
         this.blockAnswer = answer;
     }
 

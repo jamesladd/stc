@@ -284,7 +284,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     private Object toLdcConstant(String text) {
         if (isTraceEnabled(LOG))
             LOG.warn("Only String type supported right now.");
-        return text;
+        return unquote(text);
     }
 
     private int toFieldOpcode(String text) {

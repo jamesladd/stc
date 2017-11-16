@@ -123,4 +123,8 @@ class Message {
     void markAsBlockWithAnswer(String blockAnswerName) {
         this.blockAnswerNames.push(blockAnswerName);
     }
+
+    boolean isToJVM() {
+        return receiver != null && receiver.text().equals("JVM");
+    }
 }

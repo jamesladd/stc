@@ -10,9 +10,7 @@ import org.antlr.v4.runtime.tree.ParseTreeVisitor;
  * operations with no return type.
  */
 public interface SmalltalkVisitor<T> extends ParseTreeVisitor<T> {
-
 	byte[] generatedBytes();
-
 	/**
 	 * Visit a parse tree produced by {@link SmalltalkParser#script}.
 	 * @param ctx the parse tree

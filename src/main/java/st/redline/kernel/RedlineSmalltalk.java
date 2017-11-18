@@ -6,6 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import st.redline.Smalltalk;
 import st.redline.classloader.Script;
 import st.redline.classloader.SmalltalkClassLoader;
+import st.redline.classloader.Source;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -20,6 +21,7 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
     private Map<String, PrimObject> classes = new HashMap<>();
     private Map<String, Map<String, Map<String, String>>> imports = new HashMap<>();
     private String currentPackage;
+    private String currentClass;
 
     public RedlineSmalltalk() {
         this.javaValue("RedlineSmalltalk");
@@ -106,14 +108,35 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
     }
 
     @Override
-    public PrimObject currentPackage(String javaString) {
-        currentPackage = javaString;
+    public PrimObject currentPackageForIs(String className, String packageName) {
+        currentPackage = packageName;
+        currentClass = className;
         return this;
     }
 
     @Override
     public String currentPackage() {
         return currentPackage;
+    }
+
+    @Override
+    public String currentClass() {
+        return currentClass;
+    }
+
+    @Override
+    public PrimObject imports(String spec) {
+        if (isTraceEnabled(LOG))
+            LOG.trace("importing " + spec);
+        SmalltalkClassLoader smalltalkClassLoader = classLoader();
+        Source source = smalltalkClassLoader.findSource(spec);
+        if (source != null) {
+            if (isTraceEnabled(LOG))
+                LOG.trace("found " + source.fullClassName());
+            addImport(currentPackage(), source.className(), source.packageName() + "." + source.className());
+            return this;
+        } else
+            throw new RuntimeException("Import not found: " + spec);
     }
 
     @Override

@@ -207,27 +207,116 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     private void emit(Message message) {
-        // Before each Message we pop the top value off the stack, as it may
-        // be the value left from a previous message send.
-        // UNLESS the message is a messageTail in which case we leave it.
-        if (!message.isTail()) {
-            emitPop();
-            emitReceiver(message.receiver());
-        } else if (message.isCascade())
-            emitDup();
+        if (message.isToJVM())
+            emitInlineJVMInstruction(message);
+        else {
+            // Before each Message we pop the top value off the stack, as it may
+            // be the value left from a previous message send.
+            // UNLESS the message is a messageTail in which case we leave it.
+            if (!message.isTail()) {
+                emitPop();
+                emitReceiver(message.receiver());
+            } else if (message.isCascade())
+                emitDup();
 
-        emitArguments(message.arguments());
-        emitSelector(message.selectors());
-        if (message.selectors().size() != 0)
-            emitPerform(message.arguments().size());
+            emitArguments(message.arguments());
+            emitSelector(message.selectors());
+            if (message.selectors().size() != 0)
+                emitPerform(message.arguments().size());
 
-        if (message.isTail() && message.isCascade())
-            emitPop();
+            if (message.isTail() && message.isCascade())
+                emitPop();
 
-        // record the block answer names for next 'perform:'
-        // - we see the block answer names before we see a selector performed.
-        if (message.hasBlockAnswer())
-            blockAnswerNames.addAll(message.blockAnswerNames());
+            // record the block answer names for next 'perform:'
+            // - we see the block answer names before we see a selector performed.
+            if (message.hasBlockAnswer())
+                blockAnswerNames.addAll(message.blockAnswerNames());
+        }
+    }
+
+    private void emitInlineJVMInstruction(Message message) {
+        TerminalNode firstSelector = message.selectors().get(0).value();
+        if (isTraceEnabled(LOG))
+            LOG.trace(firstSelector.getText());
+        switch (firstSelector.getText()) {
+            case "fieldInsn:": {
+                if (message.selectors().size() != 4 || message.arguments().size() != 4)
+                    throw new RuntimeException("JVM fieldInsn expects 4 keywords and 4 arguments.");
+                List<EmitterNode> arguments = message.arguments();
+                int opcode = toFieldOpcode(arguments.get(0).text());
+                String owner = arguments.get(1).text();
+                String name = arguments.get(2).text();
+                String descr = arguments.get(3).text();
+                mv.visitFieldInsn(opcode, unquote(owner), unquote(name), unquote(descr));
+            }
+            break;
+            case "ldcInsn:": {
+                if (message.selectors().size() != 1 || message.arguments().size() != 1)
+                    throw new RuntimeException("JVM ldcInsn expects 1 keyword and 1 argument.");
+                List<EmitterNode> arguments = message.arguments();
+                Object constant = toLdcConstant(arguments.get(0).text());
+                mv.visitLdcInsn(constant);
+            }
+            break;
+            case "methodInsn:": {
+                if (message.selectors().size() != 5 || message.arguments().size() != 5)
+                    throw new RuntimeException("JVM methodInsn expects 5 keywords and 5 arguments.");
+                List<EmitterNode> arguments = message.arguments();
+                int opcode = toMethodOpcode(arguments.get(0).text());
+                String owner = arguments.get(1).text();
+                String name = arguments.get(2).text();
+                String descr = arguments.get(3).text();
+                boolean iface = Boolean.valueOf(arguments.get(4).text());
+                mv.visitMethodInsn(opcode, unquote(owner), unquote(name), unquote(descr), iface);
+            }
+            break;
+            default:
+                throw new RuntimeException("JVM instruction '" + firstSelector.getText() + "' not currently handled.");
+        }
+    }
+
+    private String unquote(String string) {
+        if (string.startsWith("'"))
+            return string.substring(1, string.length() - 1);
+        return string;
+    }
+
+    private Object toLdcConstant(String text) {
+        if (isTraceEnabled(LOG))
+            LOG.warn("Only String type supported right now.");
+        return unquote(text);
+    }
+
+    private int toFieldOpcode(String text) {
+        String code = text.toUpperCase();
+        switch (code) {
+            case "GETSTATIC":
+                return GETSTATIC;
+            case "PUTSTATIC":
+                return PUTSTATIC;
+            case "GETFIELD":
+                return GETFIELD;
+            case "PUTFIELD":
+                return PUTFIELD;
+            default:
+                throw new RuntimeException("JVM field opcode '" + code + "' not recognized.");
+        }
+    }
+
+    private int toMethodOpcode(String text) {
+        String code = text.toUpperCase();
+        switch (code) {
+            case "INVOKEVIRTUAL":
+                return INVOKEVIRTUAL;
+            case "INVOKESPECIAL":
+                return INVOKESPECIAL;
+            case "INVOKESTATIC":
+                return INVOKESTATIC;
+            case "INVOKEINTERFACE":
+                return INVOKEINTERFACE;
+            default:
+                throw new RuntimeException("JVM method opcode '" + code + "' not recognized.");
+        }
     }
 
     private void emitReceiver(EmitterNode receiver) {

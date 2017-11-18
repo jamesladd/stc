@@ -6,7 +6,7 @@
 grammar Smalltalk;
 
 script : sequence ws EOF;
-sequence : temps? ws statements? ws;
+sequence : ws (statements | temps)* ws statements? ws;
 ws : (SEPARATOR | COMMENT)*;
 temps : ws PIPE (ws IDENTIFIER)+ ws PIPE;
 statements : answer ws # StatementAnswer

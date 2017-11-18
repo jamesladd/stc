@@ -12,7 +12,9 @@ public interface Smalltalk {
     PrimObject nilSingleton(String javaString);
     PrimObject resolve(String reference, String className, String packageName);
 
-    PrimObject currentPackage(String javaString);
+    PrimObject imports(String javaString);
+    PrimObject currentPackageForIs(String className, String packageName);
     String currentPackage();
+    String currentClass();
     Smalltalk register(PrimObject newClass, String className);
 }

@@ -77,8 +77,10 @@ public class PrimObject {
     public PrimObject methodAt(String selector) {
         if (selector.equals("subclass:"))
             return new PrimSubclassMethod();
-        if (selector.equals("package:"))
-            return new PrimPackageMethod();
+        if (selector.equals("packageFor:is:"))
+            return new PrimPackageForIsMethod();
+        if (selector.equals("import:"))
+            return new PrimImportMethod();
         if (selector.equals("atSelector:put:"))
             return new PrimAtSelectorPutMethod();
         PrimObject dnuMethod = new PrimObject();

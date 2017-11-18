@@ -37,7 +37,7 @@ public class SmalltalkClassLoader extends ClassLoader {
         return compile(findSource(name));
     }
 
-    private Source findSource(String name) {
+    public Source findSource(String name) {
         Source source = sourceFinder.find(name);
         if (source.exists())
             return source;

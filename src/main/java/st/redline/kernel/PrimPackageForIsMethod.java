@@ -3,14 +3,14 @@ package st.redline.kernel;
 
 import st.redline.Smalltalk;
 
-public class PrimPackageMethod extends PrimMethod {
+public class PrimPackageForIsMethod extends PrimMethod {
 
-    PrimPackageMethod() {
-        this.javaValue("PrimPackage");
+    PrimPackageForIsMethod() {
+        this.javaValue("PrimPackageForIs");
         this.function((method, receiver, context) -> {
             if (!(receiver instanceof Smalltalk))
                 throw new RuntimeException("Primitive package not sent to expected receiver.");
-            return ((Smalltalk) receiver).currentPackage(String.valueOf(context.argumentAt(0).javaValue()));
+            return ((Smalltalk) receiver).currentPackageForIs(String.valueOf(context.argumentAt(0).javaValue()), String.valueOf(context.argumentAt(1).javaValue()));
         });
     }
 }

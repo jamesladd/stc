@@ -133,7 +133,7 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
         if (source != null) {
             if (isTraceEnabled(LOG))
                 LOG.trace("found " + source.fullClassName());
-            addImport(currentPackage(), source.className(), source.packageName() + "." + source.className());
+            addImport(currentPackage(), currentClass(), source.className(), source.packageName() + "." + source.className());
             return this;
         } else
             throw new RuntimeException("Import not found: " + spec);
@@ -145,7 +145,7 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
             LOG.trace(className + " in " + currentPackage());
         String fullClassName = currentPackage() + "." + className;
         classes.put(fullClassName, newClass);
-        addImport(currentPackage(), className, fullClassName);
+        addImport(currentPackage(), className, className, fullClassName);
         return this;
     }
 
@@ -183,13 +183,13 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
         return theClass.getOrDefault(reference, null);
     }
 
-    private void addImport(String packageName, String className, String fullClassName) {
+    private void addImport(String packageName, String className, String reference, String fullClassName) {
         if (isTraceEnabled(LOG))
-            LOG.trace(className + " in " + packageName + " as " + fullClassName);
+            LOG.trace(reference + " in " + packageName + "." + className + " as " + fullClassName);
         Map<String, Map<String, String>> packageMap = imports.computeIfAbsent(packageName, k -> new HashMap<>());
         Map<String, String> classMap = packageMap.computeIfAbsent(className, k -> new HashMap<>());
-        if (!classMap.containsKey(fullClassName))
-            classMap.put(className, fullClassName);
+        if (!classMap.containsKey(reference))
+            classMap.put(reference, fullClassName);
         else
             throw new RuntimeException("Attempt to add import twice for: " + className);
     }

@@ -43,4 +43,8 @@ abstract class Statement {
     void markMessageAsBlockWithAnswer(String blockAnswerName) {
         currentMessage().markAsBlockWithAnswer(blockAnswerName);
     }
+
+    boolean containsSelector(String selector) {
+        return currentMessage().containsSelector(selector);
+    }
 }

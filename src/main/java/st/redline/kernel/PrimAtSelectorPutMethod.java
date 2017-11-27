@@ -6,7 +6,11 @@ public class PrimAtSelectorPutMethod extends PrimMethod {
     PrimAtSelectorPutMethod() {
         this.javaValue("Method PrimAtSelectorPut");
         this.function((method, receiver, context) -> {
-            throw new RuntimeException("TODO.JCL - implement");
+            String selector = String.valueOf(context.argumentAt(0).javaValue());
+            PrimMethod methodBlock = (PrimMethod) context.argumentAt(1);
+            PrimClass clazz = (PrimClass) receiver.clazz();
+            clazz.methodAtPut(selector, methodBlock);
+            return receiver;
         });
     }
 }

@@ -29,7 +29,6 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     private Statement lastStatementEmitted;
     private boolean isCascade;
     private boolean subclassKeywordSeen;
-    private boolean addMethodSeen;
     private boolean captureInstanceVariableNames;
     private boolean captureClassVariableNames;
     private int blockId = 0;
@@ -95,7 +94,6 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
             LOG.trace("visit");
         isCascade = false;
         subclassKeywordSeen = false;
-        addMethodSeen = false;
         captureInstanceVariableNames = false;
         captureClassVariableNames = false;
         newStatementMessage();
@@ -187,7 +185,6 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
             subclassKeywordSeen = true;
         captureInstanceVariableNames = subclassKeywordSeen && "instanceVariableNames:".equals(keyword);
         captureClassVariableNames = subclassKeywordSeen && "classVariableNames:".equals(keyword);
-        addMethodSeen = "atSelector:put:".equals(keyword);
         if (isCascade)
             newStatementMessageTail();
         addToStatement(EmitterNode.create(KEYWORD, ctx.KEYWORD()));
@@ -262,6 +259,7 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         if (isTraceEnabled(LOG))
             LOG.trace(trace(ctx.BLOCK_START()));
         int blockId = this.blockId++;
+        boolean addMethodSeen = currentStatement().containsSelector("atSelector:put:");
         pushBlockEmitter();
         currentEmitter().openBlock(blockId, addMethodSeen);
         visitChildren(ctx);
@@ -275,7 +273,6 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
             addToStatement(EmitterNode.createBlock(ctx.BLOCK_START(), blockId));
         } else
             addToStatement(EmitterNode.createMethod(ctx.BLOCK_START(), blockId));
-        addMethodSeen = false;
         return null;
     }
 

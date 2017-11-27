@@ -31,4 +31,9 @@ public class PrimClass extends PrimObject {
     public PrimObject methodAt(String selector) {
         return methods.get(selector);
     }
+
+    public PrimObject methodAtPut(String selector, PrimMethod methodBlock) {
+        methods.put(selector, methodBlock);
+        return this;
+    }
 }

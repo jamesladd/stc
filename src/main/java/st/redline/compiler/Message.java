@@ -27,12 +27,14 @@ class Message {
     private List<EmitterNode> selectors = new ArrayList<>();
     private List<EmitterNode> arguments = new ArrayList<>();
     private Stack<String> blockAnswerNames = new Stack<>();
+    private String fullSelector;
 
     Message(boolean isTail, boolean isCascade) {
         this.receiverRequired = !isTail;
         this.isTail = isTail;
         this.isCascade = isCascade;
         this.selectorRequired = isTail || isCascade;
+        this.fullSelector = "";
         if (isCascade && !isTail)
             throw new RuntimeException("Invalid Message state, setting cascade for a non-tail message");
     }
@@ -92,6 +94,7 @@ class Message {
         if (isTraceEnabled(LOG))
             LOG.trace(trace(node));
         selectors.add(node);
+        fullSelector = fullSelector + node.text();
         selectorRequired = false;
         argumentRequired = (node.type() == KEYWORD || node.type() == BINARY_SELECTOR);
     }
@@ -126,5 +129,9 @@ class Message {
 
     boolean isToJVM() {
         return receiver != null && receiver.text().equals("JVM");
+    }
+
+    boolean containsSelector(String selector) {
+        return fullSelector.equals(selector);
     }
 }

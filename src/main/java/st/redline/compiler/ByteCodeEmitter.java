@@ -514,10 +514,10 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     private void emitBlockAnswerTry() {
-        if (isTraceEnabled(LOG))
-            LOG.trace(blockAnswerNames);
         if (blockAnswerNames.empty())
             return;
+        if (isTraceEnabled(LOG))
+            LOG.trace(blockAnswerNames);
         blockTryStartLabel = new Label();
         blockTryEndLabel = new Label();
         blockCatchLabel = new Label();
@@ -527,10 +527,10 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     }
 
     private void emitBlockAnswerCatch() {
-        if (isTraceEnabled(LOG))
-            LOG.trace(blockAnswerNames);
         if (blockAnswerNames.empty())
             return;
+        if (isTraceEnabled(LOG))
+            LOG.trace(blockAnswerNames);
         for (String blockAnswerName : blockAnswerNames) {
             mv.visitJumpInsn(GOTO, blockTryEndLabel);
             mv.visitLabel(blockCatchLabel);

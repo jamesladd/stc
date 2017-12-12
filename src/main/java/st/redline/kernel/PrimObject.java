@@ -75,10 +75,12 @@ public class PrimObject {
     }
 
     public PrimObject methodAt(String selector) {
+        if (selector.equals("class"))
+            return new PrimClassMethod();
         if (selector.equals("subclass:"))
             return new PrimSubclassMethod();
-        if (selector.equals("packageFor:is:"))
-            return new PrimPackageForIsMethod();
+        if (selector.equals("package:in:"))
+            return new PrimPackageInMethod();
         if (selector.equals("import:"))
             return new PrimImportMethod();
         if (selector.equals("atSelector:put:"))

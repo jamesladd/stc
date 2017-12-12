@@ -54,7 +54,7 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
     }
 
     public String contents() {
-        String readerGeneratedLine = "Smalltalk packageFor: '" + className() + "' is: '" + packageName() + "'.\n";
+        String readerGeneratedLine = "Smalltalk package: '" + className() + "' in: '" + packageName() + "'.\n";
         return readerGeneratedLine + reader.contents(this);
     }
 

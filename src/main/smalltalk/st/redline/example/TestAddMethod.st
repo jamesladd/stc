@@ -1,3 +1,3 @@
+Smalltalk import: 'st.redline.example.TestExample'.
 
-Object yourself.
-
+TestExample classTest.

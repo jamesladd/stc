@@ -8,8 +8,7 @@ public class PrimAtSelectorPutMethod extends PrimMethod {
         this.function((method, receiver, context) -> {
             String selector = String.valueOf(context.argumentAt(0).javaValue());
             PrimMethod methodBlock = (PrimMethod) context.argumentAt(1);
-            PrimClass clazz = (PrimClass) receiver.clazz();
-            clazz.methodAtPut(selector, methodBlock);
+            ((PrimClass) receiver).methodAtPut(selector, methodBlock);
             return receiver;
         });
     }

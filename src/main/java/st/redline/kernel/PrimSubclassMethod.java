@@ -22,7 +22,7 @@ public class PrimSubclassMethod extends PrimMethod {
 
     private PrimObject createClass(PrimObject receiver, String className) {
         PrimClass newClass = new PrimClass(className, false);
-        PrimClass newMeta = new PrimClass(className, true);
+        PrimClass newMeta = new PrimClass(className + "(meta)", true);
         newClass.clazz(newMeta);
         newClass.superclass(receiver);
         newMeta.superclass(receiver.clazz());

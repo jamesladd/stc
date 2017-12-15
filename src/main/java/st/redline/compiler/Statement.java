@@ -47,4 +47,8 @@ abstract class Statement {
     boolean containsSelector(String selector) {
         return currentMessage().containsSelector(selector);
     }
+
+    boolean hasSelector() {
+        return currentMessage().hasSelector();
+    }
 }

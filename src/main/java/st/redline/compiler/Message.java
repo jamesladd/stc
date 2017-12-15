@@ -134,4 +134,8 @@ class Message {
     boolean containsSelector(String selector) {
         return fullSelector.equals(selector);
     }
+
+    public boolean hasSelector() {
+        return !selectors.isEmpty();
+    }
 }

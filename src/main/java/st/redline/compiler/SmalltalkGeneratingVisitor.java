@@ -212,7 +212,8 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
     public Void visitKeywordMessage(SmalltalkParser.KeywordMessageContext ctx) {
         if (isTraceEnabled(LOG))
             LOG.trace("visit");
-        newStatementMessageTail();
+        if (currentStatement().hasSelector())
+            newStatementMessageTail();
         return visitChildren(ctx);
     }
 

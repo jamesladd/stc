@@ -264,7 +264,7 @@ class ByteCodeEmitter implements Emitter, Opcodes {
                 if (message.selectors().size() != 1 || message.arguments().size() != 1)
                     throw new RuntimeException("JVM ldcInsn expects 1 keyword and 1 argument.");
                 List<EmitterNode> arguments = message.arguments();
-                Object constant = toLdcConstant(arguments.get(0).text());
+                Object constant = toLdcConstant(arguments.get(0));
                 mv.visitLdcInsn(constant);
             }
             break;
@@ -322,11 +322,31 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             return null;
         return string;
     }
-
-    private Object toLdcConstant(String text) {
+    
+    private Number javaNumber(String string) {
         if (isTraceEnabled(LOG))
-            LOG.warn("Only String type supported right now.");
-        return unquote(text);
+            LOG.warn("Only Integer and Float supported right now.");
+        if (string.contains("."))
+            return Float.valueOf(string);
+        else if (string.startsWith("16r"))
+            return Integer.valueOf(string.substring(3), 16);
+        else
+            return Integer.valueOf(string);
+    }
+
+    private Object toLdcConstant(EmitterNode emitterNode) {
+        switch (emitterNode.type()) {
+        case STRING:
+        case HASH:
+            return unquote(emitterNode.text());
+        case DIGIT:
+        case HEX:
+            return javaNumber(emitterNode.text());
+        case CHARACTER_CONSTANT:
+            return emitterNode.text().charAt(1);
+        default:
+            throw new RuntimeException("JVM constant type not recognized.");
+        }
     }
     
     private int toInsnOpcode(String text) {

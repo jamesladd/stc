@@ -11,6 +11,8 @@ import st.redline.classloader.Source;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.management.RuntimeErrorException;
+
 import static java.util.Collections.emptyMap;
 import static st.redline.compiler.Trace.isTraceEnabled;
 
@@ -24,15 +26,77 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
     private String currentClass;
 
     public RedlineSmalltalk() {
-        this.javaValue("RedlineSmalltalk");
+        this.javaValue("a RedlineSmalltalk");
+        // 'this' is really an instance of the RedlineSmalltalk class registered as the global 'Smalltalk'
+        PrimClass redlineClass = new PrimClass("RedlineSmalltalk", false);
+        this.clazz(redlineClass);
+        redlineClass.clazz(new PrimClass(redlineClass.javaValue() + "(meta)", true));
+        redlineClass.methodAtPut("package:in:", new PrimPackageInMethod());
+        redlineClass.methodAtPut("import:", new PrimImportMethod());
         bootstrap();
     }
 
     private void bootstrap() {
-        PrimObject primObject = new PrimObject();
-        primObject.javaValue("PrimObject");
-        classes.put("st.redline.kernel.PrimObject", primObject);
+        classes.put("st.redline.kernel.PrimObject", createPrimObjectClass());
         classes.put("st.redline.kernel.Smalltalk", this);
+        classes.put("st.redline.kernel.RedlineSmalltalk", this.clazz());
+        
+        // load Object, Behavior, ClassDescription, Metaclass
+        // Metaclass needs to be loaded before Class so that it is present when the 
+        // definition of the subclass: method on Class takes over from the PrimSubclassMethod.
+        tryCompileClass("st.redline.kernel.Metaclass");
+        tryCompileClass("st.redline.kernel.Class"); // Load Class
+        
+        // Rewire the class hierarchy, introduce the cyclic Metaclass aspect, etc.
+        PrimClass primObject = (PrimClass)classes.get("st.redline.kernel.PrimObject");
+        PrimClass kernelClass = (PrimClass)classes.get("st.redline.kernel.Class");
+        PrimClass metaclass = (PrimClass)classes.get("st.redline.kernel.Metaclass");
+        classes.forEach((key, value) -> {
+            if (value != this) value.clazz().clazz(metaclass);
+        });
+        ((PrimClass)primObject.clazz()).superclass(kernelClass);
+        
+        // TODO: remove the original bootstrapped primitive methods
+    }
+    
+    private PrimObject createPrimObjectClass() {
+
+        PrimClass primObject = new PrimClass("PrimObject", false);
+        PrimClass primObjectMeta = new PrimClass(primObject.javaValue() + "(meta)", true);
+        primObject.clazz(primObjectMeta);
+        
+        // TODO-MS: put the Smalltalk class in the correct location of the hierarchy
+        ((PrimClass)this.clazz()).superclass(primObject);
+        ((PrimClass)this.clazz().clazz()).superclass(primObjectMeta);
+        
+        primObject.methodAtPut("class", new PrimClassMethod());
+        primObjectMeta.methodAtPut("class", new PrimClassMethod());
+        primObject.methodAtPut("subclass:", new PrimSubclassMethod());
+        primObjectMeta.methodAtPut("subclass:", new PrimSubclassMethod());
+        primObject.methodAtPut("atSelector:put:", new PrimAtSelectorPutMethod());
+        primObjectMeta.methodAtPut("atSelector:put:", new PrimAtSelectorPutMethod());
+        
+        PrimMethod doesNotUnderstand = new PrimMethod();
+        doesNotUnderstand.function = new TriFunction<PrimObject, PrimObject, PrimContext, PrimObject>() {
+            
+            @Override
+            public PrimObject apply(PrimObject receiver, PrimObject method, PrimContext context) {
+                // XXX: complete doesNotUnderstand: bootstrapping.
+                throw new RuntimeException(receiver + " doesNotUnderstand: " + context.argumentAt(0) + ".");
+            }
+        };
+        primObject.methodAtPut("doesNotUnderstand:", doesNotUnderstand);
+        primObjectMeta.methodAtPut("doesNotUnderstand:", doesNotUnderstand);
+        
+        // XXX: temp workaround for the superclass hierarchy running out
+        primObject.methodAtPut("superclass", new PrimMethod(){
+            @Override
+            public PrimObject apply(PrimObject receiver, PrimContext context) {
+                return new PrimObject();
+            }
+        });
+        
+        return primObject;
     }
 
     @Override
@@ -83,7 +147,6 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
         return object;
     }
 
-    @Override @SuppressWarnings("unchecked")
     public PrimObject resolve(String reference, String className, String packageName) {
         if (isTraceEnabled(LOG))
             LOG.trace(reference + " for " + className + " in " + packageName);
@@ -151,12 +214,17 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
 
 
     private void tryCompileClass(String path) {
+        String oldPackage = currentPackage();
+        String oldClass = currentClass();
         try {
             Class cls = tryLoadScript(path);
             Script script = newInstance(cls);
             script.sendMessages(this);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        } finally {
+            // Ensure the context is correct when return to processing the previous script
+            currentPackageForIs(oldClass, oldPackage);  
         }
     }
 

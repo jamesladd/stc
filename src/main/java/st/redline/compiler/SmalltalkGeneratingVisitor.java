@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import st.redline.classloader.Source;
+import st.redline.compiler.SmalltalkParser.BlockParamListContext;
 import st.redline.compiler.SmalltalkParser.HexContext;
 
 import java.util.ArrayList;
@@ -312,6 +313,17 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         } else
             addToStatement(EmitterNode.createMethod(ctx.BLOCK_START(), blockId));
         return null;
+    }
+    
+    @Override
+    public Void visitBlockParamList(BlockParamListContext ctx) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(trace(ctx.BLOCK_PARAM()));
+        arguments = new HashMap<>();
+        int index = 0;
+        for (TerminalNode node : ctx.BLOCK_PARAM())
+            arguments.put(node.getText().substring(1), EmitterNode.create(IDENTIFIER, node, index++));
+        return visitChildren(ctx);
     }
 
     private boolean isTemporary(String identifier) {

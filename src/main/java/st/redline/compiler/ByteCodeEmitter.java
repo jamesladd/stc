@@ -298,16 +298,37 @@ class ByteCodeEmitter implements Emitter, Opcodes {
                 mv.visitVarInsn(opcode, var);
             }
             break;
-            case "assignTo:": {
+            case "storeVar:": {
                 if (message.selectors().size() != 1 || message.arguments().size() != 1)
                     throw new RuntimeException("JVM assignTo: expects 1 keyword and 1 argument.");
                 List<EmitterNode> arguments = message.arguments();
-                int index = Integer.valueOf(arguments.get(0).text());
-                pushContext();
-                mv.visitInsn(SWAP);
-                pushIntConst(index);
-                mv.visitInsn(SWAP);
-                mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimContext", "temporaryAtPut", "(ILst/redline/kernel/PrimObject;)Lst/redline/kernel/PrimObject;", false);
+                EmitterNode var = arguments.get(0);
+                switch (var.type()) {
+                case SYNTHETIC_TEMPORARY:   {
+                    pushContext();
+                    mv.visitInsn(SWAP);
+                    pushIntConst(var.index());
+                    mv.visitInsn(SWAP);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimContext", "temporaryAtPut", "(ILst/redline/kernel/PrimObject;)Lst/redline/kernel/PrimObject;", false);
+                }
+                break;
+                case SYNTHETIC_INSTANCE_VARIABLE:
+                case SYNTHETIC_CLASS_VARIABLE:
+                    throw new RuntimeException("JVM storeVar: does not yest support instance and class variables.");
+                default:
+                    throw new RuntimeException("JVM storeVar: expects a temp variables, instance variables, or class variables.");
+                }
+            }
+            break;
+            case "loadVar:": {
+                if (message.selectors().size() != 1 || message.arguments().size() != 1)
+                    throw new RuntimeException("JVM loadVar: expects 1 keyword and 1 argument.");
+                List<EmitterNode> arguments = message.arguments();
+                EmitterNode var = arguments.get(0);
+                if (var.type() != RESERVED_WORD && (var.type() < EmitterNode.SYNTHETIC_TEMPORARY || var.type() > EmitterNode.SYNTHETIC_REFERENCE))
+                    throw new RuntimeException("JVM loadVar: expects a global references, args, temp variables, instance variables, class variables, and pseudo variables.");
+                TerminalNode node = var.value();
+                emitObject(var, node);
             }
             break;
             default:
@@ -444,6 +465,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             case SYNTHETIC_TEMPORARY:
                 emitTemporaryGet(node, emitterNode.index());
                 break;
+            case SYNTHETIC_ARGUMENT:
+                emitArgumentGet(node, emitterNode.index());
+                break;
             case SYNTHETIC_REFERENCE:
                 emitResolveReference(node.getText());
                 break;
@@ -565,6 +589,13 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         pushContext();
         pushIntConst(index);
         mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimContext", "temporaryAt", "(I)Lst/redline/kernel/PrimObject;", false);
+    }
+    
+    private void emitArgumentGet(TerminalNode node, int index) {
+        visitLine(mv, node.getSymbol().getLine());
+        pushContext();
+        pushIntConst(index);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimContext", "argumentAt", "(I)Lst/redline/kernel/PrimObject;", false);
     }
 
     private void emitDup() {

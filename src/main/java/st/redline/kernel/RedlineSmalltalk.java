@@ -11,8 +11,6 @@ import st.redline.classloader.Source;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.management.RuntimeErrorException;
-
 import static java.util.Collections.emptyMap;
 import static st.redline.compiler.Trace.isTraceEnabled;
 
@@ -56,7 +54,13 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
         });
         ((PrimClass)primObject.clazz()).superclass(kernelClass);
         
-        // TODO: remove the original bootstrapped primitive methods
+        // Remove the original bootstrapped primitive methods
+        primObject.removeMethodAt("class");
+        primObject.removeMethodAt("subclass:");
+        primObject.removeMethodAt("atSelector:put:");
+        ((PrimClass)primObject.clazz()).removeMethodAt("class");
+        ((PrimClass)primObject.clazz()).removeMethodAt("subclass:");
+        ((PrimClass)primObject.clazz()).removeMethodAt("atSelector:put:");
     }
     
     private PrimObject createPrimObjectClass() {
@@ -70,10 +74,10 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
         ((PrimClass)this.clazz().clazz()).superclass(primObjectMeta);
         
         primObject.methodAtPut("class", new PrimClassMethod());
-        primObjectMeta.methodAtPut("class", new PrimClassMethod());
         primObject.methodAtPut("subclass:", new PrimSubclassMethod());
-        primObjectMeta.methodAtPut("subclass:", new PrimSubclassMethod());
         primObject.methodAtPut("atSelector:put:", new PrimAtSelectorPutMethod());
+        primObjectMeta.methodAtPut("class", new PrimClassMethod());
+        primObjectMeta.methodAtPut("subclass:", new PrimSubclassMethod());
         primObjectMeta.methodAtPut("atSelector:put:", new PrimAtSelectorPutMethod());
         
         PrimMethod doesNotUnderstand = new PrimMethod();
@@ -89,12 +93,7 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
         primObjectMeta.methodAtPut("doesNotUnderstand:", doesNotUnderstand);
         
         // XXX: temp workaround for the superclass hierarchy running out
-        primObject.methodAtPut("superclass", new PrimMethod(){
-            @Override
-            public PrimObject apply(PrimObject receiver, PrimContext context) {
-                return new PrimObject();
-            }
-        });
+        primObject.superclass(new PrimObject());
         
         return primObject;
     }

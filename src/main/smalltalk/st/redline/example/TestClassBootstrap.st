@@ -23,6 +23,17 @@ JVM methodInsn: #INVOKEVIRTUAL
     descr: '(Ljava/lang/Object;)V'
     iface: false.
 
+JVM fieldInsn: #GETSTATIC
+    owner: 'java/lang/System'
+    name: 'out'
+    descr: 'Ljava/io/PrintStream;'.
+JVM ldcInsn: ''. "garbage to be popped off the stack, leaving the out stream on the stack"
+
 Object subclass: #TestClassBootstrap.
+JVM methodInsn: #INVOKEVIRTUAL
+    owner: 'java/io/PrintStream'
+    name: 'println'
+    descr: '(Ljava/lang/Object;)V'
+    iface: false.
 
 TestClassBootstrap printString

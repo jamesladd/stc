@@ -36,4 +36,9 @@ public class PrimClass extends PrimObject {
         methods.put(selector, methodBlock);
         return this;
     }
+    
+    public PrimObject removeMethodAt(String selector) {
+        methods.remove(selector);
+        return this;
+    }
 }

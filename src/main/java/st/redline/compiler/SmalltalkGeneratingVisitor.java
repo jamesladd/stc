@@ -1,11 +1,14 @@
 /* Redline Smalltalk, Copyright (c) James C. Ladd. All rights reserved. See LICENSE in the root of this distribution. */
 package st.redline.compiler;
 
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.tree.TerminalNode;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import st.redline.classloader.Source;
+import st.redline.compiler.SmalltalkParser.HexContext;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
@@ -158,6 +161,32 @@ class SmalltalkGeneratingVisitor extends SmalltalkBaseVisitor<Void> implements S
         }
         addToStatement(EmitterNode.create(DIGIT, ctx.DIGIT()));
         return visitChildren(ctx);
+    }
+    
+    @Override
+    public Void visitHex(SmalltalkParser.HexContext ctx) {
+        if (isTraceEnabled(LOG))
+            LOG.trace((ctx.MINUS() == null ? "" : "=") + "16r" + trace(ctx.HEXDIGIT()));
+        addToStatement(EmitterNode.create(HEX, extractChildNodes(ctx)));
+        return visitChildren(ctx);
+    }
+    
+    @Override
+    public Void visitStFloat(SmalltalkParser.StFloatContext ctx) {
+        if (isTraceEnabled(LOG))
+            LOG.trace(trace(ctx.DIGIT()));
+        addToStatement(EmitterNode.create(DIGIT, extractChildNodes(ctx)));
+        return visitChildren(ctx);
+    }
+
+    private ArrayList<TerminalNode> extractChildNodes(ParserRuleContext ctx) {
+
+        ArrayList<TerminalNode> floatNodes = new ArrayList<>();
+        for (int i = 0, childCount = ctx.getChildCount(); i < childCount; i++) {
+            TerminalNode node = ctx.getChild(TerminalNode.class, i);
+            floatNodes.add(node);
+        }
+        return floatNodes;
     }
 
     @Override

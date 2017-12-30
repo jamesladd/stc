@@ -365,8 +365,10 @@ class ByteCodeEmitter implements Emitter, Opcodes {
             return javaNumber(emitterNode.text());
         case CHARACTER_CONSTANT:
             return emitterNode.text().charAt(1);
+        case RESERVED_WORD:
+            return Boolean.valueOf(emitterNode.text());
         default:
-            throw new RuntimeException("JVM constant type not recognized.");
+            throw new RuntimeException("JVM constant type not recognized." + emitterNode.type());
         }
     }
     

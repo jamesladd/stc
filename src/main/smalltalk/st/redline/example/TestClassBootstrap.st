@@ -1,39 +1,49 @@
 
-JVM fieldInsn: #GETSTATIC
-    owner: 'java/lang/System'
-    name: 'out'
-    descr: 'Ljava/io/PrintStream;'.
-JVM ldcInsn: '====== Begin'.
-JVM methodInsn: #INVOKEVIRTUAL
-    owner: 'java/io/PrintStream'
-    name: 'println'
-    descr: '(Ljava/lang/Object;)V'
-    iface: false.
+| testMeta testClass testInstance |
 
-JVM fieldInsn: #GETSTATIC
-    owner: 'java/lang/System'
-    name: 'out'
-    descr: 'Ljava/io/PrintStream;'.
-JVM ldcInsn: ''. "garbage to be popped off the stack, leaving the out stream on the stack"
+Smalltalk import: 'st.redline.kernel.Object'.
+Smalltalk import: 'st.redline.kernel.Class'.
+Smalltalk import: 'st.redline.kernel.Metaclass'.
 
-Smalltalk class class class class class.
-JVM methodInsn: #INVOKEVIRTUAL
-    owner: 'java/io/PrintStream'
-    name: 'println'
-    descr: '(Ljava/lang/Object;)V'
-    iface: false.
+'====== Begin metaclass circularity' printString.
 
-JVM fieldInsn: #GETSTATIC
-    owner: 'java/lang/System'
-    name: 'out'
-    descr: 'Ljava/io/PrintStream;'.
-JVM ldcInsn: ''. "garbage to be popped off the stack, leaving the out stream on the stack"
+Smalltalk printString.
+Smalltalk class printString.
+Smalltalk class class printString.
+Smalltalk class class class printString.
+Smalltalk class class class class printString.
+Smalltalk class class class class class printString.
 
+'====== Begin superclass circularity' printString.
+Object class superclass printString.
+
+'====== Begin superclass' printString.
+Smalltalk class superclass printString.
+Smalltalk class superclass: Class.
+Smalltalk class superclass printString.
+
+'====== Begin Metaclass class>>subclassOf:' printString.
+testMeta := Metaclass subclassOf: Class.
+testMeta printString.
+testMeta superclass printString.
+testMeta class printString.
+
+'====== Begin Metaclass class>>name:subclassOf:' printString.
+testClass := Metaclass name: 'ATestClass' subclassOf: Object .
+testClass printString.
+testClass superclass printString.
+testClass class printString.
+testClass class superclass printString.
+
+'====== Begin Class creation (subclass:)' printString.
 Object subclass: #TestClassBootstrap.
-JVM methodInsn: #INVOKEVIRTUAL
-    owner: 'java/io/PrintStream'
-    name: 'println'
-    descr: '(Ljava/lang/Object;)V'
-    iface: false.
+TestClassBootstrap printString.
 
-TestClassBootstrap printString
+TestClassBootstrap atSelector: #test put: [
+    ^'This is just a test' printString
+].
+
+testInstance := TestClassBootstrap basicNew.
+testInstance printString.
+testInstance class printString.
+testInstance test.

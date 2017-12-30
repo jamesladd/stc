@@ -25,19 +25,25 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
 
     public RedlineSmalltalk() {
         this.javaValue("a RedlineSmalltalk");
-        // 'this' is really an instance of the RedlineSmalltalk class registered as the global 'Smalltalk'
-        PrimClass redlineClass = new PrimClass("RedlineSmalltalk", false);
-        this.clazz(redlineClass);
-        redlineClass.clazz(new PrimClass(redlineClass.javaValue() + "(meta)", true));
-        redlineClass.methodAtPut("package:in:", new PrimPackageInMethod());
-        redlineClass.methodAtPut("import:", new PrimImportMethod());
         bootstrap();
     }
 
     private void bootstrap() {
         classes.put("st.redline.kernel.PrimObject", createPrimObjectClass());
         classes.put("st.redline.kernel.Smalltalk", this);
-        classes.put("st.redline.kernel.RedlineSmalltalk", this.clazz());
+        
+        // 'this' is really an instance of the RedlineSmalltalk class registered as the global 'Smalltalk'
+        // Minimal bootstrap
+        PrimClass redlineClass = new PrimClass("RedlineSmalltalk", false);
+        redlineClass.methodAtPut("package:in:", new PrimPackageInMethod());
+        redlineClass.methodAtPut("import:", new PrimImportMethod());
+        this.clazz(redlineClass);
+        // Now create the class and reassign 'this' to the new class.
+        tryCompileClass("st.redline.kernel.RedlineSmalltalkClass");
+        redlineClass = (PrimClass)classes.get("st.redline.kernel.RedlineSmalltalkClass");
+        redlineClass.methodAtPut("package:in:", new PrimPackageInMethod());
+        redlineClass.methodAtPut("import:", new PrimImportMethod());
+        this.clazz(redlineClass);
         
         // load Object, Behavior, ClassDescription, Metaclass
         // Metaclass needs to be loaded before Class so that it is present when the 
@@ -45,7 +51,11 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
         tryCompileClass("st.redline.kernel.Metaclass");
         tryCompileClass("st.redline.kernel.Class"); // Load Class
         
-        // Rewire the class hierarchy, introduce the cyclic Metaclass aspect, etc.
+        // TODO: put the Smalltalk class in the correct location of the hierarchy
+        ((PrimClass)this.clazz()).superclass(classes.get("st.redline.kernel.Object"));
+        ((PrimClass)this.clazz().clazz()).superclass(classes.get("st.redline.kernel.Object").clazz());
+        
+        // Rewire the class hierarchy, introduce the circular Metaclass and Class aspects.
         PrimClass primObject = (PrimClass)classes.get("st.redline.kernel.PrimObject");
         PrimClass kernelClass = (PrimClass)classes.get("st.redline.kernel.Class");
         PrimClass metaclass = (PrimClass)classes.get("st.redline.kernel.Metaclass");
@@ -69,10 +79,6 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
         PrimClass primObjectMeta = new PrimClass(primObject.javaValue() + "(meta)", true);
         primObject.clazz(primObjectMeta);
         
-        // TODO-MS: put the Smalltalk class in the correct location of the hierarchy
-        ((PrimClass)this.clazz()).superclass(primObject);
-        ((PrimClass)this.clazz().clazz()).superclass(primObjectMeta);
-        
         primObject.methodAtPut("class", new PrimClassMethod());
         primObject.methodAtPut("subclass:", new PrimSubclassMethod());
         primObject.methodAtPut("atSelector:put:", new PrimAtSelectorPutMethod());
@@ -85,7 +91,7 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
             
             @Override
             public PrimObject apply(PrimObject receiver, PrimObject method, PrimContext context) {
-                // XXX: complete doesNotUnderstand: bootstrapping.
+                // TODO: complete doesNotUnderstand: bootstrapping.
                 throw new RuntimeException(receiver + " doesNotUnderstand: " + context.argumentAt(0) + ".");
             }
         };
@@ -102,6 +108,7 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
     public PrimObject createString(String value) {
         // TODO.JCL - When Smalltalk String is available create one, ie: after bootstrap
         PrimObject object = new PrimObject();
+        object.clazz(classes.get("st.redline.kernel.Object"));
         object.javaValue(value);
         return object;
     }
@@ -110,6 +117,7 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
     public PrimObject createSymbol(String value) {
         // TODO.JCL - When Smalltalk Symbol is available create one, ie: after bootstrap
         PrimObject object = new PrimObject();
+        object.clazz(classes.get("st.redline.kernel.Object"));
         object.javaValue(value);
         return object;
     }
@@ -118,6 +126,7 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
     public PrimObject createInteger(String value) {
         // TODO.JCL - When Smalltalk Symbol is available create one, ie: after bootstrap
         PrimObject object = new PrimObject();
+        object.clazz(classes.get("st.redline.kernel.Object"));
         object.javaValue(Integer.valueOf(value));
         return object;
     }
@@ -126,6 +135,7 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
     public PrimObject createCharacter(String value) {
         // TODO.JCL - When Smalltalk Symbol is available create one, ie: after bootstrap
         PrimObject object = new PrimObject();
+        object.clazz(classes.get("st.redline.kernel.Object"));
         object.javaValue(value.charAt(0));
         return object;
     }
@@ -142,6 +152,7 @@ public class RedlineSmalltalk extends PrimObject implements Smalltalk {
     public PrimObject nilSingleton(String value) {
         // TODO.JCL - When Smalltalk Symbol is available create one, ie: after bootstrap
         PrimObject object = new PrimObject();
+        object.clazz(classes.get("st.redline.kernel.Object"));
         object.javaValue("nil");
         return object;
     }

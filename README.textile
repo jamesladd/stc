@@ -1,4 +1,3 @@
-!https://secure.travis-ci.org/redline-smalltalk/redline-smalltalk.png?branch=master(Build Status)!:http://travis-ci.org/redline-smalltalk/redline-smalltalk
 
 *REDLINE UPDATED* - This is a complete rewrite rewrite
 

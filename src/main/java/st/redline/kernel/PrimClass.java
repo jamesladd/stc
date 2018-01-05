@@ -11,7 +11,7 @@ public class PrimClass extends PrimObject {
 
     private final boolean isMeta;
 
-    PrimClass(String name, boolean isMeta) {
+    public PrimClass(String name, boolean isMeta) {
         this.javaValue(name);
         this.isMeta = isMeta;
     }
@@ -34,6 +34,11 @@ public class PrimClass extends PrimObject {
 
     public PrimObject methodAtPut(String selector, PrimMethod methodBlock) {
         methods.put(selector, methodBlock);
+        return this;
+    }
+    
+    public PrimObject removeMethodAt(String selector) {
+        methods.remove(selector);
         return this;
     }
 }

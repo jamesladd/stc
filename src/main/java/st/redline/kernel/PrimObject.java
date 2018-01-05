@@ -75,16 +75,16 @@ public class PrimObject {
     }
 
     public PrimObject methodAt(String selector) {
-        if (selector.equals("class"))
-            return new PrimClassMethod();
-        if (selector.equals("subclass:"))
-            return new PrimSubclassMethod();
-        if (selector.equals("package:in:"))
-            return new PrimPackageInMethod();
-        if (selector.equals("import:"))
-            return new PrimImportMethod();
-        if (selector.equals("atSelector:put:"))
-            return new PrimAtSelectorPutMethod();
+//        if (selector.equals("class"))
+//            return new PrimClassMethod();
+//        if (selector.equals("subclass:"))
+//            return new PrimSubclassMethod();
+//        if (selector.equals("package:in:"))
+//            return new PrimPackageInMethod();
+//        if (selector.equals("import:"))
+//            return new PrimImportMethod();
+//        if (selector.equals("atSelector:put:"))
+//            return new PrimAtSelectorPutMethod();
         PrimObject dnuMethod = new PrimObject();
         dnuMethod.javaValue(selector);
         return dnuMethod;

@@ -172,7 +172,7 @@ public class SmalltalkSourceFile implements Source, LineTransformer {
             int index = packageName.lastIndexOf(File.separatorChar);
             if (index != -1)
                 packageName = packageName.substring(0, index);
-            packageName = packageName.replaceAll(String.valueOf(File.separatorChar), ".");
+            packageName = packageName.replace(File.separatorChar, '.');
         }
         return packageName;
     }

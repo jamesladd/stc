@@ -9,7 +9,6 @@ import st.redline.classloader.SmalltalkClassLoader;
 import st.redline.classloader.Source;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.Vector;
@@ -238,6 +237,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         TerminalNode firstSelector = message.selectors().get(0).value();
         if (isTraceEnabled(LOG))
             LOG.trace(firstSelector.getText());
+        visitLine(mv, message.isCascade() ? 
+                firstSelector.getSymbol().getLine()
+                : message.receiver().value().getSymbol().getLine());
         switch (firstSelector.getText()) {
             case "fieldInsn:": {
                 if (message.selectors().size() != 4 || message.arguments().size() != 4)
@@ -250,11 +252,19 @@ class ByteCodeEmitter implements Emitter, Opcodes {
                 mv.visitFieldInsn(opcode, unquote(owner), unquote(name), unquote(descr));
             }
             break;
+            case "insn:": {
+                if (message.selectors().size() != 1 || message.arguments().size() != 1)
+                    throw new RuntimeException("JVM insn expects 1 keyword and 1 argument.");
+                List<EmitterNode> arguments = message.arguments();
+                int opcode = toInsnOpcode(arguments.get(0).text());
+                mv.visitInsn(opcode);
+            }
+            break;
             case "ldcInsn:": {
                 if (message.selectors().size() != 1 || message.arguments().size() != 1)
                     throw new RuntimeException("JVM ldcInsn expects 1 keyword and 1 argument.");
                 List<EmitterNode> arguments = message.arguments();
-                Object constant = toLdcConstant(arguments.get(0).text());
+                Object constant = toLdcConstant(arguments.get(0));
                 mv.visitLdcInsn(constant);
             }
             break;
@@ -270,6 +280,57 @@ class ByteCodeEmitter implements Emitter, Opcodes {
                 mv.visitMethodInsn(opcode, unquote(owner), unquote(name), unquote(descr), iface);
             }
             break;
+            case "typeInsn:": {
+                if (message.selectors().size() != 2 || message.arguments().size() != 2)
+                    throw new RuntimeException("JVM typeInsn expects 2 keyword and 2 argument.");
+                List<EmitterNode> arguments = message.arguments();
+                int opcode = toTypeOpcode(arguments.get(0).text());
+                String type = arguments.get(1).text();
+                mv.visitTypeInsn(opcode, unquote(type));
+            }
+            break;
+            case "varInsn:": {
+                if (message.selectors().size() != 2 || message.arguments().size() != 2)
+                    throw new RuntimeException("JVM varInsn expects 2 keyword and 2 argument.");
+                List<EmitterNode> arguments = message.arguments();
+                int opcode = toVarOpcode(arguments.get(0).text());
+                int var = Integer.valueOf(arguments.get(1).text());
+                mv.visitVarInsn(opcode, var);
+            }
+            break;
+            case "storeVar:": {
+                if (message.selectors().size() != 1 || message.arguments().size() != 1)
+                    throw new RuntimeException("JVM assignTo: expects 1 keyword and 1 argument.");
+                List<EmitterNode> arguments = message.arguments();
+                EmitterNode var = arguments.get(0);
+                switch (var.type()) {
+                case SYNTHETIC_TEMPORARY:   {
+                    pushContext();
+                    mv.visitInsn(SWAP);
+                    pushIntConst(var.index());
+                    mv.visitInsn(SWAP);
+                    mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimContext", "temporaryAtPut", "(ILst/redline/kernel/PrimObject;)Lst/redline/kernel/PrimObject;", false);
+                }
+                break;
+                case SYNTHETIC_INSTANCE_VARIABLE:
+                case SYNTHETIC_CLASS_VARIABLE:
+                    throw new RuntimeException("JVM storeVar: does not yest support instance and class variables.");
+                default:
+                    throw new RuntimeException("JVM storeVar: expects a temp variables, instance variables, or class variables.");
+                }
+            }
+            break;
+            case "loadVar:": {
+                if (message.selectors().size() != 1 || message.arguments().size() != 1)
+                    throw new RuntimeException("JVM loadVar: expects 1 keyword and 1 argument.");
+                List<EmitterNode> arguments = message.arguments();
+                EmitterNode var = arguments.get(0);
+                if (var.type() != RESERVED_WORD && (var.type() < EmitterNode.SYNTHETIC_TEMPORARY || var.type() > EmitterNode.SYNTHETIC_REFERENCE))
+                    throw new RuntimeException("JVM loadVar: expects a global references, args, temp variables, instance variables, class variables, and pseudo variables.");
+                TerminalNode node = var.value();
+                emitObject(var, node);
+            }
+            break;
             default:
                 throw new RuntimeException("JVM instruction '" + firstSelector.getText() + "' not currently handled.");
         }
@@ -278,13 +339,75 @@ class ByteCodeEmitter implements Emitter, Opcodes {
     private String unquote(String string) {
         if (string.startsWith("'"))
             return string.substring(1, string.length() - 1);
+        else if (string.equals("nil"))
+            return null;
         return string;
     }
-
-    private Object toLdcConstant(String text) {
+    
+    private Number javaNumber(String string) {
         if (isTraceEnabled(LOG))
-            LOG.warn("Only String type supported right now.");
-        return unquote(text);
+            LOG.warn("Only Integer and Float supported right now.");
+        if (string.contains("."))
+            return Float.valueOf(string);
+        else if (string.startsWith("16r"))
+            return Integer.valueOf(string.substring(3), 16);
+        else
+            return Integer.valueOf(string);
+    }
+
+    private Object toLdcConstant(EmitterNode emitterNode) {
+        switch (emitterNode.type()) {
+        case STRING:
+        case HASH:
+            return unquote(emitterNode.text());
+        case DIGIT:
+        case HEX:
+            return javaNumber(emitterNode.text());
+        case CHARACTER_CONSTANT:
+            return emitterNode.text().charAt(1);
+        case RESERVED_WORD:
+            return Boolean.valueOf(emitterNode.text());
+        default:
+            throw new RuntimeException("JVM constant type not recognized." + emitterNode.type());
+        }
+    }
+    
+    private int toInsnOpcode(String text) {
+        String code = text.toUpperCase();
+        switch (code) {
+        case "DUP":
+            return DUP;
+        case "POP":
+            return POP;
+        case "ARETURN":
+            return ARETURN;
+        default:
+            throw new RuntimeException("JVM insn opcode '" + code + "' not recognized.");
+        }
+    }
+    
+    private int toTypeOpcode(String text) {
+        String code = text.toUpperCase();
+        switch (code) {
+        case "NEW":
+            return NEW;
+        case "CHECKCAST":
+            return CHECKCAST;
+        default:
+            throw new RuntimeException("JVM type opcode '" + code + "' not recognized.");
+        }
+    }
+    
+    private int toVarOpcode(String text) {
+        String code = text.toUpperCase();
+        switch (code) {
+        case "ALOAD":
+            return ALOAD;
+        case "ASTORE":
+            return ASTORE;
+        default:
+            throw new RuntimeException("JVM var opcode '" + code + "' not recognized.");
+        }
     }
 
     private int toFieldOpcode(String text) {
@@ -343,6 +466,9 @@ class ByteCodeEmitter implements Emitter, Opcodes {
                 break;
             case SYNTHETIC_TEMPORARY:
                 emitTemporaryGet(node, emitterNode.index());
+                break;
+            case SYNTHETIC_ARGUMENT:
+                emitArgumentGet(node, emitterNode.index());
                 break;
             case SYNTHETIC_REFERENCE:
                 emitResolveReference(node.getText());
@@ -465,6 +591,13 @@ class ByteCodeEmitter implements Emitter, Opcodes {
         pushContext();
         pushIntConst(index);
         mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimContext", "temporaryAt", "(I)Lst/redline/kernel/PrimObject;", false);
+    }
+    
+    private void emitArgumentGet(TerminalNode node, int index) {
+        visitLine(mv, node.getSymbol().getLine());
+        pushContext();
+        pushIntConst(index);
+        mv.visitMethodInsn(INVOKEVIRTUAL, "st/redline/kernel/PrimContext", "argumentAt", "(I)Lst/redline/kernel/PrimObject;", false);
     }
 
     private void emitDup() {
